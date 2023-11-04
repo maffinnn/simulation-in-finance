@@ -9,7 +9,7 @@ class MultiAssetGBM(object):
         self.data = data
         self.name = params.get('name', None)
         self.maturity_date =  params.get('maturity_date')
-        self.dt = 1/252 # dt is assumed to be 1
+        self.dt = 1/252
         self.asset_names = params.get('asset_names')
         self.Nassets = len(self.asset_names)
         self.window_size = params.get('window_size')
@@ -34,10 +34,13 @@ class MultiAssetGBM(object):
         self.var = cov.to_numpy().diagonal().reshape(self.Nassets, 1)
         return self    
     
+    def get_random_variables(self)->pd.DataFrame:
+        self.rv = np.random.normal(0, np.sqrt(self.dt), size=(self.Nassets, self.T))
+    
     def generate_path(self):
         St = np.exp(
             (self.mu - self.var/2) * self.dt
-            + np.matmul(self.sigma * np.random.normal(0, np.sqrt(self.dt), size=(self.Nassets, self.T)))
+            + np.matmul(self.sigma * self.rv)
         )
         St = np.vstack([np.ones(self.Nassets), St])
         St = self.S0 * St.cumprod(axis=0)
