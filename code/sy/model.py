@@ -1,3 +1,4 @@
+from __future__ import annotations
 import typing
 from datetime import date, timedelta, datetime
 import numpy as np
@@ -16,14 +17,14 @@ class MultiAssetGBM(object):
         self.interest_rate_model = params.get('interest_rate_model')
         self.volatiliy_model = params.get('volatiliy_model')
         
-    def __log_return(self, current_date: str):
+    def __log_return(self, current_date: str)->pd.DataFrame:
         window_end = datetime.strptime(current_date, format) - timedelta(days=1)
         window_start, window_end = (window_end - timedelta(days=self.window_size)).strftime(format), window_end.strftime(format)
         if self.log_return is None:
             self.log_return = np.log(self.data) - np.log(self.data.shift(1))
         return self.log_return.loc[window_start: window_end]
     
-    def fit(self, current_date: str):
+    def fit(self, current_date: str)->MultiAssetGBM:
         window_end = (datetime.strptime(current_date, format) - timedelta(days=1)).strftime(format)
         self.S0 = self.data.loc[window_end].to_numpy()
         self.windowed_log_return = self.__log_return(current_date)
@@ -34,13 +35,14 @@ class MultiAssetGBM(object):
         self.var = cov.to_numpy().diagonal().reshape(self.Nassets, 1)
         return self    
     
-    def get_random_variables(self)->pd.DataFrame:
-        self.rv = np.random.normal(0, np.sqrt(self.dt), size=(self.Nassets, self.T))
+    def get_random_variables(self)->np.ndarray:
+        if self.rv is None:
+            self.rv = np.random.normal(0, np.sqrt(self.dt), size=(self.Nassets, self.T))
+        return self.rv
     
-    def generate_path(self):
+    def generate_path(self)->np.ndarray:
         St = np.exp(
-            (self.mu - self.var/2) * self.dt
-            + np.matmul(self.sigma * self.rv)
+            (self.mu - self.var/2) * self.dt + np.matmul(self.sigma * self.rv)
         )
         St = np.vstack([np.ones(self.Nassets), St])
         St = self.S0 * St.cumprod(axis=0)
