@@ -1,0 +1,75 @@
+import typing
+from datetime import date, timedelta, datetime
+import numpy as np
+import pandas as pd
+
+format = '%Y-%m-%d'
+class MultiAssetGBM(object):
+    def __init__(self, data: pd.DataFrame, params: typing.Dict):
+        self.data = data
+        self.name = params.get('name', None)
+        self.maturity_date =  params.get('maturity_date')
+        self.dt = 1/252 # dt is assumed to be 1
+        self.asset_names = params.get('asset_names')
+        self.Nassets = len(self.asset_names)
+        self.window_size = params.get('window_size')
+        self.interest_rate_model = params.get('interest_rate_model')
+        self.volatiliy_model = params.get('volatiliy_model')
+        
+    def __log_return(self, current_date: str):
+        window_end = datetime.strptime(current_date, format) - timedelta(days=1)
+        window_start, window_end = (window_end - timedelta(days=self.window_size)).strftime(format), window_end.strftime(format)
+        if self.log_return is None:
+            self.log_return = np.log(self.data) - np.log(self.data.shift(1))
+        return self.log_return.loc[window_start: window_end]
+    
+    def fit(self, current_date: str):
+        window_end = (datetime.strptime(current_date, format) - timedelta(days=1)).strftime(format)
+        self.S0 = self.data.loc[window_end].to_numpy()
+        self.windowed_log_return = self.__log_return(current_date)
+        self.T = np.busday_count(current_date, self.maturity_date) # time to maturity
+        cov = self.windowed_log_return.cov()
+        self.sigma = np.linalg.cholesky(cov) * self.T
+        self.mu = self.interest_rate_model.fit(current_date).generate_path().loc[current_date] if self.interest_rate_model else self.windowed_log_return.mean().to_numpy().reshape(self.Nassets, 1)
+        self.var = cov.to_numpy().diagonal().reshape(self.Nassets, 1)
+        return self    
+    
+    def generate_path(self):
+        St = np.exp(
+            (self.mu - self.var/2) * self.dt
+            + np.matmul(self.sigma * np.random.normal(0, np.sqrt(self.dt), size=(self.Nassets, self.T)))
+        )
+        St = np.vstack([np.ones(self.Nassets), St])
+        St = self.S0 * St.cumprod(axis=0)
+        return St
+        
+        
+# interest rate model
+class CIR(object):
+    def __init__(self, data: pd.DataFrame, params: typing.Dict):
+        # TODO
+        self.data = data
+        return None
+
+    def fit(self, current_date: str):
+        # TODO
+        return self
+    
+    def generate_path(self):
+        # TODO
+        return None
+
+# volatility model
+class Heston(object):
+    def __init__(self, data: pd.DataFrame, params: typing.Dict):
+        # TODO
+        self.data = data
+        return None
+
+    def fit(self, current_date: str):
+        # TODO
+        return self
+    
+    def generate_path(self):
+        # TODO
+        return None
