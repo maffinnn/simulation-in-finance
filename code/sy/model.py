@@ -30,7 +30,7 @@ class MultiAssetGBM(object):
         self.windowed_log_return = self.__log_return(current_date)
         self.T = np.busday_count(current_date, self.maturity_date) # time to maturity
         cov = self.windowed_log_return.cov()
-        self.sigma = np.linalg.cholesky(cov) * self.T
+        self.sigma = np.linalg.cholesky(cov) * self.dt
         self.mu = self.interest_rate_model.fit(current_date).generate_path().loc[current_date] if self.interest_rate_model else self.windowed_log_return.mean().to_numpy().reshape(self.Nassets, 1)
         self.var = cov.to_numpy().diagonal().reshape(self.Nassets, 1)
         return self    
@@ -49,20 +49,7 @@ class MultiAssetGBM(object):
         return St
         
         
-# interest rate model
-class CIR(object):
-    def __init__(self, data: pd.DataFrame, params: typing.Dict):
-        # TODO
-        self.data = data
-        return None
 
-    def fit(self, current_date: str):
-        # TODO
-        return self
-    
-    def generate_path(self):
-        # TODO
-        return None
 
 # volatility model
 class Heston(object):
