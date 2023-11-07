@@ -47,5 +47,31 @@ EARLY_REDEMPTION_DATES = [
     pd.Timestamp('2024-05-05'),
 ]
 
+# https://www.six-group.com/en/products-services/the-swiss-stock-exchange/market-data/news-tools/trading-currency-holiday-calendar.html#/
+# Double checked with Sze Chong's product dates
+SIX_HOLIDAY_DATES = [
+    pd.Timestamp('2023-01-02'),  # Berchtholdstag
+    pd.Timestamp('2023-04-07'),  # Good Friday
+    pd.Timestamp('2023-04-10'),  # Easter Monday
+    pd.Timestamp('2023-05-01'),  # Labour Day
+    pd.Timestamp('2023-05-18'),  # Ascension Day
+    pd.Timestamp('2023-05-29'),  # Whitmonday
+    pd.Timestamp('2023-08-01'),  # National Day
+    pd.Timestamp('2023-12-25'),  # Christmas Day
+    pd.Timestamp('2023-12-26'),  # St. Stephen's Day
+    pd.Timestamp('2024-01-01'),  # New Year's Day
+    pd.Timestamp('2024-01-02'),  # Berchtholdstag
+    pd.Timestamp('2024-03-29'),  # Good Friday
+    pd.Timestamp('2024-04-01'),  # Easter Monday
+    pd.Timestamp('2024-05-01'),  # Labour Day
+    pd.Timestamp('2024-05-09'),  # Ascension Day
+    pd.Timestamp('2024-05-20'),  # Whitmonday
+    pd.Timestamp('2024-08-01'),  # National Day
+    pd.Timestamp('2024-12-24'),  # Christmas Eve
+    pd.Timestamp('2024-12-25'),  # Christmas
+    pd.Timestamp('2024-12-26'),  # St. Stephen's Day
+    pd.Timestamp('2024-12-31'),  # New Year's Eve
+]
+
 EARLY_REDEMPTION_LEVELS = [549.60, 240.40]
 CONVERSION_RATIOS = [1.8195, 4.1597]
