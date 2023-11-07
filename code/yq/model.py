@@ -2,6 +2,7 @@ import pandas as pd
 import typing
 import constants as cs
 import numpy as np
+import utils
 
 # In the main codes, we can create different models, and at the end access the sim_data to plot all the payoff_df aaginst the product prices
 class PricingModel:
@@ -18,52 +19,69 @@ class PricingModel:
     def multidimensional_gbm(self, sim_start_date: pd.Timestamp, hist_window: int, sim_window: int) -> pd.DataFrame: 
         interest_rate = 1.750/100 
 
-        last_avai_price_date = sim_start_date - pd.Timedelta(days = 1)
-        S_t = [self.data.loc[last_avai_price_date, ticker] for ticker in self.ticker_list] # Stock price of the 0th day of simulation
+        try:
+            last_avai_price_date = utils.add_trading_day(sim_start_date, -1)
+            S_t = [self.data.loc[last_avai_price_date, ticker] for ticker in self.ticker_list] # Stock price of the 0th day of simulation
+            
+            hist_data = self.data[self.data.index < sim_start_date].tail(hist_window)
         
-        hist_data = self.data[self.data.index < sim_start_date].tail(hist_window)
+        except Exception as e:
+            raise Exception("Error at wrangling historical data.")
 
-        log_returns_list = []
-        for ticker in self.ticker_list:
-            # display(data[ticker], data[ticker].shift(1))
-            log_returns = np.log(hist_data[ticker] / hist_data[ticker].shift(1)) # np.log is natural log, (P_i/P_i-1)
-            log_returns.dropna(inplace = True) # A series
-            log_returns_list.append(log_returns)
-            # print(type(log_returns))
+        try:
+            log_returns_list = []
+            for ticker in self.ticker_list:
+                # display(data[ticker], data[ticker].shift(1))
+                log_returns = np.log(hist_data[ticker] / hist_data[ticker].shift(1)) # np.log is natural log, (P_i/P_i-1)
+                log_returns.dropna(inplace = True) # A series
+                log_returns_list.append(log_returns)
+                # print(type(log_returns))
 
-        # print(log_returns_list)
-        # print(np.shape(log_returns_list))
+            # print(log_returns_list)
+            # print(np.shape(log_returns_list))
 
-        # print(f"np.array {np.array(log_returns_list)}")
-        cov_matrix = np.cov(np.array(log_returns_list))
-        print(f"Covariance matrix is:\n {cov_matrix}\n")
-        print(f"The shape is {np.shape(cov_matrix)}\n")
+            # print(f"np.array {np.array(log_returns_list)}")
+        
+        except Exception as e:
+            raise Exception("Error at generating log return.")
+        
+        try:
+            cov_matrix = np.cov(np.array(log_returns_list))
+            print(f"Covariance matrix is:\n {cov_matrix}\n")
+            print(f"The shape is {np.shape(cov_matrix)}\n")
 
-        print(f"Correlation between the two var is {cov_matrix[0][1] / (cov_matrix[0][0] * cov_matrix[1][1]) ** 0.5}") # Correct
+            print(f"Correlation between the two var is {cov_matrix[0][1] / (cov_matrix[0][0] * cov_matrix[1][1]) ** 0.5}") # Correct
 
-        L = np.linalg.cholesky(cov_matrix)
-        print(f"The matrix after Cholesky decomposition is:\n {L}\n")
+            L = np.linalg.cholesky(cov_matrix)
+            print(f"The matrix after Cholesky decomposition is:\n {L}\n")
 
-        print(f"The multiplication of L and L transpose is:\n {np.dot(L, L.T)}\n") 
+            print(f"The multiplication of L and L transpose is:\n {np.dot(L, L.T)}\n") 
 
-        sim_data = pd.DataFrame(np.zeros((sim_window, self.num_ticker)), columns = [self.ticker_list])
+            sim_data = pd.DataFrame(np.zeros((sim_window, self.num_ticker)), columns = [self.ticker_list])
+
+        except Exception as e:
+            raise Exception("Error at covariance matrix.")
 
         # display(sim_data)
         # TODO: N number of simulations
         
         # print(sim_data.loc[0, "LONN.SW"])
-        for t in range(sim_window): # TODO: change to num of days to sim (date range or sth)
-            Z = np.random.normal(0, 1, self.num_ticker) # returns a scalar if size is not specified
-            for i in range(self.num_ticker): # day need to go first, 
-                if t == 0: prev_price = S_t[i]
-                else: prev_price = sim_data.loc[t - 1, self.ticker_list[i]].item()
-                LZ = np.dot(L, Z)
+        try:
+            for t in range(sim_window): # TODO: change to num of days to sim (date range or sth)
+                Z = np.random.normal(0, 1, self.num_ticker) # returns a scalar if size is not specified
+                for i in range(self.num_ticker): # day need to go first, 
+                    if t == 0: prev_price = S_t[i]
+                    else: prev_price = sim_data.loc[t - 1, self.ticker_list[i]].item()
+                    LZ = np.dot(L, Z)
 
-                print(type(prev_price), type(cov_matrix[i][i]), type(LZ[i]))
-                print(interest_rate, cov_matrix[i][i], LZ[i])
-                sim_data.loc[t, self.ticker_list[i]] = prev_price * np.exp(interest_rate * self.dt - 0.5 * cov_matrix[i][i] * self.dt + LZ[i]) # The cov matrix and L need to be computed on the fly
+                    print(type(prev_price), type(cov_matrix[i][i]), type(LZ[i]))
+                    print(interest_rate, cov_matrix[i][i], LZ[i])
+                    sim_data.loc[t, self.ticker_list[i]] = prev_price * np.exp(interest_rate * self.dt - 0.5 * cov_matrix[i][i] * self.dt + LZ[i]) # The cov matrix and L need to be computed on the fly
 
-        return sim_data
+            return sim_data
+        
+        except Exception as e:
+            raise Exception("Error at simulating.")
         pass
 
     def interest_rate_model(self, parameters):
