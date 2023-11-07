@@ -11,7 +11,6 @@ class VasicekModel(object):
         b: long term mean level: All future trajectories of r will evolve around a mean level b in the long run.
         a: speed of reversion: A characterizes the velocity at which such trajectories will regroup around b.
         sigma: instantaneous volatility: measures instant by instant the amplitude of randomness
-        Vasicek closed form: r(t) = r(t-1)exp(-a*dt) + b*(1-exp(-a*dt)) + sigma * exp(-a*dt) 
         """
         self.data = data
         self.a = params.get('speed of reversion') # 0
@@ -26,7 +25,7 @@ class VasicekModel(object):
         """
         N = (pd.to_datetime(self.maturity_date) - pd.to_datetime(current_date)).days + 1
         Rt = [0]*(N+1)
-        prev_date = pd.to_datetime(current_date) + pd.DateOffset(days=1)
+        prev_date = pd.to_datetime(current_date) - pd.DateOffset(days=1)
         Rt[0] = self.data.loc[prev_date]['Price']
         for i in range(1, N+1):
             Rt[i] = self.a*(self.b-Rt[i-1]) * self.dt + self.sigma * np.random.normal(0, np.sqrt(self.dt)) + Rt[i-1]
