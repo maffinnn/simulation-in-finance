@@ -94,15 +94,7 @@ class PricingModel:
         # Not sure whether this should be subplot to compare with other pricing models or a plot for this current model only
         pass
 
-    def remove_SIX_holidays(self, data: pd.DataFrame) -> pd.DataFrame:
-        # Ensure that the dates you are trying to drop exist in the index
-        dates_to_drop = [date for date in cs.SIX_HOLIDAY_DATES if date in data.index]
-        print(dates_to_drop)
 
-        # Drop the dates
-        dropped_data = data.drop(dates_to_drop)
-        print(dropped_data)
-        return dropped_data
 
 # Example usage:
 # hist_stock_data = pd.DataFrame(...)  # This would be your historical stock data
