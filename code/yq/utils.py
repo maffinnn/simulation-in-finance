@@ -16,9 +16,23 @@ def create_six_trading_dates(start_date, end_date):
     six_trading_days_df.index.name = 'Dates'
     return six_trading_days_df
 
-# Input: trading date (assumed) and number of trading days to add (can be positive or negative values)
-# Limitation is to range of dates available is between 2020 and 2025
-def add_trading_day(trading_date, num_trading_day):
+def add_trading_day(trading_date: pd.Timestamp, num_trading_day: int) -> pd.Timestamp:
+    """
+    Adds a specified number of trading days to a given date within the range of 2020 to 2025.
+
+    Parameters:
+    trading_date (pd.Timestamp): The trading date from which to add trading days.
+    num_trading_day (int): The number of trading days to add, can be negative.
+
+    Returns:
+    pd.Timestamp: The resulting date after adding the trading days.
+
+    Raises:
+    ValueError: If the `trading_date` is not a valid trading date or out of the date range.
+    IndexError: If the resulting trading date is out of the valid date range.
+    """
+
+    # Assuming create_six_trading_dates returns a pd.DatetimeIndex with trading dates
     trading_df = create_six_trading_dates('2020-01-01', '2025-12-31')
     print(trading_df)
     try:
@@ -33,6 +47,10 @@ def add_trading_day(trading_date, num_trading_day):
         return trading_df.index[new_position] # Returns the index of the position (cannot use iloc)
     except:
         raise IndexError("The resulting trading date is out of bounds.")
+
+# Example usage:
+# new_trading_date = add_trading_day(pd.Timestamp('2023-01-10'), 5)
+# print(new_trading_date)
 
 # Input: a dataframe ith dates as index
 def remove_SIX_holidays(data: pd.DataFrame) -> pd.DataFrame:
