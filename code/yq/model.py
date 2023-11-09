@@ -68,9 +68,8 @@ class PricingModel:
         if self.Z_list == None: self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
         # print(sim_data.loc[0, "LONN.SW"])
         try:
-            for t in range(sim_window): # TODO: change to num of days to sim (date range or sth)
+            for t in range(sim_window):
                  # returns a scalar if size is not specified
-                # TODO: Store this generated var in the model. Should I use 
                 Z = self.Z_list[:, t]
                 for i in range(self.num_ticker): # day need to go first, 
                     if t == 0: prev_price = S_t[i]

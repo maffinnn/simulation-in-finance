@@ -21,11 +21,11 @@ def add_trading_day(trading_date: pd.Timestamp, num_trading_day: int) -> pd.Time
     Adds a specified number of trading days to a given date within the range of 2020 to 2025.
 
     Parameters:
-    trading_date (pd.Timestamp): The trading date from which to add trading days.
-    num_trading_day (int): The number of trading days to add, can be negative.
+    - trading_date (pd.Timestamp): The trading date from which to add trading days.
+    - num_trading_day (int): The number of trading days to add, can be negative.
 
     Returns:
-    pd.Timestamp: The resulting date after adding the trading days.
+    - pd.Timestamp: The resulting date after adding the trading days.
 
     Raises:
     ValueError: If the `trading_date` is not a valid trading date or out of the date range.
