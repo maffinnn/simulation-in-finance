@@ -14,9 +14,10 @@ class PricingModel:
         self.num_ticker = len(self.ticker_list) # Number of stocks
         self.sim_data = None # To store simulated paths of the underlying assets
         self.payoff_df = None # To store payoff calculations based on simulated data
+        self.Z_list = None
 
-    # Implementation of the multidimensional Geometric Brownian Motion model
-    def multidimensional_gbm(self, sim_start_date: pd.Timestamp, hist_window: int, sim_window: int) -> pd.DataFrame: 
+    # Implementation of the multi-asset Geometric Brownian Motion model
+    def multi_asset_gbm(self, sim_start_date: pd.Timestamp, hist_window: int, sim_window: int) -> pd.DataFrame: 
         interest_rate = 1.750/100 
 
         try:
@@ -63,16 +64,19 @@ class PricingModel:
             raise Exception("Error at covariance matrix.")
 
         # display(sim_data)
-        # TODO: N number of simulations
         
+        if self.Z_list == None: self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
         # print(sim_data.loc[0, "LONN.SW"])
         try:
             for t in range(sim_window): # TODO: change to num of days to sim (date range or sth)
-                Z = np.random.normal(0, 1, self.num_ticker) # returns a scalar if size is not specified
+                 # returns a scalar if size is not specified
+                # TODO: Store this generated var in the model. Should I use 
+                Z = self.Z_list[:, t]
                 for i in range(self.num_ticker): # day need to go first, 
                     if t == 0: prev_price = S_t[i]
                     else: prev_price = sim_data.loc[t - 1, self.ticker_list[i]].item()
-                    LZ = np.dot(L, Z)
+                    LZ = np.dot(L, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
+                    print("The 3 matrices are", L, Z, LZ)
 
                     print(type(prev_price), type(cov_matrix[i][i]), type(LZ[i]))
                     print(interest_rate, cov_matrix[i][i], LZ[i])
