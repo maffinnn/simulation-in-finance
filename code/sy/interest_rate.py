@@ -4,7 +4,6 @@ from datetime import date, timedelta, datetime
 import numpy as np
 import pandas as pd
 
-# interest rate model
 class VasicekModel(object):
     def __init__(self, data: pd.DataFrame, params: typing.Dict):
         """
@@ -31,11 +30,3 @@ class VasicekModel(object):
             Rt[i] = self.a*(self.b-Rt[i-1]) * self.dt + self.sigma * np.random.normal(0, np.sqrt(self.dt)) + Rt[i-1]
         Rt = Rt[1:]
         return pd.DataFrame(data=Rt, index=pd.date_range(current_date, self.maturity_date), columns=['Rate'])
-
-
-class ConstantRateModel(object):
-    def __init__(self, data: pd.DataFrame, params: typing.Dict):
-        self.data = data
-    
-    def get_rate(self):
-        return self.data['Price'].mean()
