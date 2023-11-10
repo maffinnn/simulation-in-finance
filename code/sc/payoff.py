@@ -1,7 +1,17 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import datetime
+import constants as cs
+
+#price path df structure
+#(index date), (stock1 price LONN.SE), (stock2 price SIKA.SE)
+
+def checkBarrier(df_historical):
+    barrierHit = False
+    for i in range(len(cs.ASSET_NAMES)):
+        cur_asset = cs.ASSET_NAMES[i]
+        initial_price = df_historical.iloc[0][cur_asset]
+        barrierHit = barrierHit or min(df_historical[cur_asset]) < cs.BARRIER * initial_price
+    return barrierHit
 
 #Initial fixing date: 27/04/23 -> 0
 #Final fixing date: 30/07/24 (15 months) ->
@@ -13,59 +23,51 @@ import datetime
 
 ## path dfs are length-variable, but should always end on final fixing date
 ## historical path only to determine barrier hit (not early redemption, since no market afterwards)
-def payouts(df_path1, df_path2):
+## this fn takes in only simulated portion!!! interprets first row as 'today'
+def payouts(df_sim, barrierHit):
     #init
     df_payouts = pd.DataFrame({'payout': [], 'date': []})
-    first_date = df_path1.sort_values('date').iloc[0]['date']
-    print(first_date)
-
+    first_date = df_sim.index[0]
+    #print(first_date)
     
     #Early redemption, does not yield dividends past called date
-    triggerDate = datetime.date.fromisoformat('2024-07-30') #init to final fixing date
-    redemptionDate = datetime.date.fromisoformat('2024-08-05') #init to final redemption date
-    autocall_dates = [[datetime.date.fromisoformat('2023-11-01'), datetime.date.fromisoformat('2024-01-31'), datetime.date.fromisoformat('2024-04-30')],
-                      [datetime.date.fromisoformat('2023-11-06'), datetime.date.fromisoformat('2024-02-05'), datetime.date.fromisoformat('2024-05-06')]]
-    for i in range(len(autocall_dates[0])):
-        date = autocall_dates[0][i]
-        #print(date)
-        if df_path1.loc[df_path1['date'] == date].iloc[0]['price'] >= 1 and df_path2.loc[df_path2['date'] == date].iloc[0]['price'] >= 1:
-            #print("autocall at {date}!".format(date=date))
-            triggerDate = date
-            redemptionDate = autocall_dates[1][i]
-            #er payout added as final payout later
-            #er_payout = pd.DataFrame({'payout': [1000], 'date': [redemptionDate]})
-            #df_payouts = pd.concat([df_payouts, er_payout])
+    trigger_date = cs.FINAL_FIXING_DATE #init to final fixing date
+    redemption_date = cs.REDEMPTION_DATE #init to final redemption date
+    for date in cs.EARLY_REDEMPTION_OBSERVATION_DATES:
+        autocall_hit = True
+        for asset in cs.ASSET_NAMES:
+            autocall_hit = autocall_hit and df_sim.loc[date][asset] >= cs.INITIAL_LEVELS[asset] * cs.EARLY_REDEMPTION_LEVEL
+        if autocall_hit:
+            trigger_date = date
+            redemption_date = cs.EARLY_REDEMPTION_DATES[date]
             break
     
     #barrier check
     #can and should be optimised for runtime, since barrier hit only needs to be bool
     #current formulation for checking and viz purpose
-    barrierHit = False #change me when considering varying path start date
-    if min(df_path1['price']) < 0.6:
-        barrierHit = True
-        barrier1Hit = df_path1.loc[df_path1['price'] < 0.6].sort_values(by='date').iloc[0]
-        #print("path1 hit barrier on {date} with price {price}".format(date = barrier1Hit['date'], price = barrier1Hit['price']))
-    if min(df_path2['price']) < 0.6:
-        barrierHit = True
-        barrier2Hit = df_path2.loc[df_path2['price'] < 0.6].sort_values(by='date').iloc[0]
-        #print("path2 hit barrier on {date} with price {price}".format(date = barrier2Hit['date'], price = barrier2Hit['price']))
+    if not barrierHit:
+        #check barrier for sim path
+        for asset in cs.ASSET_NAMES:
+            if min(df_sim[asset]) < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
+                barrierHit = True
+                break
     
     #dividend payment
-    div_payment_dates = [datetime.date.fromisoformat('2023-08-07'), datetime.date.fromisoformat('2023-11-06'), datetime.date.fromisoformat('2024-02-05'), datetime.date.fromisoformat('2024-05-06'), datetime.date.fromisoformat('2024-08-05')]
-    for date in div_payment_dates:
-        if date <= redemptionDate:
-            div_payout = pd.DataFrame({'payout': [1000 * 0.02], 'date': [date]})
+    for date in cs.COUPON_PAYMENT_DATES:
+        if date <= redemption_date and date > first_date:
+            div_payout = pd.DataFrame({'payout': [cs.COUPON_PAYOUT], 'date': [date]})
             df_payouts = pd.concat([df_payouts, div_payout])
     
     #Final redemption
     #if early redemption occured, payout = 1000 regardless of barrierHit
     if barrierHit:
-        path1Closing = df_path1.loc[df_path1['date'] == triggerDate].iloc[0]['price']
-        path2Closing = df_path2.loc[df_path2['date'] == triggerDate].iloc[0]['price']
-        worstPerforming = min(path1Closing, path2Closing, 1)
-        final_payout = pd.DataFrame({'payout': [1000 * worstPerforming], 'date': [redemptionDate]})
+        worst_performing = cs.DENOMINATION
+        for asset in cs.ASSET_NAMES:
+            final_price = df_sim[trigger_date][asset] #this will be > cs.DENOMINATION if autocall occurred
+            worst_performing = min(worst_performing, final_price)
+        final_payout = pd.DataFrame({'payout': [worst_performing], 'date': [redemption_date]})
     else:
-        final_payout = pd.DataFrame({'payout': [1000], 'date': [redemptionDate]})
+        final_payout = pd.DataFrame({'payout': [cs.DENOMINATION], 'date': [redemption_date]})
     df_payouts = pd.concat([df_payouts, final_payout])
     return df_payouts
         
@@ -75,3 +77,13 @@ def payouts(df_path1, df_path2):
 #since ppl buying the product wont get coupon payment anyways
 #the only important thing is barrier hit and early redemption
 #early redemption not so impt since product simply becomes untradable so no need to simulate
+
+
+def rnv(df_payouts, today):
+    return 10000
+
+def pricing(df_historical, df_sim):
+    barrierHit = checkBarrier(df_historical) #can be optimised to not check historical for every sim path
+    df_payouts = payouts(df_sim, barrierHit)
+    price = rnv(df_payouts, df_sim.index[0])
+    return price

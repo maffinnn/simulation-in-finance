@@ -1,5 +1,20 @@
 import pandas as pd
 
+# Stock tickers
+ASSET_NAMES = [
+    'LONN.SW',
+    'SIKA.SW'
+]
+
+INITIAL_LEVELS = {
+    'LONN.SW': 549.60,
+    'SIKA.SW': 240.40
+}
+CONVERSION_RATIOS = {
+    'LONN.SW': 1.8195,
+    'SIKA.SW': 4.1597
+}
+
 # Information on factsheet
 INITIAL_FIXING_DATE = pd.Timestamp("2023-04-27")
 PAYMENT_DATE = pd.Timestamp("2023-05-05")
@@ -41,11 +56,11 @@ EARLY_REDEMPTION_OBSERVATION_DATES = [
     pd.Timestamp('2024-04-30'),
 ]
 
-EARLY_REDEMPTION_DATES = [
-    pd.Timestamp('2023-11-06'),
-    pd.Timestamp('2024-02-05'),
-    pd.Timestamp('2024-05-06'),
-]
+EARLY_REDEMPTION_DATES = {
+    pd.Timestamp('2023-11-01'): pd.Timestamp('2023-11-06'),
+    pd.Timestamp('2024-01-31'): pd.Timestamp('2024-02-05'),
+    pd.Timestamp('2024-04-30'): pd.Timestamp('2024-05-06'),
+}
 
 # https://www.six-group.com/en/products-services/the-swiss-stock-exchange/market-data/news-tools/trading-currency-holiday-calendar.html#/
 # Double checked with Sze Chong's product dates
@@ -72,6 +87,3 @@ SIX_HOLIDAY_DATES = [
     pd.Timestamp('2024-12-26'),  # St. Stephen's Day
     pd.Timestamp('2024-12-31'),  # New Year's Eve
 ]
-
-EARLY_REDEMPTION_LEVELS = [549.60, 240.40]
-CONVERSION_RATIOS = [1.8195, 4.1597]
