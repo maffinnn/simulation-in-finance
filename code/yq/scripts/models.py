@@ -1,8 +1,9 @@
 import pandas as pd
 import typing
 import numpy as np
-from ..utils import option, calendar
-import heston
+from yq.scripts import heston_func as hf
+from yq.utils import option, calendar
+
 # from ...sc import constants as cs
 
 # In the main codes, we can create different models, and at the end access the sim_data to plot all the payoff_df aaginst the product prices
@@ -123,9 +124,6 @@ class PricingModel:
                         sim_window: int, h_adjustment: typing.List) -> pd.DataFrame:
         interest_rate = 1.750/100 # TODO: Change heston interest rate to refer to the table
 
-        
-            
-        
         # Do calculations on r, volatility, rho etc.?
     
         # Get the correlation between the log returns of the Si
@@ -159,7 +157,7 @@ class PricingModel:
                     self.params_list_heston[0, i] = lonn_result.params[param].value  # For lonn_result
                     self.params_list_heston[1, i] = sika_result.params[param].value  # For sika_result
 
-                print(self.params_list_heston)
+                print(f"The parameters list for Heston is:\n{self.params_list_heston}")
         except Exception as e:
             raise Exception("Error at calibrating Hestonmodel parameters.")
 
