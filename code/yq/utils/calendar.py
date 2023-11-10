@@ -41,7 +41,7 @@ class SIXTradingCalendar:
         six_trading_days_df = pd.DataFrame(index = six_trading_days)
         
         # Name the index "Dates"
-        six_trading_days_df.index.name = 'Dates'
+        six_trading_days_df.index.name = 'Date'
         return six_trading_days_df
 
     def add_trading_day(self, trading_date: pd.Timestamp, num_trading_day: int) -> pd.Timestamp:

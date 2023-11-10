@@ -3,10 +3,8 @@ import typing
 import numpy as np
 from yq.scripts import heston_func as hf
 from yq.utils import option, calendar
+from sc import constants as cs
 
-# from ...sc import constants as cs
-
-# In the main codes, we can create different models, and at the end access the sim_data to plot all the payoff_df aaginst the product prices
 class PricingModel:
     def __init__(self, params: typing.Dict):
         self.data = params.get('data') # Stock price data for underlying asset (can include max data, in the training function can customise what dates to use)
@@ -97,7 +95,9 @@ class PricingModel:
 
         # print(sim_data)
         
-        if self.Z_list == None: self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
+        if self.Z_list is None:
+            self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
+
         # print(sim_data.loc[0, "LONN.SW"])
         try:
             S_t_vector = S_0_vector # Needs to be updated every time step
@@ -105,16 +105,22 @@ class PricingModel:
                 Z = self.Z_list[:, t]
                 for i in range(self.num_ticker):
                     LZ = np.dot(L, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
-                    print("The 3 matrices are", L, Z, LZ)
-
+                    # print("The 3 matrices are", L, Z, LZ)
                     S_t_vector[i] = S_t_vector[i] * np.exp(interest_rate * self.dt - 0.5 * cov_matrix[i][i] * self.dt + LZ[i]) # The cov matrix and L need to be computed on the fly
                     sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i]
-
-            sim_data.plot()
-            return sim_data
         
         except Exception as e:
             raise Exception("Error at simulating.")
+        
+        dates = self.calendar.create_six_trading_dates(sim_start_date, cs.FINAL_FIXING_DATE)
+        print(f"The length of sim_data and dates is {len(sim_data)} and {len(dates)}\n")
+        if (len(sim_data) == len(dates)):
+            sim_data.index = dates.index
+            sim_data.columns = self.ticker_list
+            print(sim_data)
+            return sim_data
+        else:  
+            raise Exception("Length of sim_data and dates are different.")
 
     def interest_rate_model(self, parameters):
         # Implementation of the interest rate model (e.g., Vasicek, CIR)
@@ -141,10 +147,10 @@ class PricingModel:
             if (self.params_list_heston == None):
                 # Read options data 
                 lonn_call = option.read_options_data("lonn_call.csv")
-                print(lonn_call)
+                print(f"Lonza options:\n{lonn_call}")
 
                 sika_call = option.read_options_data("sika_call.csv")
-                print(sika_call)
+                print(f"Sika options:\n{sika_call}")
 
                 # Calibrate 2 sets of parameters for 2 individual assets
                 lonn_result = hf.calibrate_heston(self.data.loc['2023-11-07']['LONN.SW'], lonn_call)
@@ -157,6 +163,7 @@ class PricingModel:
                     self.params_list_heston[0, i] = lonn_result.params[param].value  # For lonn_result
                     self.params_list_heston[1, i] = sika_result.params[param].value  # For sika_result
 
+                np.set_printoptions(suppress=True, precision=4)  # 'precision' controls the number of decimal places
                 print(f"The parameters list for Heston is:\n{self.params_list_heston}")
         except Exception as e:
             raise Exception("Error at calibrating Hestonmodel parameters.")
@@ -198,7 +205,8 @@ class PricingModel:
             raise Exception("Error at calculating Cholesky.")
         
         # Generate random variable
-        if self.Z_list_heston == None: self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
+        if self.Z_list_heston is None: 
+            self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
         
         # Perform heston for each time step, each asset (diff set of params)
         try:
@@ -220,17 +228,21 @@ class PricingModel:
                     S_t_vector[i] = S_t * np.exp((interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                     V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
                     
-                    print(V_t)
+                    print(f"The V_t value for {i}th iteration is: {V_t}\n")
                     if (V_t < 0): print ("V_t SMALLER THAN 0")
                     V_t_vector[i] = max(V_t, 0) # Truncated V_t
                     sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i] 
-            
-            sim_data.plot()
-            return sim_data
         
         except Exception as e:
             raise Exception("Error at simulating.")
-
+        dates = self.calendar.create_six_trading_dates(sim_start_date, cs.FINAL_FIXING_DATE)
+        print(f"The length of sim_data and dates is {len(sim_data)} and {len(dates)}\n")
+        if (len(sim_data) == len(dates)):
+            sim_data.index = dates.index
+            sim_data.columns = self.ticker_list
+            print(sim_data)
+            return sim_data
+        
     def monte_carlo_simulation(self, parameters):
         # General Monte Carlo simulation method
         pass
