@@ -4,7 +4,29 @@ from datetime import date, timedelta, datetime
 import numpy as np
 import pandas as pd
 
-# interest rate model
+def get_period(key: str):
+    map = {
+        '1-Week': 1/52,
+        '1-Month': 1/12,
+        '2-Month': 2/12,
+        '3-Month': 3/12,
+        '6-Month': 1/2,
+        '1-Year': 1,
+        '2-Year': 2,
+    }
+    return map[key]
+
+def populate_bond_table(bond_price, final_fixing_date):
+    bond_table = pd.DataFrame(index=bond_price.index, columns=['price'])
+    X = [get_period(col) for col in bond_price.columns]
+    for date in bond_price.index:
+        tdelta = (final_fixing_date-date).days/365
+        # for date in bond_price.index:
+        Y = bond_price.loc[date].to_list()  
+        interpolated_y = np.interp(tdelta,X,Y)
+        bond_table.loc[date]['price'] = interpolated_y
+    return bond_table
+
 class VasicekModel(object):
     def __init__(self, data: pd.DataFrame, params: typing.Dict):
         """
@@ -31,11 +53,3 @@ class VasicekModel(object):
             Rt[i] = self.a*(self.b-Rt[i-1]) * self.dt + self.sigma * np.random.normal(0, np.sqrt(self.dt)) + Rt[i-1]
         Rt = Rt[1:]
         return pd.DataFrame(data=Rt, index=pd.date_range(current_date, self.maturity_date), columns=['Rate'])
-
-
-class ConstantRateModel(object):
-    def __init__(self, data: pd.DataFrame, params: typing.Dict):
-        self.data = data
-    
-    def get_rate(self):
-        return self.data['Price'].mean()
