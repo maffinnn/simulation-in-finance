@@ -18,7 +18,7 @@ class PricingModel:
         self.Z_list = None
         self.Z_list_heston = None
         self.params_list_heston = None
-
+    
     # Implementation of the multi-asset Geometric Brownian Motion model
     def multi_asset_gbm(self, sim_start_date: pd.Timestamp, hist_window: int, 
                         sim_window: int, h_adjustment: float) -> pd.DataFrame: 
@@ -78,15 +78,15 @@ class PricingModel:
         
         try:
             cov_matrix = np.cov(np.array(log_returns_list))
-            print(f"Covariance matrix is:\n {cov_matrix}\n")
-            print(f"The shape is {np.shape(cov_matrix)}\n")
+            # print(f"Covariance matrix is:\n {cov_matrix}\n")
+            # print(f"The shape is {np.shape(cov_matrix)}\n")
 
-            print(f"Correlation between the two var is {cov_matrix[0][1] / (cov_matrix[0][0] * cov_matrix[1][1]) ** 0.5}") # Correct
+            # print(f"Correlation between the two var is {cov_matrix[0][1] / (cov_matrix[0][0] * cov_matrix[1][1]) ** 0.5}") # Correct
 
             L = np.linalg.cholesky(cov_matrix)
-            print(f"The matrix after Cholesky decomposition is:\n {L}\n")
+            # print(f"The matrix after Cholesky decomposition is:\n {L}\n")
 
-            print(f"The multiplication of L and L transpose is:\n {np.dot(L, L.T)}\n") 
+            # print(f"The multiplication of L and L transpose is:\n {np.dot(L, L.T)}\n") 
 
             sim_data = pd.DataFrame(np.zeros((sim_window, self.num_ticker)), columns = [self.ticker_list])
 
@@ -95,14 +95,14 @@ class PricingModel:
 
         # print(sim_data)
         
-        if self.Z_list is None:
-            self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
+        self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
 
         # print(sim_data.loc[0, "LONN.SW"])
         try:
             S_t_vector = S_0_vector # Needs to be updated every time step
             for t in range(sim_window):
                 Z = self.Z_list[:, t]
+                # print(f"Z matrix is \n{Z}\n")
                 for i in range(self.num_ticker):
                     LZ = np.dot(L, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
                     # print("The 3 matrices are", L, Z, LZ)
@@ -113,11 +113,11 @@ class PricingModel:
             raise Exception("Error at simulating.")
         
         dates = self.calendar.create_six_trading_dates(sim_start_date, cs.FINAL_FIXING_DATE)
-        print(f"The length of sim_data and dates is {len(sim_data)} and {len(dates)}\n")
+        # print(f"The length of sim_data and dates is {len(sim_data)} and {len(dates)}\n")
         if (len(sim_data) == len(dates)):
             sim_data.index = dates.index
             sim_data.columns = self.ticker_list
-            print(sim_data)
+            # print(sim_data)
             return sim_data
         else:  
             raise Exception("Length of sim_data and dates are different.")
@@ -138,7 +138,7 @@ class PricingModel:
             S_0_vector = [self.data.loc[last_avai_price_date, self.ticker_list[i]] + h_adjustment[i]
                     for i in range(self.num_ticker)] # Stock price of the 0th day of simulation            
             hist_data = self.data[self.data.index < sim_start_date].tail(hist_window)
-            print(f"S_0_vector is {S_0_vector}\n")
+            # print(f"S_0_vector is {S_0_vector}\n")
         except Exception as e:
             raise Exception("Error at wrangling historical data.")
 
@@ -158,13 +158,13 @@ class PricingModel:
 
                 self.params_list_heston = np.zeros((self.num_ticker, 5))
                 params_order = ['kappa', 'theta', 'volvol', 'rho', 'sigma']
-                print(f"Enumerate order is: {enumerate(params_order)}\n")
+                # print(f"Enumerate order is: {enumerate(params_order)}\n")
                 for i, param in enumerate(params_order):
                     self.params_list_heston[0, i] = lonn_result.params[param].value  # For lonn_result
                     self.params_list_heston[1, i] = sika_result.params[param].value  # For sika_result
 
                 np.set_printoptions(suppress=True, precision=4)  # 'precision' controls the number of decimal places
-                print(f"The parameters list for Heston is:\n{self.params_list_heston}")
+                # print(f"The parameters list for Heston is:\n{self.params_list_heston}")
         except Exception as e:
             raise Exception("Error at calibrating Hestonmodel parameters.")
 
@@ -179,8 +179,8 @@ class PricingModel:
                 # print(type(log_returns))
             corr_matrix = np.corrcoef(log_returns_list)
             rho_S1S2 = corr_matrix[0][1]
-            print(f"rho_S1S2 is {rho_S1S2}\n")
-            print(f"Correlation between log returns of each asset:\n{corr_matrix}\n")
+            # print(f"rho_S1S2 is {rho_S1S2}\n")
+            # print(f"Correlation between log returns of each asset:\n{corr_matrix}\n")
 
         except Exception as e:
             raise Exception("Error at calculating the correlation.")
@@ -195,18 +195,17 @@ class PricingModel:
                 [0., 0., rho_S2V2, 1.]
             ])
 
-            print(f"Simplified correlation matrix is:\n{simplified_corr}\n")
+            # print(f"Simplified correlation matrix is:\n{simplified_corr}\n")
 
             L_lower = np.linalg.cholesky(simplified_corr)
 
-            print(f"The lower triangular matrix by Cholesky decomposition is:\n {L_lower}\n")
+            # print(f"The lower triangular matrix by Cholesky decomposition is:\n {L_lower}\n")
         
         except Exception as e:
             raise Exception("Error at calculating Cholesky.")
         
         # Generate random variable
-        if self.Z_list_heston is None: 
-            self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
+        self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
         
         # Perform heston for each time step, each asset (diff set of params)
         try:
@@ -240,7 +239,7 @@ class PricingModel:
         if (len(sim_data) == len(dates)):
             sim_data.index = dates.index
             sim_data.columns = self.ticker_list
-            print(sim_data)
+            # print(sim_data)
             return sim_data
         
     def monte_carlo_simulation(self, parameters):
