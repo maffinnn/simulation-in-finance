@@ -5,6 +5,8 @@ import time
 from yq.scripts import heston_func as hf
 from yq.utils import option, calendar
 from sc import constants as cs
+from sy.interest_rate import populate_bond_table
+import datetime
 
 class PricingModel:
     def __init__(self, params: typing.Dict):
@@ -52,7 +54,7 @@ class PricingModel:
         >>> sim_data = instance.multi_asset_gbm(pd.Timestamp('2023-01-01'), 252, 180)
         >>> print(sim_data)
         """
-        interest_rate = 1.750/100 
+        self.interest_rate = 1.750/100 
 
         try:
             last_avai_price_date = self.calendar.add_trading_day(sim_start_date, -1)
@@ -109,7 +111,7 @@ class PricingModel:
                 for i in range(self.num_ticker):
                     LZ = np.dot(L, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
                     # print("The 3 matrices are", L, Z, LZ)
-                    S_t_vector[i] = S_t_vector[i] * np.exp(interest_rate * self.dt - 0.5 * cov_matrix[i][i] * self.dt + LZ[i]) # The cov matrix and L need to be computed on the fly
+                    S_t_vector[i] = S_t_vector[i] * np.exp(self.interest_rate * self.dt - 0.5 * cov_matrix[i][i] * self.dt + LZ[i]) # The cov matrix and L need to be computed on the fly
                     sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i]
         
         except Exception as e:
@@ -125,9 +127,16 @@ class PricingModel:
         else:  
             raise Exception("Length of sim_data and dates are different.")
 
-    def interest_rate_model(self, parameters):
-        # Implementation of the interest rate model (e.g., Vasicek, CIR)
-        pass
+    def adjust_interest_rate(self, bond_price, sim_data):
+        sim_window = sim_data.index
+        t_0 = sim_data.index[0] - datetime.timedelta(1)
+        bond_table = populate_bond_table(bond_price, t_0, cs.FINAL_FIXING_DATE)
+        for date in sim_window:
+            for i in range(self.num_ticker):
+                ticker = cs.ASSET_NAMES[i]
+                prev_date = date - datetime.timedelta(1)
+                sim_data.loc[date][ticker] = sim_data.loc[date][ticker]/np.exp(self.interest_rate*self.dt)*(bond_table.loc[prev_date]/bond_table.loc[date])[0]
+        return sim_data
     
     def multi_asset_heston_model(self, sim_start_date: pd.Timestamp, hist_window: int, 
                         sim_window: int, h_adjustment: typing.List) -> pd.DataFrame:
