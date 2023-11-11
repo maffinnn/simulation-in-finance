@@ -135,15 +135,28 @@ def plot_a_figure():
     # print(product_est_date_sim_data_df_list[0])
     logger_yq.info("Testing the logs: %s", product_est_date_sim_data_df_list[0])
 
+
+def read_csv_data_chill(file_name: str) -> pd.DataFrame:
+    curr_dir = Path(__file__).parent.parent
+    print(curr_dir)
+
+    file_path = curr_dir.joinpath('data', 'options-test', '20230814', file_name)
+    print(file_path)
+
+    options_data = pd.read_csv(file_path)
+
+    return options_data
+
 if __name__ == "__main__":
     cur_dir = Path(__file__).parent
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath('log_file.log'))
-    logger_yq = logging.getLogger('yq')
+    # logger_yq = logging.getLogger('yq')
 
     # run_heston_sim()
     # plot_a_figure()
-    
-
+    option.format_file_names('options-complete')
+    option.clean_options_data('options-complete')
+    # read_csv_data_chill('lonn_call.csv') # Cannot read an xlsx file converted to csv file improperly
 
     # Set up specific loggers
    

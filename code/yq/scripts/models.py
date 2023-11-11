@@ -19,7 +19,7 @@ class PricingModel:
         self.ticker_list = params.get('ticker_list')
         self.time_steps_per_year = 252
         self.dt = 1/self.time_steps_per_year
-        self.interest_rate = 1.750/100 
+        self.interest_rate = cs.INTEREST_RATE
         self.num_ticker = len(self.ticker_list) # Number of stocks
         self.prod_date = params.get('prod_date')
         self.S_0_vector = None
