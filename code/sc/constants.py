@@ -2,17 +2,17 @@ import pandas as pd
 
 # Stock tickers
 ASSET_NAMES = [
-    'LONN.SW',
-    'SIKA.SW'
+    'LONN.SE',
+    'SIKA.SE'
 ]
 
 INITIAL_LEVELS = {
-    'LONN.SW': 549.60,
-    'SIKA.SW': 240.40
+    'LONN.SE': 549.60,
+    'SIKA.SE': 240.40
 }
 CONVERSION_RATIOS = {
-    'LONN.SW': 1.8195,
-    'SIKA.SW': 4.1597
+    'LONN.SE': 1.8195,
+    'SIKA.SE': 4.1597
 }
 
 # Information on factsheet
