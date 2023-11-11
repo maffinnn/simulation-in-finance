@@ -1,5 +1,5 @@
 # Device files
-.DS_Store
+code/.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
