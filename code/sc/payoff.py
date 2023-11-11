@@ -234,9 +234,7 @@ def pricing_multiple(df_sim_array):
     price = []
     for df_sim in df_sim_array:
         df_payouts = payouts(df_sim, barrierHit)
-        print(df_payouts)
         price.append(rnv(df_payouts, df_historical.index[-1]))
-        print(price)
     return price
 
 
