@@ -1,6 +1,7 @@
 import pandas as pd
 import typing
 import numpy as np
+import time
 from yq.scripts import heston_func as hf
 from yq.utils import option, calendar
 from sc import constants as cs
@@ -21,7 +22,7 @@ class PricingModel:
     
     # Implementation of the multi-asset Geometric Brownian Motion model
     def multi_asset_gbm(self, sim_start_date: pd.Timestamp, hist_window: int, 
-                        sim_window: int, h_adjustment: float) -> pd.DataFrame: 
+                        sim_window: int, h_adjustment: typing.List) -> pd.DataFrame: 
         """
         Perform a simulation of multi-asset Geometric Brownian Motion (GBM) with
         a h_adjustment to the initial stock price for all assets.
@@ -36,7 +37,7 @@ class PricingModel:
         - hist_window (int): The number of days to refer in yfinance, usually 252 
         which corresponds to the number of trading days in a year.
         - sim_window (int): The number of days to simulate.
-        - h_adjustment (float): The adjustment to the stock price St.
+        - h_adjustment (List): The adjustment to the stock price St.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the simulated asset paths. Each 
@@ -55,10 +56,10 @@ class PricingModel:
 
         try:
             last_avai_price_date = self.calendar.add_trading_day(sim_start_date, -1)
-            S_0_vector = [self.data.loc[last_avai_price_date, ticker] + h_adjustment
-                    for ticker in self.ticker_list] # Stock price of the 0th day of simulation            
+            S_0_vector = [self.data.loc[last_avai_price_date, self.ticker_list[i]] + h_adjustment[i]
+                    for i in range(self.num_ticker)] # Stock price of the 0th day of simulation            
             hist_data = self.data[self.data.index < sim_start_date].tail(hist_window)
-            
+            print(f"S_0_vector: {S_0_vector}")
         except Exception as e:
             raise Exception("Error at wrangling historical data.")
 
@@ -94,10 +95,12 @@ class PricingModel:
             raise Exception("Error at covariance matrix.")
 
         # print(sim_data)
-        
-        self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
+        # If run h_adjustment != 0 right after one simulation for one price path
+        if h_adjustment == [0, 0]:
+            self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
 
         # print(sim_data.loc[0, "LONN.SW"])
+        print(f"S_0_vector: {S_0_vector}")
         try:
             S_t_vector = S_0_vector # Needs to be updated every time step
             for t in range(sim_window):
@@ -138,13 +141,13 @@ class PricingModel:
             S_0_vector = [self.data.loc[last_avai_price_date, self.ticker_list[i]] + h_adjustment[i]
                     for i in range(self.num_ticker)] # Stock price of the 0th day of simulation            
             hist_data = self.data[self.data.index < sim_start_date].tail(hist_window)
-            # print(f"S_0_vector is {S_0_vector}\n")
+            print(f"S_0_vector is {S_0_vector}\n")
         except Exception as e:
             raise Exception("Error at wrangling historical data.")
 
         try:
             # TODO: Change to calibrate every day if have time, hardcoded the calibration S_t
-            if (self.params_list_heston == None):
+            if (self.params_list_heston is None):
                 # Read options data 
                 lonn_call = option.read_options_data("lonn_call.csv")
                 print(f"Lonza options:\n{lonn_call}")
@@ -153,9 +156,15 @@ class PricingModel:
                 print(f"Sika options:\n{sika_call}")
 
                 # Calibrate 2 sets of parameters for 2 individual assets
+                start_time = time.time()
+
                 lonn_result = hf.calibrate_heston(self.data.loc['2023-11-07']['LONN.SW'], lonn_call)
                 sika_result = hf.calibrate_heston(self.data.loc['2023-11-07']['SIKA.SW'], sika_call)
-
+                end_time = time.time()
+                elapsed_time = end_time - start_time
+                min, sec = divmod(elapsed_time, 60)
+                print(f"The elapsed time for 2 calibration is {int(min)} minutes, {int(sec)} seconds")
+        
                 self.params_list_heston = np.zeros((self.num_ticker, 5))
                 params_order = ['kappa', 'theta', 'volvol', 'rho', 'sigma']
                 # print(f"Enumerate order is: {enumerate(params_order)}\n")
@@ -205,8 +214,9 @@ class PricingModel:
             raise Exception("Error at calculating Cholesky.")
         
         # Generate random variable
-        self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
-        
+        if h_adjustment == [0, 0]:
+            self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
+        print(f"Z_list_heston is:\n {self.Z_list_heston}\n")
         # Perform heston for each time step, each asset (diff set of params)
         try:
             sim_data = pd.DataFrame(np.zeros((sim_window, self.num_ticker)), columns = [self.ticker_list])
@@ -227,7 +237,9 @@ class PricingModel:
                     S_t_vector[i] = S_t * np.exp((interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                     V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
                     
-                    print(f"The V_t value for {i}th iteration is: {V_t}\n")
+                    if (i == 0): # LONN.SW
+                        print(f"Ratio is: {S_t_vector[i] / S_t}")
+                    print(f"The V_t value for {t}th iteration asset {i} is: {V_t}\n")
                     if (V_t < 0): print ("V_t SMALLER THAN 0")
                     V_t_vector[i] = max(V_t, 0) # Truncated V_t
                     sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i] 

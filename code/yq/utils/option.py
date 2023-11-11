@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+from yq.utils import calendar
 
 def read_options_data(file_name: str):
     """
@@ -56,10 +57,44 @@ def read_options_data(file_name: str):
 
     return options_data
 
+def create_csv_files(prod_est_date: pd.Timestamp) -> None:
+    """
+    Create a directory structure for a given production estimated date and
+    creates two CSV files, 'lonn_call.csv' and 'sika_call.csv', in this directory.
+
+    Parameters:
+    prod_est_date (pd.Timestamp): The production estimated date.
+
+    The function creates a directory path in the format 'data/options/YYYYMMDD' 
+    relative to the script's location and creates two CSV files in it.
+    """
+    try:
+        cur_dir = Path(__file__).parent
+        target_dir = cur_dir.joinpath('..', '..', '..', 'data', 'options', prod_est_date.strftime('%Y%m%d'))
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        # Creating CSV file paths using joinpath
+        lonn_call_path = target_dir.joinpath('lonn_call.csv')
+        sika_call_path = target_dir.joinpath('sika_call.csv')
+
+        # Create two empty CSV files
+        lonn_call_path.touch()
+        sika_call_path.touch()
+
+        # Example: Writing headers to CSV files
+        # with open(lonn_call_path, 'w') as f:
+        #     f.write('Header1,Header2,Header3\n')
+        # with open(sika_call_path, 'w') as f:
+        #     f.write('Header1,Header2,Header3\n')
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    lonn_call = read_options_data("lonn_call.csv")
-    print(lonn_call)
+    pass
+    # create_date_folders(pd.Timestamp('2023-08-09'))
+    # lonn_call = read_options_data("lonn_call.csv")
+    # print(lonn_call)
 
-    sika_call = read_options_data("sika_call.csv")
-    print(sika_call)
+    # sika_call = read_options_data("sika_call.csv")
+    # print(sika_call)
