@@ -1,4 +1,5 @@
 import typing
+import logging
 import pickle
 import pandas as pd
 import numpy as np
@@ -18,6 +19,8 @@ from yq.scripts import heston_func
 from yq.utils import option
 from yq.utils import calendar
 from yq.scripts import simulation as sm
+from yq.utils import path as yq_path
+from yq.utils import log
 from sc import constants as cs
 from sy.variance_reduction import apply_control_variates
 from sy.interest_rate import populate_bond_table, get_period
@@ -46,8 +49,7 @@ def load_object(filename):
     with open(filename, 'rb') as inp:  # Read in binary mode
         return pickle.load(inp)
 
-
-if __name__ == "__main__":
+def run_heston_sim():
     historical_start_date = '2022-08-09'
     # Define the ticker list
     ticker_list = ['LONN.SW', 'SIKA.SW']
@@ -110,7 +112,45 @@ if __name__ == "__main__":
         except Exception as e:
             # Log the error with the date that caused it
             raise Exception("MultiHeston has error.")
-        
+
+def plot_a_figure():
+    # Copy the start_time_str from the folders
+    product_est_date_sim_data_df_list = sm.read_sim_data(
+            model_name='gbm',
+            start_time_str='20231111_195045_022812', 
+            prod_est_start_date=pd.Timestamp('2023-08-09'), 
+            prod_est_end_date=pd.Timestamp('2023-11-09'))
+    # print(type(product_est_date_sim_data_df_list)[0])
+    n_sim_on_day = pd.concat(product_est_date_sim_data_df_list[20], axis=1)
+    ax = n_sim_on_day.plot(alpha=0.6, legend=False)
+    # Set the title
+    ax.set_title("Product Pricing Date: x, Model: Multi Asset GBM")
+
+    # Add text labels for additional features
+    ax.text(0.5, 0.95, "n_sim = 100, LONZA, SIKA", horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
+
+    figure = ax.get_figure()
+    figure.savefig(yq_path.get_plots_path(cur_dir).joinpath('sample_sim_path_on_prod_date.png'))
+
+    # print(product_est_date_sim_data_df_list[0])
+    logger_yq.info("Testing the logs: %s", product_est_date_sim_data_df_list[0])
+
+if __name__ == "__main__":
+    cur_dir = Path(__file__).parent
+    logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath('log_file.log'))
+    logger_yq = logging.getLogger('yq')
+
+    # run_heston_sim()
+    # plot_a_figure()
+    
+
+
+    # Set up specific loggers
+   
+    # Your plotting code remains the same
+    # ...
+
+    # Logging the DataFrame
     pass
     # calendar = calendar.SIXTradingCalendar()
     # dates = calendar.create_six_trading_dates('2023-08-09', '2023-11-09')

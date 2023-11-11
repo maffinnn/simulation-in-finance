@@ -2,11 +2,15 @@ import pandas as pd
 import typing
 import numpy as np
 import time
+import logging
+from pathlib import Path
 from yq.scripts import heston_func as hf
-from yq.utils import option, calendar
+from yq.utils import option, calendar, log, path as yq_path
 from sc import constants as cs
 from sy.interest_rate import populate_bond_table
 import datetime
+
+logger_yq = logging.getLogger('yq')
 
 class PricingModel:
     def __init__(self, params: typing.Dict):
@@ -15,6 +19,7 @@ class PricingModel:
         self.ticker_list = params.get('ticker_list')
         self.time_steps_per_year = 252
         self.dt = 1/self.time_steps_per_year
+        self.interest_rate = 1.750/100 
         self.num_ticker = len(self.ticker_list) # Number of stocks
         self.prod_date = params.get('prod_date')
         self.S_0_vector = None
@@ -58,7 +63,6 @@ class PricingModel:
         >>> sim_data = instance.multi_asset_gbm(pd.Timestamp('2023-01-01'), 252, 180)
         >>> print(sim_data)
         """
-        self.interest_rate = 1.750/100 
 
         try:
             last_avai_price_date = self.calendar.add_trading_day(sim_start_date, -1)
@@ -104,7 +108,7 @@ class PricingModel:
         # If run h_adjustment != 0 right after one simulation for one price path
         if h_adjustment == [0, 0]:
             self.Z_list = np.random.normal(0, 1, (self.num_ticker, sim_window))
-
+        
         # print(sim_data.loc[0, "LONN.SW"])
         print(f"S_0_vector: {S_0_vector}")
         try:
@@ -149,7 +153,7 @@ class PricingModel:
         # Do calculations on r, volatility, rho etc.?
     
         # Get the correlation between the log returns of the Si
-        if self.S_0_vector is None:
+        if self.S_0_vector is None or h_adjustment != [0, 0]:
             try:
                 last_avai_price_date = self.calendar.add_trading_day(sim_start_date, -1)
                 self.S_0_vector = [self.data.loc[last_avai_price_date, self.ticker_list[i]] + h_adjustment[i]
@@ -159,6 +163,7 @@ class PricingModel:
             except Exception as e:
                 raise Exception("Error at wrangling historical data.")
 
+        logger_yq.info("Before checking for calibration, the params_list_heston is %s", self.params_list_heston)
         if (self.params_list_heston is None):
             try:
                 # TODO: Change to calibrate every day if have time, hardcoded the calibration S_t
@@ -188,6 +193,7 @@ class PricingModel:
 
                     np.set_printoptions(suppress=True, precision=4)  # 'precision' controls the number of decimal places
                     print(f"The parameters list for Heston is:\n{self.params_list_heston}")
+                    logger_yq.info("The calibrated params_list_Heston is: %s", self.params_list_heston)
             except Exception as e:
                 raise Exception("Error at calibrating Hestonmodel parameters.")
 
@@ -231,9 +237,12 @@ class PricingModel:
         # simulating other +h, -h paths for each asset
         if h_adjustment == [0, 0]:
             self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, sim_window))
-        print(f"Z_list_heston is:\n {self.Z_list_heston}\n")
+        # Never calculate Z_list before
+        elif self.Z_list_heston is None:
+            raise Exception("Attempt to compute h_adjusted price path without original.")
+        # print(f"Z_list_heston is:\n {self.Z_list_heston}\n")
         # Perform heston for each time step, each asset (diff set of params)
-        
+        logger_yq.info("The Z list is %s", self.Z_list_heston)
         try:
             sim_data = pd.DataFrame(np.zeros((sim_window, self.num_ticker)), columns = [self.ticker_list])
             S_t_vector = self.S_0_vector # Price vector t (to be updated after every step)
@@ -250,12 +259,20 @@ class PricingModel:
                     LZ = np.dot(self.L_lower, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
                     # print(f"The 3 matrices are: \n", L_lower, Z.T, LZ)
 
+                    if (i == 0): # LONN.SW
+                        logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
+                        logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
+                    
                     S_t_vector[i] = S_t * np.exp((interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                     V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
                     
                     if (i == 0): # LONN.SW
-                        print(f"Ratio is: {S_t_vector[i] / S_t}")
-                    print(f"The V_t value for {t}th iteration asset {i} is: {V_t}\n")
+                        # print(f"Ratio is: {S_t_vector[i] / S_t}")
+                        logger_yq.info("New S_t, new V_t and S_t+1/S_t is %s, %s, %s", S_t_vector[i], V_t_vector[i], S_t_vector[i] / S_t)
+
+                    # print(f"The V_t value for {t}th iteration asset {i} is: {V_t}\n")
+                    # logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
+
                     if (V_t < 0): print ("V_t SMALLER THAN 0")
                     V_t_vector[i] = max(V_t, 0) # Truncated V_t
                     sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i] 
