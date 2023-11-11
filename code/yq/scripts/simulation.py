@@ -21,7 +21,7 @@ def read_sim_data(model_name: str,
         sim_data_df = []
         for sim in range(file_count):
             file_path = storage_dir.joinpath(str(sim) + '.csv')
-            sim_data_df.append(pd.read_csv(file_path))
+            sim_data_df.append(pd.read_csv(file_path, index_col='Date'))
 
         product_est_date_sim_data_df_list.append(sim_data_df)
         # print(f"sim_data_df for {product_est_date}:\n {product_est_date_sim_data_df_list}\n")
