@@ -39,7 +39,6 @@ def store_sim_data(start_time_acc: datetime,
                    product_est_date: pd.Timestamp,
                    sim: int) -> None:
     start_time_str = start_time_acc.strftime('%Y%m%d_%H%M%S_%f')
-    model_name = 'gbm'
     cur_dir = Path(__file__).parent
     storage_dir = cur_dir.joinpath('..', '..', '..', 'sim_data', model_name, start_time_str, product_est_date.strftime('%Y-%m-%d'))
     storage_dir.mkdir(parents=True, exist_ok=True)

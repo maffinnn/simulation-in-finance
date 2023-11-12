@@ -15,13 +15,14 @@ import os
 
 # Self-written modules
 from yq.scripts import models
-from yq.scripts import heston_func
+from yq.scripts import heston
 from yq.utils import option
 from yq.utils import calendar
 from yq.scripts import simulation as sm
 from yq.utils import path as yq_path
 from yq.utils import log
 from sc import constants as cs
+from sc import payoff as po
 from sy.variance_reduction import apply_control_variates
 from sy.interest_rate import populate_bond_table, get_period
 from sy.calibration import apply_empirical_martingale_correction
@@ -49,7 +50,7 @@ def load_object(filename):
     with open(filename, 'rb') as inp:  # Read in binary mode
         return pickle.load(inp)
 
-def run_heston_sim():
+def run_heston_sim_test_h():
     historical_start_date = '2022-08-09'
     # Define the ticker list
     ticker_list = ['LONN.SW', 'SIKA.SW']
@@ -151,11 +152,41 @@ if __name__ == "__main__":
     cur_dir = Path(__file__).parent
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath('log_file.log'))
     # logger_yq = logging.getLogger('yq')
-
-    # run_heston_sim()
-    # plot_a_figure()
-    option.format_file_names('options-complete')
+    # option.format_file_names('options-complete')
     option.clean_options_data('options-complete')
+
+    tcal = calendar.SIXTradingCalendar()
+    # print(bus_date_range)
+    # print(bus_date_range.index.to_list())
+    start_time_acc = datetime.datetime.now()
+    
+    # TODO: BEFORE RUNNING: Change the dates, h_array, 
+    start_time = time.time()
+    count = 0
+    for prod_date in tcal.create_six_trading_dates('2023-09-11', '2023-09-15').index:
+        try: 
+            logger_yq.info(f"Pricing the product on {prod_date}")
+            params = {
+                    'prod_date': prod_date,
+                    'hist_window': 252,
+                    'h_array': [[0, 1, -1], [0, 1, -1]],
+                    'start_time_acc': start_time_acc
+            }
+            hst = heston.multi_heston(params)
+            # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
+            hst.sim_n_path(n_sim=1)
+            del hst
+            count += 1
+        except Exception as e:
+            logger_yq.error(f"Error during calibration on {prod_date}: {e}")
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    min, sec = divmod(elapsed_time, 60)
+    logger_yq.info(f"The elapsed time for {count} pricing dates is {int(min)} minutes, {int(sec)} seconds")
+    # run_heston_sim_test_h()
+    # plot_a_figure()
+
     # read_csv_data_chill('lonn_call.csv') # Cannot read an xlsx file converted to csv file improperly
 
     # Set up specific loggers

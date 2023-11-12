@@ -3,6 +3,12 @@ LONZA price: 331.30
 SIKA price: 226.30
 
 WARNING: 13/9 is empty, so used 12/9 to replace
+18-21/8 (LONZA) all used 24/8 data because strike_num = 50, the maturity is not ranged
+21-23/8 (SIKA) all used 24/8 data because not sure why the calibration has error
+25-30/8 (LONZA all used 31/8 data) because strike = 50
+- Next time need to run all the data once at least to check if there are any problems
+with the model
+
 There is a description for every maturity date, can use dropna to remove
 Some rows have 0, might want to remove
 

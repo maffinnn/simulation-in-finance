@@ -8,6 +8,17 @@ from sc import constants as cs
 
 logger_yq = logging.getLogger('yq')
 
+def read_clean_options_data(options_dir: str, curr_date: pd.Timestamp, file_name: str) -> pd.DataFrame:
+    curr_dir = Path(__file__).parent
+    root_dir = yq_path.get_root_dir(curr_dir)
+    dir_name = curr_date.strftime('%Y%m%d')
+    file_path = root_dir.joinpath('data', options_dir, dir_name, file_name)
+
+    options_data = pd.read_csv(file_path, index_col=None)
+    logger_yq.info("File path is %s", file_path)
+    logger_yq.info(f"Options data read is\n {options_data.head()}")
+    return options_data
+
 def read_options_data(file_name: str):
     """
     Read the option data from a CSV file and clean it.
@@ -39,7 +50,7 @@ def read_options_data(file_name: str):
     file_path = curr_dir.joinpath('data', 'options', file_name)
     print(file_path)
 
-    options_data = pd.read_csv(file_path)
+    options_data = pd.read_csv(file_path, index_col=None)
 
     # Drop the description rows
     # display(options_data)
@@ -85,30 +96,28 @@ def clean_options_data(options_dir: str):
             # Number of CSV files is exactly 2
             lonza_cnt, sika_cnt = 0, 0
             for file in files:
-                with open(file, 'r') as f:
-                    first_line = f.readline()
-                    if not first_line.strip():
-                            logger_yq.warning("File is empty!!")
-                    second_line = f.readline()
                 file_name = file.name
                 logger_yq.info(f"The file name is {file_name}")
-
-                if file_name == 'lonn_call.csv' and 'LONE' in second_line:
-                    lonza_cnt += 1
-                elif file_name == 'sika_call.csv' and 'SIK' in second_line: 
-                    sika_cnt += 1
-                options_data = pd.read_csv(file)
+                with open(file, 'r') as f:
+                    for line in f:
+                        if file_name == 'lonn_call.csv' and 'LONE' in line:
+                            lonza_cnt += 1 # Must be 1 if things are right
+                            break
+                        elif file_name == 'sika_call.csv' and 'SIK' in line: 
+                            sika_cnt += 1
+                            break
+                options_data = pd.read_csv(file, index_col=None)
                 cle_opt_data = clean_options_df(options_data=options_data, curr_date=date)
-                logger_yq.info(f"The cle_opt_data df is {cle_opt_data}")
+                logger_yq.info(f"The cle_opt_data df is:\n{cle_opt_data}")
                 new_path = store_dir.joinpath(str(file_name))
                 logger_yq.info(f"The new path is {new_path}")
-                cle_opt_data.to_csv(new_path)
+                cle_opt_data.to_csv(new_path, index=False)
 
             if (lonza_cnt != 1) or (sika_cnt != 1):
-                logger_yq.info("Warning: Data might not belong to the asset in {date}'s files.")
+                logger_yq.warning(f"Warning: Data might not belong to the asset in {date}'s files.")
                 continue
         else:
-            logger_yq.info("Warning: Path not exist or not a folder")
+            logger_yq.warning(f"Warning: Path not exist or not a folder")
 
 
 def clean_options_df(options_data: pd.DataFrame, curr_date: pd.Timestamp):
@@ -121,13 +130,20 @@ def clean_options_df(options_data: pd.DataFrame, curr_date: pd.Timestamp):
     options_data['maturity'] = (options_data['ExDt'] - pd.to_datetime(curr_date)).dt.days / 356.25
 
     # Remove rows with zeros
-    options_data = options_data[options_data['Mid'] > 0].reset_index(drop=True)
+    options_data = options_data[(options_data['Mid'] > 0) & (options_data['IVM'] > 0)].reset_index(drop=True)
 
-    options_data = options_data[['maturity', 'Strike', 'Mid']]
-    options_data.columns = ['maturity', 'strike', 'price']
+    options_data = options_data[['maturity', 'Strike', 'Mid', 'IVM']]
+    options_data.columns = ['maturity', 'strike', 'price', 'IV']
+
+    options_data = options_data[options_data['maturity'] > 0.1]
     
     # Calculate the risk free rate for each maturity
     options_data['rate'] = [cs.INTEREST_RATE for _ in range(len(options_data))] 
+
+    if (options_data.isna().sum().sum() > 0 or (options_data == 0).sum().sum() > 0):
+        logger_yq.warning(f"Options data contain 0 or NaN values")
+    elif (len(options_data) == 0):
+        logger_yq.error(f"Options data became empty")
     return options_data
 
 def format_file_names(options_dir: str):

@@ -1,10 +1,14 @@
 # Parallel computation using numba
 from numba import jit, prange
 import numpy as np
+import logging
 
 # Optimizer
 from lmfit import Parameters, minimize
 import pandas as pd
+
+logger_yq = logging.getLogger('yq')
+
 
 i = complex(0,1)
 
@@ -66,28 +70,25 @@ def priceHestonMid(St, K, r, T, sigma, kappa, theta, volvol, rho):
 
 def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
     volSurfaceLong = options_data
-    #Initialize parameters
-    # sigma, kappa, theta, volvol, rho = 0.1, 0.1, 0.1, 0.1, 0.1
-
     # Define global variables to be used in optimization
     maturities = volSurfaceLong['maturity'].to_numpy('float')
     strikes = volSurfaceLong['strike'].to_numpy('float')
     marketPrices = volSurfaceLong['price'].to_numpy('float')
     rates = volSurfaceLong['rate'].to_numpy('float')
     # Can be used for debugging
-    # def iter_cb(params, iter, resid):
-    #     parameters = [params['sigma'].value, 
-    #                   params['kappa'].value, 
-    #                   params['theta'].value, 
-    #                   params['volvol'].value, 
-    #                   params['rho'].value, 
-    #                   np.sum(np.square(resid))]
-    #     print(parameters) 
+    def iter_cb(params, iter, resid):
+        parameters = [params['sigma'].value, 
+                      params['kappa'].value, 
+                      params['theta'].value, 
+                      params['volvol'].value, 
+                      params['rho'].value, 
+                      np.sum(np.square(resid))]
+        logger_yq.info(f"The parameters in heston are: {parameters}") 
         
     # This is the calibration function
     def calibratorHeston(St, initialValues = [0.5,0.5,0.5,0.5,-0.5], 
                                 lowerBounds = [1e-2,1e-2,1e-2,1e-2,-1], 
-                                upperBounds = [100,100,100,100,0]):
+                                upperBounds = [10,10,10,10,0]): 
         # changed upper bound to 100
         '''
         Implementation of the Levenberg Marquardt algorithm in Python to find the optimal value 
@@ -126,7 +127,8 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
         2) We define an objective function that gives the relative difference between market prices and model prices
         3) We minimize the function using the Levenberg Marquardt algorithm
         '''
-            
+        
+
         # Define parameters
         params = Parameters()
         params.add('sigma',value = initialValues[0], min = lowerBounds[0], max = upperBounds[0])
@@ -135,6 +137,8 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
         params.add('volvol', value = initialValues[3], min = lowerBounds[3], max = upperBounds[3])
         params.add('rho', value = initialValues[4], min = lowerBounds[4], max = upperBounds[4])
         
+        # if np.isnan(list(params.valuesdict().values())).any():
+        #     logger_yq.warning("NaN detected in initial parameters:", params)
         
         # Define objective function
         objectiveFunctionHeston = lambda paramVect: (marketPrices - priceHestonMid(St, strikes,  
@@ -149,8 +153,8 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
         # Optimise parameters
         result = minimize(objectiveFunctionHeston, 
                         params, 
-                        method = 'leastsq',
-    #                     iter_cb = iter_cb,
+                        method = 'leastsq', # 'leastsq' previously
+                        # iter_cb = iter_cb, # Can be commented if don't want debugging
                         ftol = 1e-6)
         return(result)
 

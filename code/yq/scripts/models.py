@@ -148,7 +148,7 @@ class PricingModel:
     
     def multi_asset_heston_model(self, sim_start_date: pd.Timestamp, hist_window: int, 
                         sim_window: int, h_adjustment: typing.List) -> pd.DataFrame:
-        interest_rate = 1.750/100 # TODO: Change heston interest rate to refer to the table
+        interest_rate = cs.INTEREST_RATE
 
         # Do calculations on r, volatility, rho etc.?
     
