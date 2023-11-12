@@ -98,12 +98,9 @@ class multi_heston(PricingModel):
                            sim=sim)
             # Plot the graph of every sim
             if (self.plot):
-                sim_data_comb.plot()
-                stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('sim_data_comb_heston', self.start_time_acc.strftime('%Y%m%d_%H%M%S_%f'), self.prod_date.strftime('%Y_%m_%d'))
-                stor_dir.mkdir(parents=True, exist_ok=True)
-                file_path = stor_dir.joinpath(f'{sim}.png')
-                plt.savefig(file_path)
-                plt.close()
+                self.plot_sim_path(plot_hist=True, 
+                                   sim_data_comb=sim_data_comb,
+                                   sim=sim)
 
         end_time = time.time()
         elapsed_time = end_time - start_time
@@ -129,7 +126,7 @@ class multi_heston(PricingModel):
 
                 # if (i == 0): # LONN.SW
                 #     logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
-                logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
+                # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
                 
                 S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                 V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
@@ -211,3 +208,41 @@ class multi_heston(PricingModel):
 
         self.L_lower = np.linalg.cholesky(simplified_corr)
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
+    
+    def plot_sim_path(self, plot_hist: bool, sim_data_comb: pd.DataFrame, sim: int) -> None:
+        # Plot sim paths from prod pricing date (for each h) for each asset
+        fig, ax = plt.subplots(figsize=(10,6)) 
+        # If use figure then cannot have fig, ax; just use plt in lines below
+        if plot_hist: 
+            logger_yq.info(f"The hist_data is\n{self.hist_data}")
+            hist_df = self.data[(self.data.index >= cs.INITIAL_FIXING_DATE) 
+                           & (self.data.index <= cs.FINAL_FIXING_DATE)]
+            for asset in cs.ASSET_NAMES:
+                ax.plot(hist_df.index, hist_df[asset], alpha=0.5, label=asset)
+        data = {}
+        for i in range(len(cs.ASSET_NAMES)):
+            data[sim_data_comb.columns[i]] = self.S_0_vector[i] # Access the price on the prod date
+        prod_date_df = pd.DataFrame(data, index=[self.prod_date])
+        smooth_path = pd.concat([prod_date_df, sim_data_comb], axis=0)
+        logger_yq.info(f"The smooth path df is:\n{smooth_path}")
+        smooth_path.plot(ax=ax, alpha=0.5) # Another way of plotting
+
+        title_str = f"PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, r: {self.interest_rate}"
+        subtitle_str = f"sim_start_date: {self.sim_start_date.strftime('%Y-%m-%d')}, sim_wdw: {self.sim_window}"
+        plt.title(f"{title_str}\n{subtitle_str}")
+        plt.legend(loc='upper right')
+
+        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('sim_data_comb_heston', 
+                                                                          self.start_time_acc.strftime('%Y%m%d_%H%M%S_%f'), 
+                                                                          self.prod_date.strftime('%Y_%m_%d'))
+        stor_dir.mkdir(parents=True, exist_ok=True)
+        file_path = stor_dir.joinpath(f'{sim}.png')
+        plt.savefig(file_path, bbox_inches='tight')
+        logger_yq.info(f"Path of 1 sim is plotted")
+
+    def plot_prod_price():
+        # Payout
+        # From initial pricing to end of pricing date
+        # Title: RMSE/MAPE, hist_wdw, n_sim
+
+        pass
