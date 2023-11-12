@@ -1,6 +1,8 @@
 import sc.payoff as po
 import sc.constants as cs
 
+# Simple greeks implementations
+
 #TODO: greeks
 
 #evaluates delta for a single price path

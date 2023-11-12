@@ -249,11 +249,5 @@ def pricing_multiple(df_sim_array):
 # Sensitivity Analysis
 # ===============================================================================================
 
-#TODO: greeks
-
-#evaluates delta for a single price path
-def delta_single_gbm(h, df_historical, df_sim, asset):
-    initial_price = df_historical.iloc[-1][asset]
-    df_plus_h = df_sim
-    df_plus_h[asset] = df_plus_h[asset]
-    return 1000
+# Look in greeks.py for simple implementations!
+# Watch this space for simultaneous payoff and greek calculations.
