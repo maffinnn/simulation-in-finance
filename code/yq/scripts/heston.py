@@ -25,6 +25,7 @@ class PricingModel:
         self.prod_date = params.get('prod_date')
         self.hist_window = params.get('hist_window')
         self.start_time_acc = params.get('start_time_acc')
+        self.plot: bool = params.get('plot')
         self.time_steps_per_year = 252
         self.dt = 1/self.time_steps_per_year
         self.interest_rate = cs.INTEREST_RATE
@@ -68,7 +69,7 @@ class multi_heston(PricingModel):
     def sim_n_path(self, n_sim):
         start_time = time.time()
         self.hist_data = self.data[self.data.index < self.sim_start_date].sort_index().tail(self.hist_window)
-        logger_yq.info(f"The historical data is\n {self.hist_data}")
+        logger_yq.info(f"The historical data is\n {self.hist_data.head()}")
         self.calibrate(self.prod_date)
         self.calc_L_lower()
         
@@ -78,7 +79,7 @@ class multi_heston(PricingModel):
             sim_data_comb = pd.DataFrame()
             for pair in range(len(self.h_array[0])):
                 sim_data = self.sim_path(h_vector=self.h_array[:, pair])
-                logger_yq.info(f"The simulated data for {sim}th iteration is:\n {sim_data}")
+                logger_yq.info(f"The simulated data for {sim}th iteration is:\n {sim_data.head()}")
 
                 sim_data_comb = pd.concat([sim_data_comb, sim_data], axis=1)
             
@@ -88,7 +89,7 @@ class multi_heston(PricingModel):
                 sim_data_comb.index = dates.index
             else:
                 logger_yq.warning(f"The length of sim_data and dates is different: {len(sim_data)} and {len(dates)}\n")
-            logger_yq.info(f"1 sim, diff h, sim_data_comb:\n{sim_data_comb}")
+            logger_yq.info(f"1 sim, diff h, sim_data_comb:\n{sim_data_comb.head()}")
             # Save the every path into folder
             sm.store_sim_data(start_time_acc=self.start_time_acc,
                            model_name='heston',
@@ -96,17 +97,18 @@ class multi_heston(PricingModel):
                            product_est_date=self.prod_date,
                            sim=sim)
             # Plot the graph of every sim
-            sim_data_comb.plot()
-            stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('sim_data_comb_heston', self.start_time_acc.strftime('%Y%m%d_%H%M%S_%f'), self.prod_date.strftime('%Y_%m_%d'))
-            stor_dir.mkdir(parents=True, exist_ok=True)
-            file_path = stor_dir.joinpath(f'{sim}.png')
-            plt.savefig(file_path)
-            plt.close()
+            if (self.plot):
+                sim_data_comb.plot()
+                stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('sim_data_comb_heston', self.start_time_acc.strftime('%Y%m%d_%H%M%S_%f'), self.prod_date.strftime('%Y_%m_%d'))
+                stor_dir.mkdir(parents=True, exist_ok=True)
+                file_path = stor_dir.joinpath(f'{sim}.png')
+                plt.savefig(file_path)
+                plt.close()
 
         end_time = time.time()
         elapsed_time = end_time - start_time
         min, sec = divmod(elapsed_time, 60)
-        logger_yq.info(f"The elapsed time for {n_sim}th sim is {int(min)} minutes, {int(sec)} seconds")
+        logger_yq.info(f"The elapsed time for {sim}th sim is {int(min)} minutes, {int(sec)} seconds")
     
     def sim_path(self, h_vector: np.array):
         sim_data = pd.DataFrame(np.zeros((self.sim_window, self.num_ticker)), columns=[self.ticker_list])
@@ -127,7 +129,7 @@ class multi_heston(PricingModel):
 
                 # if (i == 0): # LONN.SW
                 #     logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
-                # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
+                logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
                 
                 S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                 V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
@@ -153,7 +155,7 @@ class multi_heston(PricingModel):
         lonn_call = lonn_call[['maturity', 'strike', 'price', 'rate']]
         sika_call = sika_call[['maturity', 'strike', 'price', 'rate']]
 
-        logger_yq.info(f"LONZA and SIKA df are \n{lonn_call}\n{sika_call}")
+        logger_yq.info(f"LONZA and SIKA df are \n{lonn_call.head()}\n{sika_call.head()}")
 
         # Calibrate 2 sets of parameters for 2 individual assets
         start_time = time.time()

@@ -154,7 +154,7 @@ if __name__ == "__main__":
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
     # logger_yq = logging.getLogger('yq')
     # option.format_file_names('options-complete')
-    option.clean_options_data('options-complete')
+    # option.clean_options_data('options-complete')
 
     tcal = calendar.SIXTradingCalendar()
     # print(bus_date_range)
@@ -164,14 +164,15 @@ if __name__ == "__main__":
     # TODO: BEFORE RUNNING: Change the dates, h_array, 
     start_time = time.time()
     count = 0
-    for prod_date in tcal.create_six_trading_dates('2023-10-30', '2023-10-30').index:
+    for prod_date in tcal.create_six_trading_dates('2023-08-09', '2023-08-09').index:
         try: 
             logger_yq.info(f"Pricing the product on {prod_date}")
             params = {
                     'prod_date': prod_date,
                     'hist_window': 252,
                     'h_array': [[0, 1, -1], [0, 1, -1]],
-                    'start_time_acc': start_time_acc
+                    'start_time_acc': start_time_acc,
+                    'plot': False
             }
             hst = heston.multi_heston(params)
             # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
