@@ -136,6 +136,7 @@ class PricingModel:
             raise Exception("Length of sim_data and dates are different.")
 
     def adjust_interest_rate(self, bond_price, sim_data):
+        sim_data_copy = sim_data.copy(deep=True)
         sim_window = sim_data.index
         t_0 = sim_data.index[0] - datetime.timedelta(1)
         bond_table = populate_bond_table(bond_price, t_0, cs.FINAL_FIXING_DATE)
@@ -143,8 +144,8 @@ class PricingModel:
             for i in range(self.num_ticker):
                 ticker = cs.ASSET_NAMES[i]
                 prev_date = date - datetime.timedelta(1)
-                sim_data.loc[date][ticker] = sim_data.loc[date][ticker]/np.exp(self.interest_rate*self.dt)*(bond_table.loc[prev_date]/bond_table.loc[date])[0]
-        return sim_data
+                sim_data_copy.loc[date][ticker] = sim_data.loc[date][ticker]/np.exp(self.interest_rate*self.dt)*(bond_table.loc[prev_date]/bond_table.loc[date]).iloc[0]
+        return sim_data_copy
     
     def multi_asset_heston_model(self, sim_start_date: pd.Timestamp, hist_window: int, 
                         sim_window: int, h_adjustment: typing.List) -> pd.DataFrame:
