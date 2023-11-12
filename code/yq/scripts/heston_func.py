@@ -1,70 +1,94 @@
 # Parallel computation using numba
-from numba import jit, prange
+from numba import prange
 import numpy as np
 import logging
+import sys
+import cmath
 
 # Optimizer
 from lmfit import Parameters, minimize
 import pandas as pd
 
 logger_yq = logging.getLogger('yq')
+epsilon = sys.float_info.epsilon  # Very small value to avoid division by zero or log of zero
 
 
 i = complex(0,1)
 
 # To be used in the Heston pricer
-@jit
+# @jit
 def fHeston(s, St, K, r, T, sigma, kappa, theta, volvol, rho):
-    # To be used a lot
-    prod = rho * sigma *i *s 
-    
-    # Calculate d
-    d1 = (prod - kappa)**2
-    d2 = (sigma**2) * (i*s + s**2)
-    d = np.sqrt(d1 + d2)
-    
-    # Calculate g
+    logger_yq.info(f"Received parameters for fHeston - s: {s}, St: {St}, K: {K}, r: {r}, T: {T}, sigma: {sigma}, kappa: {kappa}, theta: {theta}, volvol: {volvol}, rho: {rho}")
+
+    prod = rho * sigma * i * s
+    logger_yq.info(f"Calculated prod: {prod}")
+
+    d1 = pow(prod - kappa, 2)
+    d2 = pow(sigma, 2) * (i * s + pow(s, 2))
+    d = cmath.sqrt(d1 + d2)
+    logger_yq.info(f"Calculated d components - d1: {d1}, d2: {d2}, d: {d}")
+
     g1 = kappa - prod - d
     g2 = kappa - prod + d
-    g = g1/g2
+    g = g1 / g2 if g2 != 0 else np.inf
+    logger_yq.info(f"Calculated g components - g1: {g1}, g2: {g2}, g: {g}")
+
+    exp1 = np.exp(np.log(St) * i * s) * np.exp(i * s * r * T)
+    exp2 = 1 - g * np.exp(-d * T)
+    exp3 = 1 - g
+    mainExp1 = exp1 * pow(exp2 / exp3, -2 * theta * kappa / pow(sigma, 2)) if exp3 != 0 else np.inf
+    logger_yq.info(f"Calculated mainExp1: {mainExp1}")
+
+    # Calculating exp4, exp5, exp6, and mainExp2
+    exp4 = theta * kappa * T / pow(sigma, 2)
+    logger_yq.info(f"Calculated exp4: {exp4}")
+
+    exp5 = volvol / pow(sigma, 2)
+    logger_yq.info(f"Calculated exp5: {exp5}")
+
+    exp6_denominator = 1 - g * np.exp(-d * T)
+    if exp6_denominator != 0:
+        exp6 = (1 - np.exp(-d * T)) / exp6_denominator
+    else:
+        exp6 = np.inf
+    logger_yq.info(f"Calculated exp6: {exp6}")
+
+    mainExp2 = np.exp((exp4 * g1) + (exp5 * g1 * exp6))
+    logger_yq.info(f"Calculated mainExp2: {mainExp2}")
+
+    result = mainExp1 * mainExp2
+    logger_yq.info(f"Final result: {result}")
     
-    # Calculate first exponential
-    exp1 = np.exp(np.log(St) * i *s) * np.exp(i * s* r* T)
-    exp2 = 1 - g * np.exp(-d *T)
-    exp3 = 1- g
-    mainExp1 = exp1 * np.power(exp2/ exp3, -2 * theta * kappa/(sigma **2))
-    
-    # Calculate second exponential
-    exp4 = theta * kappa * T/(sigma **2)
-    exp5 = volvol/(sigma **2)
-    exp6 = (1 - np.exp(-d * T))/(1 - g * np.exp(-d * T))
-    mainExp2 = np.exp((exp4 * g1) + (exp5 *g1 * exp6))
-    
-    return (mainExp1 * mainExp2)
+    return result
 
 # Heston Pricer (allow for parallel processing with numba)
-@jit(forceobj=True)
+# @jit(forceobj=True)
 def priceHestonMid(St, K, r, T, sigma, kappa, theta, volvol, rho):
-    P, iterations, maxNumber = 0,1000,100
-    ds = maxNumber/iterations
-    
+    logger_yq.info("Starting priceHestonMid calculation")
+    P, iterations, maxNumber = 0, 1000, 100
+    ds = maxNumber / iterations
+
     element1 = 0.5 * (St - K * np.exp(-r * T))
-    
+    logger_yq.info(f"Element 1 calculated: {element1}")
+
     # Calculate the complex integral
-    # Using j instead of i to avoid confusion
     for j in prange(1, iterations):
-        s1 = ds * (2*j + 1)/2
+        s1 = ds * (2 * j + 1) / 2
         s2 = s1 - i
         
-        numerator1 = fHeston(s2,  St, K, r, T, sigma, kappa, theta, volvol, rho)
-        numerator2 = K * fHeston(s1,  St, K, r, T, sigma, kappa, theta, volvol, rho)
-        denominator = np.exp(np.log(K) * i * s1) *i *s1
-        
-        P = P + ds *(numerator1 - numerator2)/denominator
+        numerator1 = fHeston(s2, St, K, r, T, sigma, kappa, theta, volvol, rho)
+        numerator2 = K * fHeston(s1, St, K, r, T, sigma, kappa, theta, volvol, rho)
+
+        denominator = np.exp(np.log(K + epsilon) * i * s1) * i * s1 + epsilon
+        P += ds * (numerator1 - numerator2) / denominator
     
-    element2 = P/np.pi
-    
-    return np.real((element1 + element2))
+    element2 = P / np.pi
+    logger_yq.info(f"Element 2 calculated: {element2}")
+
+    result = np.real((element1 + element2))
+    logger_yq.info(f"Final result: {result}")
+
+    return result
 
 
 
@@ -148,7 +172,7 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
                                                                             paramVect['kappa'].value,
                                                                             paramVect['theta'].value,
                                                                             paramVect['volvol'].value,
-                                                                            paramVect['rho'].value))/marketPrices   
+                                                                            paramVect['rho'].value))/(marketPrices + sys.float_info.epsilon) 
         
         # Optimise parameters
         result = minimize(objectiveFunctionHeston, 

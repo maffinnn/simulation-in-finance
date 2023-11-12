@@ -149,8 +149,9 @@ def read_csv_data_chill(file_name: str) -> pd.DataFrame:
     return options_data
 
 if __name__ == "__main__":
+    # cur_dir = Path(os.getcwd()).parent # ipynb cannot use __file__
     cur_dir = Path(__file__).parent
-    logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath('log_file.log'))
+    logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
     # logger_yq = logging.getLogger('yq')
     # option.format_file_names('options-complete')
     option.clean_options_data('options-complete')
@@ -163,7 +164,7 @@ if __name__ == "__main__":
     # TODO: BEFORE RUNNING: Change the dates, h_array, 
     start_time = time.time()
     count = 0
-    for prod_date in tcal.create_six_trading_dates('2023-09-11', '2023-09-15').index:
+    for prod_date in tcal.create_six_trading_dates('2023-10-30', '2023-10-30').index:
         try: 
             logger_yq.info(f"Pricing the product on {prod_date}")
             params = {
