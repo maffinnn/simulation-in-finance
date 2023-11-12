@@ -163,8 +163,8 @@ def plot_graph():
         ax.plot(df_sim.index, df_sim[col], alpha=0.5, label=col)
 
 
-    title_str = f"PPD: "
-    plt.title(title_str)
+    #title_str = f"PPD: "
+    # plt.title(title_str)
     plt.legend(loc='upper right')
     plt.tight_layout()
     stor_dir = yq_path.get_plots_path(Path(__file__).parent)                     
@@ -191,19 +191,19 @@ if __name__ == "__main__":
     # TODO: BEFORE RUNNING: Change the dates, h_array, 
     start_time = time.time()
     count = 0
-    for prod_date in tcal.create_six_trading_dates('2023-08-09', '2023-08-09').index:
+    for prod_date in tcal.create_six_trading_dates('2023-08-09', '2023-11-09').index:
         try: 
             logger_yq.info(f"Pricing the product on {prod_date}")
             params = {
                     'prod_date': prod_date,
-                    'hist_window': 252,
+                    'hist_window': 7,
                     'h_array': [[0], [0]],
                     'start_time_acc': start_time_acc,
                     'plot': True
             }
             hst = heston.multi_heston(params)
             # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
-            hst.sim_n_path(n_sim=1)
+            hst.sim_n_path(n_sim=2)
             del hst
             count += 1
         except Exception as e:

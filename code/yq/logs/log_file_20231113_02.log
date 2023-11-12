@@ -686,3 +686,1495 @@ Date
 2023-11-13 02:05:56,431 - yq - INFO - Path of 1 sim is plotted
 2023-11-13 02:05:56,431 - yq - INFO - The elapsed time for 0th sim is 0 minutes, 14 seconds
 2023-11-13 02:05:56,431 - yq - INFO - The elapsed time for 1 pricing dates is 0 minutes, 15 seconds
+2023-11-13 02:58:13,024 - yq - INFO - Pricing the product on 2023-08-09 00:00:00
+2023-11-13 02:58:13,026 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 02:58:13,045 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 02:58:13,311 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-10    569.8    237.3
+2022-08-11    584.0    246.3
+2022-08-12    570.2    243.4
+2022-08-15    569.6    247.6
+2022-08-16    558.4    243.4
+2023-11-13 02:58:13,344 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230809/lonn_call.csv
+2023-11-13 02:58:13,346 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0   0.10386     440  52.149994  27.330225  0.0175
+1   0.10386     450  43.049988  25.649502  0.0175
+2   0.10386     460  34.500000  24.389547  0.0175
+3   0.10386     470  26.799995  23.625263  0.0175
+4   0.10386     480  19.849991  22.715864  0.0175
+2023-11-13 02:58:13,349 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230809/sika_call.csv
+2023-11-13 02:58:13,351 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0   0.10386     220  48.050003  38.010380  0.0175
+1   0.10386     230  38.400002  33.623005  0.0175
+2   0.10386     240  29.074997  29.997280  0.0175
+3   0.10386     250  20.525002  27.632607  0.0175
+4   0.10386     260  13.275000  26.195461  0.0175
+2023-11-13 02:58:13,359 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0   0.10386     440  52.149994  0.0175
+1   0.10386     450  43.049988  0.0175
+2   0.10386     460  34.500000  0.0175
+3   0.10386     470  26.799995  0.0175
+4   0.10386     480  19.849991  0.0175
+   maturity  strike      price    rate
+0   0.10386     220  48.050003  0.0175
+1   0.10386     230  38.400002  0.0175
+2   0.10386     240  29.074997  0.0175
+3   0.10386     250  20.525002  0.0175
+4   0.10386     260  13.275000  0.0175
+2023-11-13 02:58:13,359 - yq - INFO - Calibrating LONZA.
+2023-11-13 02:58:17,368 - yq - INFO - Calibrating SIKA.
+2023-11-13 02:58:21,284 - yq - INFO - The S_0 for LONZA and SIKA are 489.0 and 265.5
+2023-11-13 02:58:21,287 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1765aca10>
+ <lmfit.minimizer.MinimizerResult object at 0x17668f310>
+2023-11-13 02:58:21,287 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 7 seconds
+2023-11-13 02:58:21,287 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 3.54981049  0.12429418  0.06651261 -0.29351806  2.15034224]
+ [ 4.65314853  0.14327446  0.12397803 -0.49566622  3.43812376]]
+2023-11-13 02:58:21,292 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-11    0.024616
+2022-08-12   -0.023914
+2022-08-15   -0.001053
+2022-08-16   -0.019859
+2022-08-17    0.003932
+                ...   
+2023-08-03   -0.015793
+2023-08-04    0.006104
+2023-08-07   -0.005696
+2023-08-08    0.002038
+2023-08-09   -0.004489
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-11    0.037225
+2022-08-12   -0.011844
+2022-08-15    0.017108
+2022-08-16   -0.017108
+2022-08-17   -0.012402
+                ...   
+2023-08-03   -0.008169
+2023-08-04    0.039479
+2023-08-07   -0.028724
+2023-08-08   -0.013368
+2023-08-09   -0.007505
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 02:58:21,292 - yq - INFO - rho_S1S2 is 0.5700777401625888
+
+2023-11-13 02:58:21,292 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.57007774]
+ [0.57007774 1.        ]]
+
+2023-11-13 02:58:21,292 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.29351806  0.57007774  0.        ]
+ [-0.29351806  1.          0.          0.        ]
+ [ 0.57007774  0.          1.         -0.49566622]
+ [ 0.          0.         -0.49566622  1.        ]]
+
+2023-11-13 02:58:21,294 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.29351806  0.95595353  0.          0.        ]
+ [ 0.57007774  0.17503792  0.80272853  0.        ]
+ [ 0.          0.         -0.61747677  0.78658912]]
+
+2023-11-13 02:58:21,312 - yq - INFO - The adjusted S_0 is [489.  265.5]
+2023-11-13 02:58:21,336 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:21,337 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  398.267008  203.127840
+1  390.565926  167.915653
+2  442.476855  177.569262
+3  409.616947  196.738955
+4  371.613085  179.865319
+2023-11-13 02:58:21,417 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-10  398.267008  203.127840
+2023-08-11  390.565926  167.915653
+2023-08-14  442.476855  177.569262
+2023-08-15  409.616947  196.738955
+2023-08-16  371.613085  179.865319
+2023-11-13 02:58:21,421 - yq - INFO - The adjusted S_0 is [489.  265.5]
+2023-11-13 02:58:21,441 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:21,442 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  527.867098  303.577847
+1  502.377150  248.399517
+2  463.134094  216.907463
+3  425.068675  227.988963
+4  504.539295  289.205302
+2023-11-13 02:58:21,537 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-10  527.867098  303.577847
+2023-08-11  502.377150  248.399517
+2023-08-14  463.134094  216.907463
+2023-08-15  425.068675  227.988963
+2023-08-16  504.539295  289.205302
+2023-11-13 02:58:21,539 - yq - INFO - The adjusted S_0 is [489.  265.5]
+2023-11-13 02:58:21,560 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:21,561 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  512.074234  314.073878
+1  493.036487  292.564226
+2  458.709371  239.750998
+3  500.003662  286.347165
+4  452.452084  273.685171
+2023-11-13 02:58:21,647 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-10  512.074234  314.073878
+2023-08-11  493.036487  292.564226
+2023-08-14  458.709371  239.750998
+2023-08-15  500.003662  286.347165
+2023-08-16  452.452084  273.685171
+2023-11-13 02:58:21,648 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 8 seconds
+2023-11-13 02:58:21,648 - yq - INFO - Pricing the product on 2023-08-10 00:00:00
+2023-11-13 02:58:21,648 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 02:58:21,656 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 02:58:21,868 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-11    584.0    246.3
+2022-08-12    570.2    243.4
+2022-08-15    569.6    247.6
+2022-08-16    558.4    243.4
+2022-08-17    560.6    240.4
+2023-11-13 02:58:21,891 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230810/lonn_call.csv
+2023-11-13 02:58:21,893 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.101053     450  51.699997  28.406391  0.0175
+1  0.101053     460  42.599991  26.427944  0.0175
+2  0.101053     470  34.000000  24.808001  0.0175
+3  0.101053     480  28.599991  27.952068  0.0175
+4  0.101053     490  19.499998  23.021019  0.0175
+2023-11-13 02:58:21,902 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230810/sika_call.csv
+2023-11-13 02:58:21,905 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.101053     220  49.675003  37.533554  0.0175
+1  0.101053     230  39.950005  33.262680  0.0175
+2  0.101053     240  30.450005  29.446768  0.0175
+3  0.101053     250  21.574997  26.823681  0.0175
+4  0.101053     260  13.925000  25.314522  0.0175
+2023-11-13 02:58:21,908 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.101053     450  51.699997  0.0175
+1  0.101053     460  42.599991  0.0175
+2  0.101053     470  34.000000  0.0175
+3  0.101053     480  28.599991  0.0175
+4  0.101053     490  19.499998  0.0175
+   maturity  strike      price    rate
+0  0.101053     220  49.675003  0.0175
+1  0.101053     230  39.950005  0.0175
+2  0.101053     240  30.450005  0.0175
+3  0.101053     250  21.574997  0.0175
+4  0.101053     260  13.925000  0.0175
+2023-11-13 02:58:21,908 - yq - INFO - Calibrating LONZA.
+2023-11-13 02:58:28,698 - yq - INFO - Calibrating SIKA.
+2023-11-13 02:58:42,333 - yq - INFO - The S_0 for LONZA and SIKA are 498.1 and 268.3
+2023-11-13 02:58:42,333 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766de590>
+ <lmfit.minimizer.MinimizerResult object at 0x176690a90>
+2023-11-13 02:58:42,334 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 20 seconds
+2023-11-13 02:58:42,334 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 4.80493262  0.1131859   0.0681332  -0.31277735  2.27836569]
+ [ 5.74806625  0.11228372  0.09071392 -0.42236711  3.09514421]]
+2023-11-13 02:58:42,345 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-12   -0.023914
+2022-08-15   -0.001053
+2022-08-16   -0.019859
+2022-08-17    0.003932
+2022-08-18    0.023622
+                ...   
+2023-08-04    0.006104
+2023-08-07   -0.005696
+2023-08-08    0.002038
+2023-08-09   -0.004489
+2023-08-10    0.018438
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-12   -0.011844
+2022-08-15    0.017108
+2022-08-16   -0.017108
+2022-08-17   -0.012402
+2022-08-18    0.005807
+                ...   
+2023-08-04    0.039479
+2023-08-07   -0.028724
+2023-08-08   -0.013368
+2023-08-09   -0.007505
+2023-08-10    0.010491
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 02:58:42,352 - yq - INFO - rho_S1S2 is 0.567077292667247
+
+2023-11-13 02:58:42,352 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56707729]
+ [0.56707729 1.        ]]
+
+2023-11-13 02:58:42,353 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.31277735  0.56707729  0.        ]
+ [-0.31277735  1.          0.          0.        ]
+ [ 0.56707729  0.          1.         -0.42236711]
+ [ 0.          0.         -0.42236711  1.        ]]
+
+2023-11-13 02:58:42,353 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.31277735  0.94982647  0.          0.        ]
+ [ 0.56707729  0.18673825  0.80221703  0.        ]
+ [ 0.          0.         -0.5264998   0.85017525]]
+
+2023-11-13 02:58:42,358 - yq - INFO - The adjusted S_0 is [498.1 268.3]
+2023-11-13 02:58:42,379 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:42,381 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  444.706328  262.133707
+1  386.927259  227.111752
+2  309.986562  178.180465
+3  283.939100  167.899390
+4  226.425395  150.369228
+2023-11-13 02:58:42,474 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-11  444.706328  262.133707
+2023-08-14  386.927259  227.111752
+2023-08-15  309.986562  178.180465
+2023-08-16  283.939100  167.899390
+2023-08-17  226.425395  150.369228
+2023-11-13 02:58:42,477 - yq - INFO - The adjusted S_0 is [498.1 268.3]
+2023-11-13 02:58:42,497 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:42,498 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  494.505688  250.174254
+1  462.932860  237.101288
+2  500.185706  262.342272
+3  501.543305  260.918328
+4  496.043176  306.476477
+2023-11-13 02:58:42,603 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-11  494.505688  250.174254
+2023-08-14  462.932860  237.101288
+2023-08-15  500.185706  262.342272
+2023-08-16  501.543305  260.918328
+2023-08-17  496.043176  306.476477
+2023-11-13 02:58:42,605 - yq - INFO - The adjusted S_0 is [498.1 268.3]
+2023-11-13 02:58:42,624 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:42,626 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  541.760780  314.795191
+1  616.901985  351.807171
+2  596.538787  371.383362
+3  669.449217  380.754602
+4  680.645275  303.757830
+2023-11-13 02:58:42,718 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-11  541.760780  314.795191
+2023-08-14  616.901985  351.807171
+2023-08-15  596.538787  371.383362
+2023-08-16  669.449217  380.754602
+2023-08-17  680.645275  303.757830
+2023-11-13 02:58:42,719 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 20 seconds
+2023-11-13 02:58:42,719 - yq - INFO - Pricing the product on 2023-08-11 00:00:00
+2023-11-13 02:58:42,719 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 02:58:42,726 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 02:58:42,922 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-12    570.2    243.4
+2022-08-15    569.6    247.6
+2022-08-16    558.4    243.4
+2022-08-17    560.6    240.4
+2022-08-18    574.0    241.8
+2023-11-13 02:58:42,924 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230811/lonn_call.csv
+2023-11-13 02:58:42,926 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.196491     450  51.399994  25.468338  0.0175
+1  0.196491     460  43.399994  24.842302  0.0175
+2  0.196491     470  35.899994  24.175629  0.0175
+3  0.196491     480  29.149994  23.683537  0.0175
+4  0.196491     490  23.199997  23.294483  0.0175
+2023-11-13 02:58:42,927 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230811/sika_call.csv
+2023-11-13 02:58:42,928 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.196491     220  44.675003  31.911819  0.0175
+1  0.196491     230  35.525002  29.347454  0.0175
+2  0.196491     240  27.000000  27.414755  0.0175
+3  0.196491     250  19.449997  26.059502  0.0175
+4  0.196491     260  13.125000  24.996462  0.0175
+2023-11-13 02:58:42,931 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.196491     450  51.399994  0.0175
+1  0.196491     460  43.399994  0.0175
+2  0.196491     470  35.899994  0.0175
+3  0.196491     480  29.149994  0.0175
+4  0.196491     490  23.199997  0.0175
+   maturity  strike      price    rate
+0  0.196491     220  44.675003  0.0175
+1  0.196491     230  35.525002  0.0175
+2  0.196491     240  27.000000  0.0175
+3  0.196491     250  19.449997  0.0175
+4  0.196491     260  13.125000  0.0175
+2023-11-13 02:58:42,931 - yq - INFO - Calibrating LONZA.
+2023-11-13 02:58:47,300 - yq - INFO - Calibrating SIKA.
+2023-11-13 02:58:52,388 - yq - INFO - The S_0 for LONZA and SIKA are 494.9 and 262.8
+2023-11-13 02:58:52,388 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766d5b90>
+ <lmfit.minimizer.MinimizerResult object at 0x1766d5090>
+2023-11-13 02:58:52,388 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 9 seconds
+2023-11-13 02:58:52,388 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 0.0100982   6.38443243  0.0649069  -0.26798989  1.20777668]
+ [ 0.0100038   0.01871573  0.07506272 -0.33254287  1.10347658]]
+2023-11-13 02:58:52,395 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-15   -0.001053
+2022-08-16   -0.019859
+2022-08-17    0.003932
+2022-08-18    0.023622
+2022-08-19   -0.017575
+                ...   
+2023-08-07   -0.005696
+2023-08-08    0.002038
+2023-08-09   -0.004489
+2023-08-10    0.018438
+2023-08-11   -0.006445
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-15    0.017108
+2022-08-16   -0.017108
+2022-08-17   -0.012402
+2022-08-18    0.005807
+2022-08-19   -0.028100
+                ...   
+2023-08-07   -0.028724
+2023-08-08   -0.013368
+2023-08-09   -0.007505
+2023-08-10    0.010491
+2023-08-11   -0.020712
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 02:58:52,395 - yq - INFO - rho_S1S2 is 0.5662243928613783
+
+2023-11-13 02:58:52,395 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56622439]
+ [0.56622439 1.        ]]
+
+2023-11-13 02:58:52,395 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.26798989  0.56622439  0.        ]
+ [-0.26798989  1.          0.          0.        ]
+ [ 0.56622439  0.          1.         -0.33254287]
+ [ 0.          0.         -0.33254287  1.        ]]
+
+2023-11-13 02:58:52,395 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.26798989  0.96342172  0.          0.        ]
+ [ 0.56622439  0.15750362  0.80906276  0.        ]
+ [ 0.          0.         -0.41102234  0.91162527]]
+
+2023-11-13 02:58:52,396 - yq - INFO - The adjusted S_0 is [494.9 262.8]
+2023-11-13 02:58:52,416 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:52,417 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  428.606072  249.512957
+1  458.961158  264.135484
+2  465.003574  259.450876
+3  472.417051  297.991385
+4  442.685325  290.704567
+2023-11-13 02:58:52,504 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-14  428.606072  249.512957
+2023-08-15  458.961158  264.135484
+2023-08-16  465.003574  259.450876
+2023-08-17  472.417051  297.991385
+2023-08-18  442.685325  290.704567
+2023-11-13 02:58:52,506 - yq - INFO - The adjusted S_0 is [494.9 262.8]
+2023-11-13 02:58:52,526 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:52,527 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  521.431935  272.756195
+1  508.478397  272.636345
+2  473.590616  242.248400
+3  470.840314  224.246072
+4  476.772459  233.399988
+2023-11-13 02:58:52,619 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-14  521.431935  272.756195
+2023-08-15  508.478397  272.636345
+2023-08-16  473.590616  242.248400
+2023-08-17  470.840314  224.246072
+2023-08-18  476.772459  233.399988
+2023-11-13 02:58:52,625 - yq - INFO - The adjusted S_0 is [494.9 262.8]
+2023-11-13 02:58:52,649 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:58:52,651 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  476.321794  255.243629
+1  494.955275  256.432081
+2  431.903197  212.677290
+3  437.793180  207.099756
+4  406.259803  208.675229
+2023-11-13 02:58:52,732 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-14  476.321794  255.243629
+2023-08-15  494.955275  256.432081
+2023-08-16  431.903197  212.677290
+2023-08-17  437.793180  207.099756
+2023-08-18  406.259803  208.675229
+2023-11-13 02:58:52,733 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 9 seconds
+2023-11-13 02:58:52,733 - yq - INFO - Pricing the product on 2023-08-14 00:00:00
+2023-11-13 02:58:52,734 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 02:58:52,739 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 02:58:52,928 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-15    569.6    247.6
+2022-08-16    558.4    243.4
+2022-08-17    560.6    240.4
+2022-08-18    574.0    241.8
+2022-08-19    564.0    235.1
+2023-11-13 02:58:52,929 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230814/lonn_call.csv
+2023-11-13 02:58:52,930 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0   0.18807     450  51.399994  25.468338  0.0175
+1   0.18807     460  43.399994  24.842302  0.0175
+2   0.18807     470  35.899994  24.175629  0.0175
+3   0.18807     480  29.149994  23.683537  0.0175
+4   0.18807     490  23.199997  23.294483  0.0175
+2023-11-13 02:58:52,931 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230814/sika_call.csv
+2023-11-13 02:58:52,933 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0   0.18807     220  44.675003  31.911819  0.0175
+1   0.18807     230  35.525002  29.347454  0.0175
+2   0.18807     240  27.000000  27.414755  0.0175
+3   0.18807     250  19.449997  26.059502  0.0175
+4   0.18807     260  13.125000  24.996462  0.0175
+2023-11-13 02:58:52,935 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0   0.18807     450  51.399994  0.0175
+1   0.18807     460  43.399994  0.0175
+2   0.18807     470  35.899994  0.0175
+3   0.18807     480  29.149994  0.0175
+4   0.18807     490  23.199997  0.0175
+   maturity  strike      price    rate
+0   0.18807     220  44.675003  0.0175
+1   0.18807     230  35.525002  0.0175
+2   0.18807     240  27.000000  0.0175
+3   0.18807     250  19.449997  0.0175
+4   0.18807     260  13.125000  0.0175
+2023-11-13 02:58:52,935 - yq - INFO - Calibrating LONZA.
+2023-11-13 02:58:57,326 - yq - INFO - Calibrating SIKA.
+2023-11-13 02:59:06,256 - yq - INFO - The S_0 for LONZA and SIKA are 494.2 and 262.5
+2023-11-13 02:59:06,257 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766bcc50>
+ <lmfit.minimizer.MinimizerResult object at 0x1766bd790>
+2023-11-13 02:59:06,257 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 13 seconds
+2023-11-13 02:59:06,257 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 4.58825664  0.08046836  0.09300292 -0.28437046  2.5422585 ]
+ [ 1.47982388  0.14357181  0.08717267 -0.43752539  1.91718134]]
+2023-11-13 02:59:06,262 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-16   -0.019859
+2022-08-17    0.003932
+2022-08-18    0.023622
+2022-08-19   -0.017575
+2022-08-22   -0.032069
+                ...   
+2023-08-08    0.002038
+2023-08-09   -0.004489
+2023-08-10    0.018438
+2023-08-11   -0.006445
+2023-08-14   -0.001415
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-16   -0.017108
+2022-08-17   -0.012402
+2022-08-18    0.005807
+2022-08-19   -0.028100
+2022-08-22   -0.021932
+                ...   
+2023-08-08   -0.013368
+2023-08-09   -0.007505
+2023-08-10    0.010491
+2023-08-11   -0.020712
+2023-08-14   -0.001142
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 02:59:06,263 - yq - INFO - rho_S1S2 is 0.5670413781733628
+
+2023-11-13 02:59:06,263 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56704138]
+ [0.56704138 1.        ]]
+
+2023-11-13 02:59:06,263 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.28437046  0.56704138  0.        ]
+ [-0.28437046  1.          0.          0.        ]
+ [ 0.56704138  0.          1.         -0.43752539]
+ [ 0.          0.         -0.43752539  1.        ]]
+
+2023-11-13 02:59:06,263 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.28437046  0.95871447  0.          0.        ]
+ [ 0.56704138  0.16819379  0.80633425  0.        ]
+ [ 0.          0.         -0.54261045  0.83998446]]
+
+2023-11-13 02:59:06,264 - yq - INFO - The adjusted S_0 is [494.2 262.5]
+2023-11-13 02:59:06,284 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:59:06,285 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  515.049523  267.880193
+1  535.418423  277.142285
+2  540.603784  235.069089
+3  553.425121  286.548353
+4  644.777491  282.205876
+2023-11-13 02:59:06,382 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-15  515.049523  267.880193
+2023-08-16  535.418423  277.142285
+2023-08-17  540.603784  235.069089
+2023-08-18  553.425121  286.548353
+2023-08-21  644.777491  282.205876
+2023-11-13 02:59:06,388 - yq - INFO - The adjusted S_0 is [494.2 262.5]
+2023-11-13 02:59:06,410 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:59:06,412 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  512.973393  254.437157
+1  435.245187  226.378316
+2  413.446912  201.722848
+3  440.780648  205.768850
+4  452.202248  228.004569
+2023-11-13 02:59:06,507 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-15  512.973393  254.437157
+2023-08-16  435.245187  226.378316
+2023-08-17  413.446912  201.722848
+2023-08-18  440.780648  205.768850
+2023-08-21  452.202248  228.004569
+2023-11-13 02:59:06,511 - yq - INFO - The adjusted S_0 is [494.2 262.5]
+2023-11-13 02:59:06,536 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 02:59:06,538 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  583.606995  318.925296
+1  544.458474  302.531924
+2  460.663744  246.336180
+3  426.847755  245.302198
+4  444.716005  216.116669
+2023-11-13 02:59:06,628 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-15  583.606995  318.925296
+2023-08-16  544.458474  302.531924
+2023-08-17  460.663744  246.336180
+2023-08-18  426.847755  245.302198
+2023-08-21  444.716005  216.116669
+2023-11-13 02:59:06,650 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 13 seconds
+2023-11-13 02:59:06,650 - yq - INFO - Pricing the product on 2023-08-15 00:00:00
+2023-11-13 02:59:06,650 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 02:59:06,657 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 02:59:06,842 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-16    558.4    243.4
+2022-08-17    560.6    240.4
+2022-08-18    574.0    241.8
+2022-08-19    564.0    235.1
+2022-08-22    546.2    230.0
+2023-11-13 02:59:06,848 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230815/lonn_call.csv
+2023-11-13 02:59:06,849 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.185263     440  55.374992  28.061256  0.0175
+1  0.185263     450  47.000000  26.852697  0.0175
+2  0.185263     460  39.199997  25.892950  0.0175
+3  0.185263     470  32.699989  25.923019  0.0175
+4  0.185263     480  24.799995  23.396318  0.0175
+2023-11-13 02:59:06,852 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230815/sika_call.csv
+2023-11-13 02:59:06,853 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.185263     210  50.325005  34.053059  0.0175
+1  0.185263     220  40.974998  31.394001  0.0175
+2  0.185263     230  32.075005  29.231590  0.0175
+3  0.185263     240  23.925003  27.594440  0.0175
+4  0.185263     250  16.900002  26.497833  0.0175
+2023-11-13 02:59:06,856 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.185263     440  55.374992  0.0175
+1  0.185263     450  47.000000  0.0175
+2  0.185263     460  39.199997  0.0175
+3  0.185263     470  32.699989  0.0175
+4  0.185263     480  24.799995  0.0175
+   maturity  strike      price    rate
+0  0.185263     210  50.325005  0.0175
+1  0.185263     220  40.974998  0.0175
+2  0.185263     230  32.075005  0.0175
+3  0.185263     240  23.925003  0.0175
+4  0.185263     250  16.900002  0.0175
+2023-11-13 02:59:06,856 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:03:23,359 - yq - INFO - Calibrating SIKA.
+2023-11-13 03:03:29,097 - yq - INFO - The S_0 for LONZA and SIKA are 487.9 and 258.1
+2023-11-13 03:03:29,099 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766ed290>
+ <lmfit.minimizer.MinimizerResult object at 0x1766d5ed0>
+2023-11-13 03:03:29,100 - yq - INFO - The elapsed time for 2 calibration is 4 minutes, 22 seconds
+2023-11-13 03:03:29,100 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 0.01409728  8.9606762   0.06452067 -0.43649555  1.04712927]
+ [ 1.36984422  0.16759345  0.09923003 -0.45831439  2.13871674]]
+2023-11-13 03:03:29,113 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-17    0.003932
+2022-08-18    0.023622
+2022-08-19   -0.017575
+2022-08-22   -0.032069
+2022-08-23   -0.020718
+                ...   
+2023-08-09   -0.004489
+2023-08-10    0.018438
+2023-08-11   -0.006445
+2023-08-14   -0.001415
+2023-08-15   -0.012830
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-17   -0.012402
+2022-08-18    0.005807
+2022-08-19   -0.028100
+2022-08-22   -0.021932
+2022-08-23   -0.015334
+                ...   
+2023-08-09   -0.007505
+2023-08-10    0.010491
+2023-08-11   -0.020712
+2023-08-14   -0.001142
+2023-08-15   -0.016904
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 03:03:29,114 - yq - INFO - rho_S1S2 is 0.5664995647698844
+
+2023-11-13 03:03:29,114 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56649956]
+ [0.56649956 1.        ]]
+
+2023-11-13 03:03:29,114 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.43649555  0.56649956  0.        ]
+ [-0.43649555  1.          0.          0.        ]
+ [ 0.56649956  0.          1.         -0.45831439]
+ [ 0.          0.         -0.45831439  1.        ]]
+
+2023-11-13 03:03:29,115 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.43649555  0.89970641  0.          0.        ]
+ [ 0.56649956  0.27483915  0.77687945  0.        ]
+ [ 0.          0.         -0.58994274  0.80744509]]
+
+2023-11-13 03:03:29,121 - yq - INFO - The adjusted S_0 is [487.9 258.1]
+2023-11-13 03:03:29,141 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:29,146 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  449.901972  252.202780
+1  426.607496  221.941288
+2  442.903460  245.645986
+3  503.256076  275.734115
+4  494.480444  254.281370
+2023-11-13 03:03:29,281 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-16  449.901972  252.202780
+2023-08-17  426.607496  221.941288
+2023-08-18  442.903460  245.645986
+2023-08-21  503.256076  275.734115
+2023-08-22  494.480444  254.281370
+2023-11-13 03:03:29,313 - yq - INFO - The adjusted S_0 is [487.9 258.1]
+2023-11-13 03:03:29,334 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:29,335 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  430.189917  226.344325
+1  401.981842  208.322221
+2  410.114785  221.858282
+3  424.238859  185.618126
+4  424.581064  193.152027
+2023-11-13 03:03:29,432 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-16  430.189917  226.344325
+2023-08-17  401.981842  208.322221
+2023-08-18  410.114785  221.858282
+2023-08-21  424.238859  185.618126
+2023-08-22  424.581064  193.152027
+2023-11-13 03:03:29,438 - yq - INFO - The adjusted S_0 is [487.9 258.1]
+2023-11-13 03:03:29,461 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:29,462 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  421.965262  232.293951
+1  426.252235  240.492411
+2  427.777872  266.555041
+3  415.276397  255.781768
+4  467.588166  245.937129
+2023-11-13 03:03:29,546 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-16  421.965262  232.293951
+2023-08-17  426.252235  240.492411
+2023-08-18  427.777872  266.555041
+2023-08-21  415.276397  255.781768
+2023-08-22  467.588166  245.937129
+2023-11-13 03:03:29,547 - yq - INFO - The elapsed time for 2th sim is 4 minutes, 22 seconds
+2023-11-13 03:03:29,548 - yq - INFO - Pricing the product on 2023-08-16 00:00:00
+2023-11-13 03:03:29,549 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 03:03:29,567 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 03:03:29,763 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-17    560.6    240.4
+2022-08-18    574.0    241.8
+2022-08-19    564.0    235.1
+2022-08-22    546.2    230.0
+2022-08-23    535.0    226.5
+2023-11-13 03:03:29,765 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230816/lonn_call.csv
+2023-11-13 03:03:29,767 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.182456     430  55.974991  27.144444  0.0175
+1  0.182456     440  47.599991  26.275923  0.0175
+2  0.182456     450  39.799988  25.597614  0.0175
+3  0.182456     460  32.649994  25.031048  0.0175
+4  0.182456     470  26.224991  24.533737  0.0175
+2023-11-13 03:03:29,768 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230816/sika_call.csv
+2023-11-13 03:03:29,769 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.182456     210  49.275002  34.904442  0.0175
+1  0.182456     220  39.925003  31.884911  0.0175
+2  0.182456     230  31.074997  29.593031  0.0175
+3  0.182456     240  23.049995  27.989325  0.0175
+4  0.182456     250  16.124998  26.773222  0.0175
+2023-11-13 03:03:29,772 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.182456     430  55.974991  0.0175
+1  0.182456     440  47.599991  0.0175
+2  0.182456     450  39.799988  0.0175
+3  0.182456     460  32.649994  0.0175
+4  0.182456     470  26.224991  0.0175
+   maturity  strike      price    rate
+0  0.182456     210  49.275002  0.0175
+1  0.182456     220  39.925003  0.0175
+2  0.182456     230  31.074997  0.0175
+3  0.182456     240  23.049995  0.0175
+4  0.182456     250  16.124998  0.0175
+2023-11-13 03:03:29,772 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:03:36,842 - yq - INFO - Calibrating SIKA.
+2023-11-13 03:03:43,617 - yq - INFO - The S_0 for LONZA and SIKA are 479.8 and 257.4
+2023-11-13 03:03:43,617 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766dec90>
+ <lmfit.minimizer.MinimizerResult object at 0x1766ab090>
+2023-11-13 03:03:43,618 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 13 seconds
+2023-11-13 03:03:43,618 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 2.14362101  0.09964172  0.06994063 -0.2798371   1.20697751]
+ [ 1.60136253  0.15471509  0.09528288 -0.43942843  2.17791819]]
+2023-11-13 03:03:43,628 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-18    0.023622
+2022-08-19   -0.017575
+2022-08-22   -0.032069
+2022-08-23   -0.020718
+2022-08-24    0.011892
+                ...   
+2023-08-10    0.018438
+2023-08-11   -0.006445
+2023-08-14   -0.001415
+2023-08-15   -0.012830
+2023-08-16   -0.016741
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-18    0.005807
+2022-08-19   -0.028100
+2022-08-22   -0.021932
+2022-08-23   -0.015334
+2022-08-24    0.003526
+                ...   
+2023-08-10    0.010491
+2023-08-11   -0.020712
+2023-08-14   -0.001142
+2023-08-15   -0.016904
+2023-08-16   -0.002716
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 03:03:43,629 - yq - INFO - rho_S1S2 is 0.5672132244073371
+
+2023-11-13 03:03:43,629 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56721322]
+ [0.56721322 1.        ]]
+
+2023-11-13 03:03:43,629 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.2798371   0.56721322  0.        ]
+ [-0.2798371   1.          0.          0.        ]
+ [ 0.56721322  0.          1.         -0.43942843]
+ [ 0.          0.         -0.43942843  1.        ]]
+
+2023-11-13 03:03:43,629 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.2798371   0.9600475   0.          0.        ]
+ [ 0.56721322  0.16533276  0.80680496  0.        ]
+ [ 0.          0.         -0.54465261  0.83866175]]
+
+2023-11-13 03:03:43,637 - yq - INFO - The adjusted S_0 is [479.8 257.4]
+2023-11-13 03:03:43,659 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:43,663 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  516.563649  270.413473
+1  453.284941  256.447439
+2  411.085184  262.941973
+3  395.991101  230.511600
+4  406.246399  231.760142
+2023-11-13 03:03:43,778 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-17  516.563649  270.413473
+2023-08-18  453.284941  256.447439
+2023-08-21  411.085184  262.941973
+2023-08-22  395.991101  230.511600
+2023-08-23  406.246399  231.760142
+2023-11-13 03:03:43,781 - yq - INFO - The adjusted S_0 is [479.8 257.4]
+2023-11-13 03:03:43,801 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:43,802 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  493.228103  286.853926
+1  510.596688  293.905360
+2  570.188418  320.447484
+3  500.408013  293.410522
+4  487.652667  331.292591
+2023-11-13 03:03:43,897 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-17  493.228103  286.853926
+2023-08-18  510.596688  293.905360
+2023-08-21  570.188418  320.447484
+2023-08-22  500.408013  293.410522
+2023-08-23  487.652667  331.292591
+2023-11-13 03:03:43,900 - yq - INFO - The adjusted S_0 is [479.8 257.4]
+2023-11-13 03:03:43,937 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:43,938 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  465.401292  244.840609
+1  419.478167  234.311261
+2  395.181115  209.608803
+3  390.858072  225.648428
+4  375.250257  221.678889
+2023-11-13 03:03:44,040 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-17  465.401292  244.840609
+2023-08-18  419.478167  234.311261
+2023-08-21  395.181115  209.608803
+2023-08-22  390.858072  225.648428
+2023-08-23  375.250257  221.678889
+2023-11-13 03:03:44,041 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 14 seconds
+2023-11-13 03:03:44,042 - yq - INFO - Pricing the product on 2023-08-17 00:00:00
+2023-11-13 03:03:44,042 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 03:03:44,050 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 03:03:44,302 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-18    574.0    241.8
+2022-08-19    564.0    235.1
+2022-08-22    546.2    230.0
+2022-08-23    535.0    226.5
+2022-08-24    541.4    227.3
+2023-11-13 03:03:44,307 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230817/lonn_call.csv
+2023-11-13 03:03:44,309 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.179649     430  50.399994  27.299341  0.0175
+1  0.179649     440  42.250000  26.296572  0.0175
+2  0.179649     450  34.750000  25.521204  0.0175
+3  0.179649     460  27.949989  24.854713  0.0175
+4  0.179649     470  21.949989  24.286530  0.0175
+2023-11-13 03:03:44,310 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230817/sika_call.csv
+2023-11-13 03:03:44,312 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.179649     210  42.400002  33.117111  0.0175
+1  0.179649     220  33.425003  30.933372  0.0175
+2  0.179649     230  25.150002  29.240053  0.0175
+3  0.179649     240  17.875000  27.899794  0.0175
+4  0.179649     250  11.900000  26.879539  0.0175
+2023-11-13 03:03:44,315 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.179649     430  50.399994  0.0175
+1  0.179649     440  42.250000  0.0175
+2  0.179649     450  34.750000  0.0175
+3  0.179649     460  27.949989  0.0175
+4  0.179649     470  21.949989  0.0175
+   maturity  strike      price    rate
+0  0.179649     210  42.400002  0.0175
+1  0.179649     220  33.425003  0.0175
+2  0.179649     230  25.150002  0.0175
+3  0.179649     240  17.875000  0.0175
+4  0.179649     250  11.900000  0.0175
+2023-11-13 03:03:44,315 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:03:52,095 - yq - INFO - Calibrating SIKA.
+2023-11-13 03:03:55,124 - yq - INFO - The S_0 for LONZA and SIKA are 473.2 and 250.6
+2023-11-13 03:03:55,125 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x17659b210>
+ <lmfit.minimizer.MinimizerResult object at 0x17667c690>
+2023-11-13 03:03:55,125 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 10 seconds
+2023-11-13 03:03:55,125 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 2.08270098  0.12722079  0.07250101 -0.34704934  1.67582263]
+ [ 7.67886992  0.09073023  0.11332459 -0.36988337  3.05774782]]
+2023-11-13 03:03:55,127 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-19   -0.017575
+2022-08-22   -0.032069
+2022-08-23   -0.020718
+2022-08-24    0.011892
+2022-08-25    0.017939
+                ...   
+2023-08-11   -0.006445
+2023-08-14   -0.001415
+2023-08-15   -0.012830
+2023-08-16   -0.016741
+2023-08-17   -0.013851
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-19   -0.028100
+2022-08-22   -0.021932
+2022-08-23   -0.015334
+2022-08-24    0.003526
+2022-08-25    0.009196
+                ...   
+2023-08-11   -0.020712
+2023-08-14   -0.001142
+2023-08-15   -0.016904
+2023-08-16   -0.002716
+2023-08-17   -0.026773
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 03:03:55,127 - yq - INFO - rho_S1S2 is 0.5686990652741496
+
+2023-11-13 03:03:55,127 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56869907]
+ [0.56869907 1.        ]]
+
+2023-11-13 03:03:55,128 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.34704934  0.56869907  0.        ]
+ [-0.34704934  1.          0.          0.        ]
+ [ 0.56869907  0.          1.         -0.36988337]
+ [ 0.          0.         -0.36988337  1.        ]]
+
+2023-11-13 03:03:55,128 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.34704934  0.93784687  0.          0.        ]
+ [ 0.56869907  0.21044654  0.79516893  0.        ]
+ [ 0.          0.         -0.46516325  0.88522491]]
+
+2023-11-13 03:03:55,128 - yq - INFO - The adjusted S_0 is [473.2 250.6]
+2023-11-13 03:03:55,148 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:55,150 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  437.636152  218.399592
+1  445.633809  217.680340
+2  535.777930  242.628127
+3  535.042722  243.170511
+4  610.343167  228.588490
+2023-11-13 03:03:55,248 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-18  437.636152  218.399592
+2023-08-21  445.633809  217.680340
+2023-08-22  535.777930  242.628127
+2023-08-23  535.042722  243.170511
+2023-08-24  610.343167  228.588490
+2023-11-13 03:03:55,251 - yq - INFO - The adjusted S_0 is [473.2 250.6]
+2023-11-13 03:03:55,281 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:55,282 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  424.139426  224.632673
+1  441.113192  240.645153
+2  398.308675  208.695117
+3  403.518078  193.896483
+4  410.642029  208.068789
+2023-11-13 03:03:55,387 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-18  424.139426  224.632673
+2023-08-21  441.113192  240.645153
+2023-08-22  398.308675  208.695117
+2023-08-23  403.518078  193.896483
+2023-08-24  410.642029  208.068789
+2023-11-13 03:03:55,388 - yq - INFO - The adjusted S_0 is [473.2 250.6]
+2023-11-13 03:03:55,412 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:03:55,413 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  509.815844  324.788376
+1  469.059580  320.466852
+2  529.444188  326.402943
+3  495.793629  294.896863
+4  497.454971  294.033519
+2023-11-13 03:03:55,507 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-18  509.815844  324.788376
+2023-08-21  469.059580  320.466852
+2023-08-22  529.444188  326.402943
+2023-08-23  495.793629  294.896863
+2023-08-24  497.454971  294.033519
+2023-11-13 03:03:55,508 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 11 seconds
+2023-11-13 03:03:55,509 - yq - INFO - Pricing the product on 2023-08-18 00:00:00
+2023-11-13 03:03:55,509 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 03:03:55,515 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 03:03:55,732 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-19    564.0    235.1
+2022-08-22    546.2    230.0
+2022-08-23    535.0    226.5
+2022-08-24    541.4    227.3
+2022-08-25    551.2    229.4
+2023-11-13 03:03:55,734 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230818/lonn_call.csv
+2023-11-13 03:03:55,736 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.176842     430  53.599991  28.433285  0.0175
+1  0.176842     440  45.049988  27.074509  0.0175
+2  0.176842     450  37.099991  26.028452  0.0175
+3  0.176842     460  29.824997  25.145454  0.0175
+4  0.176842     470  23.349991  24.413734  0.0175
+2023-11-13 03:03:55,737 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230818/sika_call.csv
+2023-11-13 03:03:55,739 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.176842     200  48.974998  36.800362  0.0175
+1  0.176842     210  39.600006  33.488438  0.0175
+2  0.176842     220  30.675003  30.802935  0.0175
+3  0.176842     230  22.599998  29.016119  0.0175
+4  0.176842     240  15.625000  27.617016  0.0175
+2023-11-13 03:03:55,742 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.176842     430  53.599991  0.0175
+1  0.176842     440  45.049988  0.0175
+2  0.176842     450  37.099991  0.0175
+3  0.176842     460  29.824997  0.0175
+4  0.176842     470  23.349991  0.0175
+   maturity  strike      price    rate
+0  0.176842     200  48.974998  0.0175
+1  0.176842     210  39.600006  0.0175
+2  0.176842     220  30.675003  0.0175
+3  0.176842     230  22.599998  0.0175
+4  0.176842     240  15.625000  0.0175
+2023-11-13 03:03:55,743 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:04:14,197 - yq - INFO - Calibrating SIKA.
+2023-11-13 03:04:25,417 - yq - INFO - The S_0 for LONZA and SIKA are 471.9 and 247.5
+2023-11-13 03:04:25,418 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766bc550>
+ <lmfit.minimizer.MinimizerResult object at 0x1766d7750>
+2023-11-13 03:04:25,419 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 29 seconds
+2023-11-13 03:04:25,419 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 1.03524019  0.32159557  0.10067872 -0.55170894  2.25765214]
+ [ 2.70549433  0.12108759  0.09485559 -0.41880165  2.09551211]]
+2023-11-13 03:04:25,437 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-22   -0.032069
+2022-08-23   -0.020718
+2022-08-24    0.011892
+2022-08-25    0.017939
+2022-08-26   -0.025355
+                ...   
+2023-08-14   -0.001415
+2023-08-15   -0.012830
+2023-08-16   -0.016741
+2023-08-17   -0.013851
+2023-08-18   -0.002751
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-22   -0.021932
+2022-08-23   -0.015334
+2022-08-24    0.003526
+2022-08-25    0.009196
+2022-08-26   -0.029642
+                ...   
+2023-08-14   -0.001142
+2023-08-15   -0.016904
+2023-08-16   -0.002716
+2023-08-17   -0.026773
+2023-08-18   -0.012447
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 03:04:25,438 - yq - INFO - rho_S1S2 is 0.566833256100892
+
+2023-11-13 03:04:25,438 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56683326]
+ [0.56683326 1.        ]]
+
+2023-11-13 03:04:25,438 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.55170894  0.56683326  0.        ]
+ [-0.55170894  1.          0.          0.        ]
+ [ 0.56683326  0.          1.         -0.41880165]
+ [ 0.          0.         -0.41880165  1.        ]]
+
+2023-11-13 03:04:25,438 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.55170894  0.83403672  0.          0.        ]
+ [ 0.56683326  0.37495589  0.73355855  0.        ]
+ [ 0.          0.         -0.57091782  0.82100721]]
+
+2023-11-13 03:04:25,453 - yq - INFO - The adjusted S_0 is [471.9 247.5]
+2023-11-13 03:04:25,478 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:04:25,482 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  542.503445  280.921408
+1  543.692066  320.520282
+2  523.546975  331.359897
+3  534.105878  299.082180
+4  570.453688  321.132021
+2023-11-13 03:04:25,596 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-21  542.503445  280.921408
+2023-08-22  543.692066  320.520282
+2023-08-23  523.546975  331.359897
+2023-08-24  534.105878  299.082180
+2023-08-25  570.453688  321.132021
+2023-11-13 03:04:25,598 - yq - INFO - The adjusted S_0 is [471.9 247.5]
+2023-11-13 03:04:25,620 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:04:25,622 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  583.548302  300.905316
+1  554.171793  297.739584
+2  524.440304  289.400772
+3  437.893394  265.543072
+4  486.889748  285.436031
+2023-11-13 03:04:25,721 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-21  583.548302  300.905316
+2023-08-22  554.171793  297.739584
+2023-08-23  524.440304  289.400772
+2023-08-24  437.893394  265.543072
+2023-08-25  486.889748  285.436031
+2023-11-13 03:04:25,723 - yq - INFO - The adjusted S_0 is [471.9 247.5]
+2023-11-13 03:04:25,744 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:04:25,745 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  496.706525  287.188809
+1  476.898389  276.102099
+2  557.900243  320.021943
+3  536.764068  254.994813
+4  549.298486  268.400003
+2023-11-13 03:04:25,840 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-21  496.706525  287.188809
+2023-08-22  476.898389  276.102099
+2023-08-23  557.900243  320.021943
+2023-08-24  536.764068  254.994813
+2023-08-25  549.298486  268.400003
+2023-11-13 03:04:25,841 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 30 seconds
+2023-11-13 03:04:25,841 - yq - INFO - Pricing the product on 2023-08-21 00:00:00
+2023-11-13 03:04:25,841 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 03:04:25,849 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 03:04:26,085 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-22    546.2    230.0
+2022-08-23    535.0    226.5
+2022-08-24    541.4    227.3
+2022-08-25    551.2    229.4
+2022-08-26    537.4    222.7
+2023-11-13 03:04:26,092 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230821/lonn_call.csv
+2023-11-13 03:04:26,094 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.168421     430  53.599991  28.433285  0.0175
+1  0.168421     440  45.049988  27.074509  0.0175
+2  0.168421     450  37.099991  26.028452  0.0175
+3  0.168421     460  29.824997  25.145454  0.0175
+4  0.168421     470  23.349991  24.413734  0.0175
+2023-11-13 03:04:26,095 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230821/sika_call.csv
+2023-11-13 03:04:26,097 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.168421     195  47.125008  36.494854  0.0175
+1  0.168421     200  42.300003  34.223370  0.0175
+2  0.168421     210  32.924995  30.578308  0.0175
+3  0.168421     220  24.175003  27.988766  0.0175
+4  0.168421     230  16.475006  26.213083  0.0175
+2023-11-13 03:04:26,102 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.168421     430  53.599991  0.0175
+1  0.168421     440  45.049988  0.0175
+2  0.168421     450  37.099991  0.0175
+3  0.168421     460  29.824997  0.0175
+4  0.168421     470  23.349991  0.0175
+   maturity  strike      price    rate
+0  0.168421     195  47.125008  0.0175
+1  0.168421     200  42.300003  0.0175
+2  0.168421     210  32.924995  0.0175
+3  0.168421     220  24.175003  0.0175
+4  0.168421     230  16.475006  0.0175
+2023-11-13 03:04:26,102 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:04:37,583 - yq - INFO - Calibrating SIKA.
+2023-11-13 03:04:47,330 - yq - INFO - The S_0 for LONZA and SIKA are 469.9 and 244.9
+2023-11-13 03:04:47,330 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766d2990>
+ <lmfit.minimizer.MinimizerResult object at 0x1765a4450>
+2023-11-13 03:04:47,330 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 21 seconds
+2023-11-13 03:04:47,330 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 0.54787032  0.60701262  0.12663701 -0.60368768  2.53474713]
+ [ 4.00602288  0.05884885  0.04024789 -0.03474505  1.57391712]]
+2023-11-13 03:04:47,334 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-23   -0.020718
+2022-08-24    0.011892
+2022-08-25    0.017939
+2022-08-26   -0.025355
+2022-08-29   -0.024488
+                ...   
+2023-08-15   -0.012830
+2023-08-16   -0.016741
+2023-08-17   -0.013851
+2023-08-18   -0.002751
+2023-08-21   -0.004247
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-23   -0.015334
+2022-08-24    0.003526
+2022-08-25    0.009196
+2022-08-26   -0.029642
+2022-08-29   -0.005403
+                ...   
+2023-08-15   -0.016904
+2023-08-16   -0.002716
+2023-08-17   -0.026773
+2023-08-18   -0.012447
+2023-08-21   -0.010561
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 03:04:47,334 - yq - INFO - rho_S1S2 is 0.5642591288564683
+
+2023-11-13 03:04:47,334 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56425913]
+ [0.56425913 1.        ]]
+
+2023-11-13 03:04:47,335 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.60368768  0.56425913  0.        ]
+ [-0.60368768  1.          0.          0.        ]
+ [ 0.56425913  0.          1.         -0.03474505]
+ [ 0.          0.         -0.03474505  1.        ]]
+
+2023-11-13 03:04:47,335 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.60368768  0.79722092  0.          0.        ]
+ [ 0.56425913  0.42727966  0.70643027  0.        ]
+ [ 0.          0.         -0.04918398  0.99878974]]
+
+2023-11-13 03:04:47,336 - yq - INFO - The adjusted S_0 is [469.9 244.9]
+2023-11-13 03:04:47,359 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:04:47,361 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  444.237245  265.877888
+1  380.284076  229.734428
+2  338.218768  212.483224
+3  347.434587  222.879763
+4  321.779933  232.933072
+2023-11-13 03:04:47,468 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-22  444.237245  265.877888
+2023-08-23  380.284076  229.734428
+2023-08-24  338.218768  212.483224
+2023-08-25  347.434587  222.879763
+2023-08-28  321.779933  232.933072
+2023-11-13 03:04:47,471 - yq - INFO - The adjusted S_0 is [469.9 244.9]
+2023-11-13 03:04:47,494 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:04:47,495 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  398.125653  248.036624
+1  379.774760  240.306030
+2  390.902600  242.849561
+3  428.719140  242.633990
+4  390.849501  223.924577
+2023-11-13 03:04:47,600 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-22  398.125653  248.036624
+2023-08-23  379.774760  240.306030
+2023-08-24  390.902600  242.849561
+2023-08-25  428.719140  242.633990
+2023-08-28  390.849501  223.924577
+2023-11-13 03:04:47,602 - yq - INFO - The adjusted S_0 is [469.9 244.9]
+2023-11-13 03:04:47,626 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:04:47,632 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  504.338011  234.943547
+1  525.727730  245.357734
+2  609.558489  249.480292
+3  694.927510  273.933796
+4  789.680616  300.136099
+2023-11-13 03:04:47,733 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-22  504.338011  234.943547
+2023-08-23  525.727730  245.357734
+2023-08-24  609.558489  249.480292
+2023-08-25  694.927510  273.933796
+2023-08-28  789.680616  300.136099
+2023-11-13 03:04:47,734 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 21 seconds
+2023-11-13 03:04:47,735 - yq - INFO - Pricing the product on 2023-08-22 00:00:00
+2023-11-13 03:04:47,735 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 03:04:47,741 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 03:04:47,963 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-23    535.0    226.5
+2022-08-24    541.4    227.3
+2022-08-25    551.2    229.4
+2022-08-26    537.4    222.7
+2022-08-29    524.4    221.5
+2023-11-13 03:04:47,964 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230822/lonn_call.csv
+2023-11-13 03:04:47,966 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.165614     430  53.599991  28.433285  0.0175
+1  0.165614     440  45.049988  27.074509  0.0175
+2  0.165614     450  37.099991  26.028452  0.0175
+3  0.165614     460  29.824997  25.145454  0.0175
+4  0.165614     470  23.349991  24.413734  0.0175
+2023-11-13 03:04:47,968 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230822/sika_call.csv
+2023-11-13 03:04:47,970 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.165614     195  47.125008  36.494854  0.0175
+1  0.165614     200  42.300003  34.223370  0.0175
+2  0.165614     210  32.924995  30.578308  0.0175
+3  0.165614     220  24.175003  27.988766  0.0175
+4  0.165614     230  16.475006  26.213083  0.0175
+2023-11-13 03:04:47,973 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.165614     430  53.599991  0.0175
+1  0.165614     440  45.049988  0.0175
+2  0.165614     450  37.099991  0.0175
+3  0.165614     460  29.824997  0.0175
+4  0.165614     470  23.349991  0.0175
+   maturity  strike      price    rate
+0  0.165614     195  47.125008  0.0175
+1  0.165614     200  42.300003  0.0175
+2  0.165614     210  32.924995  0.0175
+3  0.165614     220  24.175003  0.0175
+4  0.165614     230  16.475006  0.0175
+2023-11-13 03:04:47,973 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:05:05,864 - yq - INFO - Calibrating SIKA.
+2023-11-13 03:05:22,395 - yq - INFO - The S_0 for LONZA and SIKA are 469.1 and 245.1
+2023-11-13 03:05:22,395 - yq - INFO - Calibration results for LONZA and SIKA are 
+<lmfit.minimizer.MinimizerResult object at 0x1766f75d0>
+ <lmfit.minimizer.MinimizerResult object at 0x17667dc10>
+2023-11-13 03:05:22,395 - yq - INFO - The elapsed time for 2 calibration is 0 minutes, 34 seconds
+2023-11-13 03:05:22,395 - yq - INFO - The calibrated params_list_Heston is:
+ [[ 0.34473461  0.95755058  0.13752472 -0.62214131  2.6434498 ]
+ [ 4.23671041  0.05591936  0.04016247 -0.0103039   1.56645733]]
+2023-11-13 03:05:22,410 - yq - INFO - The log returns list for all assets is: [Date
+2022-08-24    0.011892
+2022-08-25    0.017939
+2022-08-26   -0.025355
+2022-08-29   -0.024488
+2022-08-30    0.002286
+                ...   
+2023-08-16   -0.016741
+2023-08-17   -0.013851
+2023-08-18   -0.002751
+2023-08-21   -0.004247
+2023-08-22   -0.001704
+Name: LONN.SE, Length: 251, dtype: float64, Date
+2022-08-24    0.003526
+2022-08-25    0.009196
+2022-08-26   -0.029642
+2022-08-29   -0.005403
+2022-08-30    0.010777
+                ...   
+2023-08-16   -0.002716
+2023-08-17   -0.026773
+2023-08-18   -0.012447
+2023-08-21   -0.010561
+2023-08-22    0.000816
+Name: SIKA.SE, Length: 251, dtype: float64]
+2023-11-13 03:05:22,411 - yq - INFO - rho_S1S2 is 0.5629994325831318
+
+2023-11-13 03:05:22,412 - yq - INFO - Correlation between log returns of each asset:
+[[1.         0.56299943]
+ [0.56299943 1.        ]]
+
+2023-11-13 03:05:22,412 - yq - INFO - Simplified correlation matrix is:
+[[ 1.         -0.62214131  0.56299943  0.        ]
+ [-0.62214131  1.          0.          0.        ]
+ [ 0.56299943  0.          1.         -0.0103039 ]
+ [ 0.          0.         -0.0103039   1.        ]]
+
+2023-11-13 03:05:22,413 - yq - INFO - Lower triangular matrix L after Cholesky decomposition is:
+[[ 1.          0.          0.          0.        ]
+ [-0.62214131  0.78290497  0.          0.        ]
+ [ 0.56299943  0.44739172  0.69489013  0.        ]
+ [ 0.          0.         -0.0148281   0.99989006]]
+
+2023-11-13 03:05:22,420 - yq - INFO - The adjusted S_0 is [469.1 245.1]
+2023-11-13 03:05:22,440 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:05:22,443 - yq - INFO - The simulated data for 0th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  531.246399  229.623652
+1  552.532563  239.073533
+2  614.383142  247.423903
+3  657.904234  248.151271
+4  642.068369  256.836903
+2023-11-13 03:05:22,540 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-23  531.246399  229.623652
+2023-08-24  552.532563  239.073533
+2023-08-25  614.383142  247.423903
+2023-08-28  657.904234  248.151271
+2023-08-29  642.068369  256.836903
+2023-11-13 03:05:22,542 - yq - INFO - The adjusted S_0 is [469.1 245.1]
+2023-11-13 03:05:22,562 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:05:22,563 - yq - INFO - The simulated data for 1th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  488.001294  258.066168
+1  483.609259  243.337143
+2  451.426959  226.064257
+3  509.621344  241.876243
+4  437.192033  206.441643
+2023-11-13 03:05:22,658 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-23  488.001294  258.066168
+2023-08-24  483.609259  243.337143
+2023-08-25  451.426959  226.064257
+2023-08-28  509.621344  241.876243
+2023-08-29  437.192033  206.441643
+2023-11-13 03:05:22,660 - yq - INFO - The adjusted S_0 is [469.1 245.1]
+2023-11-13 03:05:22,680 - yq - INFO - The new column names are ['LONN.SE_0', 'SIKA.SE_0']
+2023-11-13 03:05:22,682 - yq - INFO - The simulated data for 2th iteration is:
+     LONN.SE_0   SIKA.SE_0
+0  429.686150  234.257418
+1  375.031017  230.530292
+2  397.158719  241.089818
+3  398.948556  236.740028
+4  496.858610  269.615295
+2023-11-13 03:05:22,781 - yq - INFO - 1 sim, diff h, sim_data_comb:
+             LONN.SE_0   SIKA.SE_0
+Date                              
+2023-08-23  429.686150  234.257418
+2023-08-24  375.031017  230.530292
+2023-08-25  397.158719  241.089818
+2023-08-28  398.948556  236.740028
+2023-08-29  496.858610  269.615295
+2023-11-13 03:05:22,782 - yq - INFO - The elapsed time for 2th sim is 0 minutes, 34 seconds
+2023-11-13 03:05:22,783 - yq - INFO - Pricing the product on 2023-08-23 00:00:00
+2023-11-13 03:05:22,783 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/LONN.SE.json
+2023-11-13 03:05:22,790 - yq - INFO - The json file path is: /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/sc/SIKA.SE.json
+2023-11-13 03:05:22,998 - yq - INFO - The historical data is
+             LONN.SE  SIKA.SE
+Date                        
+2022-08-24    541.4    227.3
+2022-08-25    551.2    229.4
+2022-08-26    537.4    222.7
+2022-08-29    524.4    221.5
+2022-08-30    525.6    223.9
+2023-11-13 03:05:23,002 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230823/lonn_call.csv
+2023-11-13 03:05:23,004 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.162807     430  53.599991  28.433285  0.0175
+1  0.162807     440  45.049988  27.074509  0.0175
+2  0.162807     450  37.099991  26.028452  0.0175
+3  0.162807     460  29.824997  25.145454  0.0175
+4  0.162807     470  23.349991  24.413734  0.0175
+2023-11-13 03:05:23,006 - yq - INFO - File path is /Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/data/options-cleaned/20230823/sika_call.csv
+2023-11-13 03:05:23,007 - yq - INFO - Options data read is
+    maturity  strike      price         IV    rate
+0  0.162807     195  47.125008  36.494854  0.0175
+1  0.162807     200  42.300003  34.223370  0.0175
+2  0.162807     210  32.924995  30.578308  0.0175
+3  0.162807     220  24.175003  27.988766  0.0175
+4  0.162807     230  16.475006  26.213083  0.0175
+2023-11-13 03:05:23,010 - yq - INFO - LONZA and SIKA df are 
+   maturity  strike      price    rate
+0  0.162807     430  53.599991  0.0175
+1  0.162807     440  45.049988  0.0175
+2  0.162807     450  37.099991  0.0175
+3  0.162807     460  29.824997  0.0175
+4  0.162807     470  23.349991  0.0175
+   maturity  strike      price    rate
+0  0.162807     195  47.125008  0.0175
+1  0.162807     200  42.300003  0.0175
+2  0.162807     210  32.924995  0.0175
+3  0.162807     220  24.175003  0.0175
+4  0.162807     230  16.475006  0.0175
+2023-11-13 03:05:23,010 - yq - INFO - Calibrating LONZA.
+2023-11-13 03:05:33,622 - yq - INFO - Calibrating SIKA.
