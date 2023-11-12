@@ -13,7 +13,7 @@ def get_plots_path(cur_dir: str) -> str:
 def get_root_dir(cur_dir: str) -> str:
     while cur_dir.name != 'simulation-in-finance':    
             cur_dir = cur_dir.parent
-            print(f"Now we are at {cur_dir.name}\n")
+            # print(f"Now we are at {cur_dir.name}\n")
             if cur_dir == cur_dir.parent:
                 # We have reached the filesystem root without finding the marker
                 raise FileNotFoundError("Root directory marker not found.")

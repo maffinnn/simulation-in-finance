@@ -148,13 +148,40 @@ def read_csv_data_chill(file_name: str) -> pd.DataFrame:
 
     return options_data
 
+def plot_graph():
+    paths_arr = sm.read_sim_data('heston', '20231113_013012_363749', pd.Timestamp('2023-08-09'), pd.Timestamp('2023-08-09'))
+    df_sim = paths_arr[0][0]
+
+    fig, ax = plt.subplots(figsize=(10,6))
+
+    hist_data = po.get_historical_assets_all()
+    hist_df = hist_data[(hist_data.index >= cs.INITIAL_FIXING_DATE) 
+                            & (hist_data.index <= cs.FINAL_FIXING_DATE)]
+    for asset in cs.ASSET_NAMES:
+        ax.plot(hist_df.index, hist_df[asset], alpha=0.5, label=asset)
+    for col in df_sim.columns:
+        ax.plot(df_sim.index, df_sim[col], alpha=0.5, label=col)
+
+
+    title_str = f"PPD: "
+    plt.title(title_str)
+    plt.legend(loc='upper right')
+    plt.tight_layout()
+    stor_dir = yq_path.get_plots_path(Path(__file__).parent)                     
+    stor_dir.mkdir(parents=True, exist_ok=True)
+    file_path = stor_dir.joinpath(f'test1.png')
+    plt.savefig(file_path, bbox_inches='tight')
+
 if __name__ == "__main__":
     # cur_dir = Path(os.getcwd()).parent # ipynb cannot use __file__
     cur_dir = Path(__file__).parent
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
     # logger_yq = logging.getLogger('yq')
     # option.format_file_names('options-complete')
-    option.clean_options_data('options-complete')
+    # option.clean_options_data('options-complete')
+    # plot_graph()
+
+    #################################################
 
     tcal = calendar.SIXTradingCalendar()
     # print(bus_date_range)
@@ -164,14 +191,15 @@ if __name__ == "__main__":
     # TODO: BEFORE RUNNING: Change the dates, h_array, 
     start_time = time.time()
     count = 0
-    for prod_date in tcal.create_six_trading_dates('2023-10-30', '2023-10-30').index:
+    for prod_date in tcal.create_six_trading_dates('2023-08-09', '2023-08-09').index:
         try: 
             logger_yq.info(f"Pricing the product on {prod_date}")
             params = {
                     'prod_date': prod_date,
                     'hist_window': 252,
-                    'h_array': [[0, 1, -1], [0, 1, -1]],
-                    'start_time_acc': start_time_acc
+                    'h_array': [[0], [0]],
+                    'start_time_acc': start_time_acc,
+                    'plot': True
             }
             hst = heston.multi_heston(params)
             # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
@@ -185,6 +213,8 @@ if __name__ == "__main__":
     elapsed_time = end_time - start_time
     min, sec = divmod(elapsed_time, 60)
     logger_yq.info(f"The elapsed time for {count} pricing dates is {int(min)} minutes, {int(sec)} seconds")
+    
+    #---------------------------
     # run_heston_sim_test_h()
     # plot_a_figure()
 
