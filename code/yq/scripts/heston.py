@@ -44,7 +44,7 @@ class PricingModel:
         self.sim_data = None # To store one simulated path of all the underlying assets
         self.payout = None # To store payoff calculations based on simulated data
 
-       @timeit
+    @timeit
     def plot_sim_path(self, plot_hist: bool, sim_data_comb: pd.DataFrame, sim: int, uid: str) -> None:
         # Plot sim paths from prod pricing date (for each h) for each asset
         fig, ax = plt.subplots(figsize=(10,6)) 
@@ -63,7 +63,11 @@ class PricingModel:
         logger_yq.info(f"The smooth path df is:\n{smooth_path}")
         smooth_path.plot(ax=ax, alpha=0.5) # Another way of plotting
 
-        title_str = f"Model: {self.model_name}, PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, max_sigma: {self.max_sigma}"
+        if self.model_name == 'heston':
+            title_str = f"Model: {self.model_name}, PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, max_sigma: {self.max_sigma}"
+        else:
+            title_str = f"Model: {self.model_name}, PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}"
+        
         subtitle_str = f"sim_start_date: {self.sim_start_date.strftime('%Y-%m-%d')}, sim_wdw: {self.sim_window}"
         plt.title(f"{title_str}\n{subtitle_str}")
         plt.legend(loc='upper right')
@@ -248,7 +252,11 @@ class MultiHeston(PricingModel):
 
         logger_yq.info(f"Simplified correlation matrix is:\n{simplified_corr}\n")
 
-        self.L_lower = np.linalg.cholesky(simplified_corr)
+        try:
+            self.L_lower = np.linalg.cholesky(simplified_corr)
+        except Exception as e:
+            logger_yq.error(f"Error with max_sigma{self.max_sigma}, day: {self.prod_date}")
+
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
 
     def plot_prod_price():

@@ -1,12 +1,22 @@
 import logging
 import re
 import pandas as pd
+import typing
+import numpy as np
+import time
+import logging
 import matplotlib.pyplot as plt
 from pathlib import Path
-from yq.utils import option
-from yq.utils import path as yq_path
-from sc import payoff as po
+
+from yq.utils import io
+from yq.utils.time import timeit
+from yq.scripts import heston_func as hf
+from yq.scripts import simulation as sm
+from yq.utils import option, calendar, log, path as yq_path
 from sc import constants as cs
+from sc import payoff as po
+from sy.interest_rate import populate_bond_table
+import datetime
 
 logger_yq = logging.getLogger('yq')
 
@@ -82,4 +92,71 @@ def analyse_volatility():
     
     pass
     # Fetch data form options
+
+@timeit
+# hist_windows = [63]
+#     n_sims = [3]
+#     models = ['gbm','heston']
+#     max_sigmas = [0.5, 1.5, 10]
+def analyse_rmse(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
+    # TODO: Take the values from yq_script
+    model = '' #TODO:
+    dir_list = ['20231113_185603_63_0.5']
+
+
+    # For different methodologies, we want to get the RMSE for the ppd_payous against actual price
+    # Change to itertools
+    RMSE_list = []
+    for uid in dir_list:
+        paths_arr = sm.read_sim_data(model, uid, cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
+        n_sim = len(paths_arr[0])
+        n_ppd = len(paths_arr)
+    
+
+        actual_price = po.get_product_price(cs.FINAL_PROD_PRICING_DATE).rename(columns={'Price': 'actual_price'})
+        # Actual price for the product price period
+        actual_price = actual_price[actual_price.index >= cs.INITIAL_PROD_PRICING_DATE]
+
+        # Average payouts of all the sim paths on each ppd
+        ppd_payouts = []
+        for ppd in range(n_ppd):
+            # Payouts for all the paths on one day of the price period (multiple paths)
+            paths_payout = po.pricing_multiple(paths_arr[ppd])
+            ppd_payouts.append(np.mean(paths_payout))
+        # Payouts for the entire pricing period
+        
+        if (len(ppd_payouts) != len(actual_price)):
+            logger_yq.error(f"The length of payouts and actual price dfs is diff: {len(ppd_payouts)}, {len(actual_price)}")
+        
+        ppd_payouts_df = pd.DataFrame({'ppd_payouts': ppd_payouts})
+        ppd_payouts_df.index = actual_price.index
+        payouts_compare = pd.concat([ppd_payouts_df, actual_price], axis=1)
+        logger_yq.info(f"The payouts compare df is:\n{payouts_compare.head()}")
+
+        # # TODO: Plot payouts_compare
+        # fig, ax = plt.subplots(figsize=(10,6)) 
+        # if self.model_name == 'heston':
+        #     title_str = f"Model: {model}, hist_wdw: INSERTSTH{model}, max_sigma: {max_sigma}"
+        # else:
+        #     # TODO: Do sth for gbm
+        #     pass
+        # subtitle_str = f"xxx"
+        # plt.title(f"{title_str}\n{subtitle_str}")
+
+        # payouts_compare.plot()
+        # plt.legend(loc='upper right')
+
+        # stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(model, 'eval')
+        # stor_dir.mkdir(parents=True, exist_ok=True)
+        # file_path = stor_dir.joinpath(f'#############.png') # TODO: Rename
+        # plt.savefig(file_path, bbox_inches='tight')
+        # plt.close()
+
+        # RMSE = np.sqrt(np.mean((payouts_compare['ppd_payouts'] - payouts_compare['actual_price']) ** 2))
+        # RMSE_list.append(RMSE)
+        # logger_yq.info(f"RMSE for combination is:\n{RMSE}") # TODO: Add combination
+
+    # TODO: Write the list into a csv file or sth
+
+
 

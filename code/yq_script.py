@@ -182,9 +182,9 @@ def sim_price_period(start_date: pd.Timestamp,
                 hst.sim_n_path(n_sim=n_sim)
                 del hst
             elif (model == 'gbm'):
-                gbm = gbm.MultiGBM(params)
-                gbm.sim_n_path(n_sim=n_sim)
-                del gbm
+                gbm_pricer = gbm.MultiGBM(params)
+                gbm_pricer.sim_n_path(n_sim=n_sim)
+                del gbm_pricer
             count += 1
         except Exception as e:
             logger_yq.error(f"Error during simulation on {prod_date}: {e}")
@@ -218,6 +218,7 @@ if __name__ == "__main__":
                                 hist_window=hist_window, 
                                 n_sim=n_sim,
                                 plot=True, # Hardcoded
+                                max_sigma=0, # Won't be used anyway
                                 model='gbm')
             pass
          
@@ -252,6 +253,7 @@ if __name__ == "__main__":
                     max_sigmas=max_sigmas)
      
 
+    # TODO:
     #---------------------------
     # run_heston_sim_test_h()
     # plot_a_figure()
