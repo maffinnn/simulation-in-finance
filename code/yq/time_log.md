@@ -30,3 +30,21 @@ sim_grid_search_heston(hist_windows=hist_windows,
 2023-11-14 00:02:09,139 - yq - INFO - Runtime of sim_price_period: 0h 1m 20s 777ms
 (start_date=Timestamp('2023-08-09 00:00:00'), end_date=Timestamp('2023-11-09 00:00:00'), hist_window=63, n_sim=3, plot=True, max_sigma=10, model='heston')
 2023-11-14 00:02:09,139 - yq - INFO - Runtime of sim_grid_search_heston: 0h 4m 57s 545ms
+
+- 1 combo, heston
+
+    hist_windows = [63]
+    n_sims = [100]
+    models = ['heston']
+    max_sigmas = [1.5]
+
+Runtime of sim_n_path: 0h 0m 11s 524ms
+(<yq.scripts.heston.MultiHeston object at 0x166028550>, n_sim=100)
+
+- 1 combo, gbm
+
+    hist_windows = [63]
+    n_sims = [100]
+    models = ['gbm']
+    max_sigmas = [1.5]
+

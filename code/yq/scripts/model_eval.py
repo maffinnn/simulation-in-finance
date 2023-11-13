@@ -103,7 +103,7 @@ def analyse_volatility():
 def analyse_rmse():
     # TODO: Take the values from yq_script
     model = 'heston' #TODO:
-    dir_list = ['20231114_004756_63_0.5']
+    dir_list = ['20231114_015957_63_1.5']
     max_sigma = 0.5
 
     # For different methodologies, we want to get the RMSE for the ppd_payous against actual price
