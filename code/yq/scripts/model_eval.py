@@ -100,7 +100,7 @@ def analyse_volatility():
 #     max_sigmas = [0.5, 1.5, 10]
 def analyse_rmse(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
     # TODO: Take the values from yq_script
-    model = '' #TODO:
+    model = 'heston' #TODO:
     dir_list = ['20231113_185603_63_0.5']
 
 
@@ -146,7 +146,7 @@ def analyse_rmse(hist_windows: list, n_sims: list, models: list, max_sigmas: lis
         # payouts_compare.plot()
         # plt.legend(loc='upper right')
 
-        # stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(model, 'eval')
+        # stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
         # stor_dir.mkdir(parents=True, exist_ok=True)
         # file_path = stor_dir.joinpath(f'#############.png') # TODO: Rename
         # plt.savefig(file_path, bbox_inches='tight')

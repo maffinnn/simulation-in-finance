@@ -24,6 +24,7 @@ class MultiGBM(PricingModel):
         self.hist_data = None
         self.Z_list = None
         self.L_lower = None
+        self.cov_matrix = None
 
     @timeit
     def sim_n_path(self, n_sim):
@@ -70,8 +71,8 @@ class MultiGBM(PricingModel):
             log_returns_list.append(log_returns)
         logger_yq.info(f"The log returns list for all assets is: {log_returns_list}")
 
-        cov_matrix = np.cov(np.array(log_returns_list))
-        self.L_lower = np.linalg.cholesky(cov_matrix)
+        self.cov_matrix = np.cov(np.array(log_returns_list))
+        self.L_lower = np.linalg.cholesky(self.cov_matrix)
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
         
     def sim_path(self, h_vector: np.array):
@@ -86,7 +87,7 @@ class MultiGBM(PricingModel):
             # logger_yq.info(f"The 3 matrices L_lower, Z.T, LZ are:\n{self.L_lower}\n{Z.T}\n{LZ}", )
 
             for i in range(self.num_ticker):
-                S_t_vector[i] = S_t_vector[i] * np.exp(self.interest_rate * self.dt - 0.5 * cov_matrix[i][i] * self.dt + LZ[i]) 
+                S_t_vector[i] = S_t_vector[i] * np.exp(self.interest_rate * self.dt - 0.5 * self.cov_matrix[i][i] * self.dt + LZ[i]) 
                 sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i]
         
         col_names = [f"{asset}_{h_vector[i]}" for i, asset in enumerate(self.ticker_list)]

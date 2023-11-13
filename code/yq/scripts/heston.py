@@ -73,7 +73,7 @@ class PricingModel:
         plt.legend(loc='upper right')
 
         stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(f'{self.model_name}',
-                                                                          'sim_data_comb', 
+                                                                          uid, 
                                                                           self.prod_date.strftime('%Y_%m_%d'))
         stor_dir.mkdir(parents=True, exist_ok=True)
         file_path = stor_dir.joinpath(f'{sim}.png')

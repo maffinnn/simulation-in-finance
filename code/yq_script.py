@@ -247,12 +247,12 @@ if __name__ == "__main__":
     n_sims = [3]
     models = ['gbm','heston']
     max_sigmas = [0.5, 1.5, 10]
-    sim_grid_search_heston(hist_windows=hist_windows,
-                    n_sims=n_sims,
-                    models=models,
-                    max_sigmas=max_sigmas)
+    # sim_grid_search_heston(hist_windows=hist_windows,
+    #                 n_sims=n_sims,
+    #                 models=models,
+    #                 max_sigmas=max_sigmas)
      
-
+    model_eval.analyse_rmse()
     # TODO:
     #---------------------------
     # run_heston_sim_test_h()
