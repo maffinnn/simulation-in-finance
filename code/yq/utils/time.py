@@ -22,7 +22,7 @@ def timeit(func):
         milliseconds = (seconds - int(seconds)) * 1000
         seconds = int(seconds)
 
-        logger_yq.info(f"Runtime of {func.__name__}({signature}): {hours}h {minutes}m {seconds}s {milliseconds:.0f}ms")
+        logger_yq.info(f"Runtime of {func.__name__}: {int(hours)}h {int(minutes)}m {seconds}s {milliseconds:.0f}ms\n({signature})")
         return result
     return wrapper
 

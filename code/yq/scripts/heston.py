@@ -5,6 +5,7 @@ import time
 import logging
 import matplotlib.pyplot as plt
 from pathlib import Path
+
 from yq.utils import io
 from yq.utils.time import timeit
 from yq.scripts import heston_func as hf
@@ -21,7 +22,7 @@ logger_yq = logging.getLogger('yq')
 # simulations with different models, calibrations (if needed), 
 class PricingModel:
     def __init__ (self, params):
-        self.model_name = None
+        self.model_name = params.get('model_name')
         self.data = po.get_historical_assets_all()
         self.ticker_list = cs.ASSET_NAMES
         self.calendar = calendar.SIXTradingCalendar()
@@ -43,6 +44,39 @@ class PricingModel:
         self.sim_data = None # To store one simulated path of all the underlying assets
         self.payout = None # To store payoff calculations based on simulated data
 
+       @timeit
+    def plot_sim_path(self, plot_hist: bool, sim_data_comb: pd.DataFrame, sim: int, uid: str) -> None:
+        # Plot sim paths from prod pricing date (for each h) for each asset
+        fig, ax = plt.subplots(figsize=(10,6)) 
+        # If use figure then cannot have fig, ax; just use plt in lines below
+        if plot_hist: 
+            logger_yq.info(f"The hist_data is\n{self.hist_data}")
+            hist_df = self.data[(self.data.index >= cs.INITIAL_FIXING_DATE) 
+                           & (self.data.index <= cs.FINAL_FIXING_DATE)]
+            for asset in cs.ASSET_NAMES:
+                ax.plot(hist_df.index, hist_df[asset], alpha=0.5, label=asset)
+        data = {}
+        for i in range(len(cs.ASSET_NAMES)):
+            data[sim_data_comb.columns[i]] = self.S_0_vector[i] # Access the price on the prod date
+        prod_date_df = pd.DataFrame(data, index=[self.prod_date])
+        smooth_path = pd.concat([prod_date_df, sim_data_comb], axis=0)
+        logger_yq.info(f"The smooth path df is:\n{smooth_path}")
+        smooth_path.plot(ax=ax, alpha=0.5) # Another way of plotting
+
+        title_str = f"Model: {self.model_name}, PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, max_sigma: {self.max_sigma}"
+        subtitle_str = f"sim_start_date: {self.sim_start_date.strftime('%Y-%m-%d')}, sim_wdw: {self.sim_window}"
+        plt.title(f"{title_str}\n{subtitle_str}")
+        plt.legend(loc='upper right')
+
+        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(f'{self.model_name}',
+                                                                          'sim_data_comb', 
+                                                                          self.prod_date.strftime('%Y_%m_%d'))
+        stor_dir.mkdir(parents=True, exist_ok=True)
+        file_path = stor_dir.joinpath(f'{sim}.png')
+        plt.savefig(file_path, bbox_inches='tight')
+        plt.close()
+        logger_yq.info(f"Path of 1 sim is plotted")
+
 
 class MultiHeston(PricingModel):
     """
@@ -63,7 +97,6 @@ class MultiHeston(PricingModel):
     """
     def __init__(self, params):
         super().__init__(params)
-        self.model_name = "heston"
         self.h_array = np.array(params.get('h_array')) # All sublists must have the same length
         self.max_sigma = params.get('max_sigma')
         self.hist_data = None
@@ -80,7 +113,7 @@ class MultiHeston(PricingModel):
         
         for sim in range(n_sim):
             # Diff h need to use the same Z, but diff sim use diff Z
-            self.Z_list_heston = np.random.normal(0, 1, (self.num_ticker * 2, self.sim_window))
+            self.Z_list = np.random.normal(0, 1, (self.num_ticker * 2, self.sim_window))
             sim_data_comb = pd.DataFrame()
             for pair in range(len(self.h_array[0])):
                 sim_data = self.sim_path(h_vector=self.h_array[:, pair])
@@ -105,7 +138,8 @@ class MultiHeston(PricingModel):
             if (self.plot):
                 self.plot_sim_path(plot_hist=True, 
                                    sim_data_comb=sim_data_comb,
-                                   sim=sim)
+                                   sim=sim,
+                                   uid=f"{self.start_time_acc.strftime('%Y%m%d_%H%M%S')}_{self.hist_window}_{self.max_sigma}")
     
     def sim_path(self, h_vector: np.array):
         sim_data = pd.DataFrame(np.zeros((self.sim_window, self.num_ticker)), columns=[self.ticker_list])
@@ -114,7 +148,7 @@ class MultiHeston(PricingModel):
         S_t_vector = adj_S_0.copy() # Copy the adjusted S_0 vector
         V_t_vector = self.params_list_heston[:, 4].copy() # Initial V_0 (to be updated after every step also)
         for t in range(self.sim_window):
-            Z = self.Z_list_heston[:, t]
+            Z = self.Z_list[:, t]
             LZ = np.dot(self.L_lower, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
             # logger_yq.info(f"The 3 matrices L_lower, Z.T, LZ are:\n{self.L_lower}\n{Z.T}\n{LZ}", )
 
@@ -216,40 +250,6 @@ class MultiHeston(PricingModel):
 
         self.L_lower = np.linalg.cholesky(simplified_corr)
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
-    
-    @timeit
-    def plot_sim_path(self, plot_hist: bool, sim_data_comb: pd.DataFrame, sim: int) -> None:
-        # Plot sim paths from prod pricing date (for each h) for each asset
-        fig, ax = plt.subplots(figsize=(10,6)) 
-        # If use figure then cannot have fig, ax; just use plt in lines below
-        if plot_hist: 
-            logger_yq.info(f"The hist_data is\n{self.hist_data}")
-            hist_df = self.data[(self.data.index >= cs.INITIAL_FIXING_DATE) 
-                           & (self.data.index <= cs.FINAL_FIXING_DATE)]
-            for asset in cs.ASSET_NAMES:
-                ax.plot(hist_df.index, hist_df[asset], alpha=0.5, label=asset)
-        data = {}
-        for i in range(len(cs.ASSET_NAMES)):
-            data[sim_data_comb.columns[i]] = self.S_0_vector[i] # Access the price on the prod date
-        prod_date_df = pd.DataFrame(data, index=[self.prod_date])
-        smooth_path = pd.concat([prod_date_df, sim_data_comb], axis=0)
-        logger_yq.info(f"The smooth path df is:\n{smooth_path}")
-        smooth_path.plot(ax=ax, alpha=0.5) # Another way of plotting
-
-        title_str = f"Model: {self.model_name}, PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, max_sigma: {self.max_sigma}"
-        subtitle_str = f"sim_start_date: {self.sim_start_date.strftime('%Y-%m-%d')}, sim_wdw: {self.sim_window}"
-        plt.title(f"{title_str}\n{subtitle_str}")
-        plt.legend(loc='upper right')
-
-        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(f'{self.model_name}',
-                                                                          'sim_data_comb', 
-                                                                          f"{self.start_time_acc.strftime('%Y%m%d_%H%M%S')}_{self.hist_window}_{self.max_sigma}", 
-                                                                          self.prod_date.strftime('%Y_%m_%d'))
-        stor_dir.mkdir(parents=True, exist_ok=True)
-        file_path = stor_dir.joinpath(f'{sim}.png')
-        plt.savefig(file_path, bbox_inches='tight')
-        plt.close()
-        logger_yq.info(f"Path of 1 sim is plotted")
 
     def plot_prod_price():
         # Payout

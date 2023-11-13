@@ -18,7 +18,7 @@ import os
 from yq.utils.time import timeit
 from yq.utils import io
 from yq.scripts import models, model_eval
-from yq.scripts import heston
+from yq.scripts import heston, gbm
 from yq.utils import option
 from yq.utils import calendar
 from yq.scripts import simulation as sm
@@ -117,28 +117,6 @@ def run_heston_sim_test_h():
             # Log the error with the date that caused it
             raise Exception("MultiHeston has error.")
 
-def plot_a_figure():
-    # Copy the start_time_str from the folders
-    product_est_date_sim_data_df_list = sm.read_sim_data(
-            model_name='gbm',
-            start_time_str='20231111_195045_022812', 
-            prod_est_start_date=pd.Timestamp('2023-08-09'), 
-            prod_est_end_date=pd.Timestamp('2023-11-09'))
-    # print(type(product_est_date_sim_data_df_list)[0])
-    n_sim_on_day = pd.concat(product_est_date_sim_data_df_list[20], axis=1)
-    ax = n_sim_on_day.plot(alpha=0.6, legend=False)
-    # Set the title
-    ax.set_title("Product Pricing Date: x, Model: Multi Asset GBM")
-
-    # Add text labels for additional features
-    ax.text(0.5, 0.95, "n_sim = 100, LONZA, SIKA", horizontalalignment='center', verticalalignment='center', transform=ax.transAxes)
-
-    figure = ax.get_figure()
-    figure.savefig(yq_path.get_plots_path(cur_dir).joinpath('sample_sim_path_on_prod_date.png'))
-
-    # print(product_est_date_sim_data_df_list[0])
-    logger_yq.info("Testing the logs: %s", product_est_date_sim_data_df_list[0])
-
 
 def read_csv_data_chill(file_name: str) -> pd.DataFrame:
     curr_dir = Path(__file__).parent.parent
@@ -152,28 +130,24 @@ def read_csv_data_chill(file_name: str) -> pd.DataFrame:
     return options_data
 
 @timeit
-def plot_graph():
-    paths_arr = sm.read_sim_data('heston', '20231113_030732_248877', pd.Timestamp('2023-08-09'), pd.Timestamp('2023-08-09'))
-    df_sim = paths_arr[0][0]
-
+def plot_graph(model: str, prod_date: str):
+    paths_arr = sm.read_sim_data(model, '20231113_185603_63_0.5', pd.Timestamp(prod_date), pd.Timestamp(prod_date))
+    n_sim = len(paths_arr[0])
+    n_ppd = len(paths_arr)
+    logger_yq.info(f"The number of PPD and sims is {n_ppd}, {n_sim} ")
+    sim_paths = pd.concat(paths_arr[0], axis=1)
+    
     fig, ax = plt.subplots(figsize=(10,6))
-
-    hist_data = po.get_historical_assets_all()
-    hist_df = hist_data[(hist_data.index >= cs.INITIAL_FIXING_DATE) 
-                            & (hist_data.index <= cs.FINAL_FIXING_DATE)]
-    for asset in cs.ASSET_NAMES:
-        ax.plot(hist_df.index, hist_df[asset], alpha=0.5, label=asset)
-    for col in df_sim.columns:
-        ax.plot(df_sim.index, df_sim[col], alpha=0.5, label=col)
-
-
-    #title_str = f"PPD: "
-    # plt.title(title_str)
+    sim_paths.plot()
+    
+    title_str = f"PPD: {prod_date}"
+    plt.title(title_str)
     plt.legend(loc='upper right')
     plt.tight_layout()
-    stor_dir = yq_path.get_plots_path(Path(__file__).parent)                     
+    stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(f'{model}',
+                                                                          'n_sim')                     
     stor_dir.mkdir(parents=True, exist_ok=True)
-    file_path = stor_dir.joinpath(f'test1.png')
+    file_path = stor_dir.joinpath(f"{prod_date.strftime('%Y%m%d')}_{n_sim}.png")
     plt.savefig(file_path, bbox_inches='tight')
 
 @timeit
@@ -192,8 +166,8 @@ def sim_price_period(start_date: pd.Timestamp,
     for prod_date in tcal.create_six_trading_dates(start_date, end_date).index:
         try: 
             logger_yq.info(f"Pricing the product on {prod_date}")
-            if (model == 'heston'):
-                params = {
+            params = {
+                    'model_name': model,
                     'prod_date': prod_date,
                     'hist_window': hist_window,
                     'h_array': [[0], [0]],
@@ -201,15 +175,16 @@ def sim_price_period(start_date: pd.Timestamp,
                     'plot': plot,
                     'max_sigma': max_sigma
                 }
+            if (model == 'heston'):
+                
                 hst = heston.MultiHeston(params)
                 # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
                 hst.sim_n_path(n_sim=n_sim)
                 del hst
             elif (model == 'gbm'):
-                # gbm = gbm.MultiGbm(params)
-                # gbm.sim_n_path(n_sim=n_sim)
-                # del gbm
-                pass
+                gbm = gbm.MultiGBM(params)
+                gbm.sim_n_path(n_sim=n_sim)
+                del gbm
             count += 1
         except Exception as e:
             logger_yq.error(f"Error during simulation on {prod_date}: {e}")
@@ -231,24 +206,25 @@ if __name__ == "__main__":
     #################################################
     # TODO: Change the acc start time to fix the issues
     # Individual testing
-    # sim_price_period(start_date='2023-08-09', 
-    #                          end_date='2023-08-09', 
-    #                          hist_window=63, 
-    #                          n_sim=5,
-    #                          plot=True,
-    #                          max_sigma=0.35,
-    #                          model='heston')
 
     @timeit
     def sim_grid_search_heston(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
         if ('gbm' in models):
             logger_yq.info("Doing grid search for GBM")
+            for hist_window, n_sim in itertools.product(hist_windows, n_sims):
+                logger_yq.info(f"Combination is hist_window: {hist_window}, n_sim: {n_sim}")
+                sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
+                                end_date=cs.FINAL_PROD_PRICING_DATE, 
+                                hist_window=hist_window, 
+                                n_sim=n_sim,
+                                plot=True, # Hardcoded
+                                model='gbm')
             pass
          
         if ('heston' in models):
             logger_yq.info("Doing grid search for Heston")
             for hist_window, n_sim, max_sigma in itertools.product(hist_windows, n_sims, max_sigmas):
-                logger_yq.info(f"Running grid search for hist_window: {hist_window}, n_sim: {n_sim}")
+                logger_yq.info(f"Combination is hist_window: {hist_window}, n_sim: {n_sim}")
                 sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
                                 end_date=cs.FINAL_PROD_PRICING_DATE, 
                                 hist_window=hist_window, 
