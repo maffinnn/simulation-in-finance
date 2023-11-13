@@ -1,8 +1,12 @@
 import logging
 import pandas as pd
 from pathlib import Path
+import os
+import numpy as np
+
 from sc import constants as cs
 from yq.utils import path as yq_path
+import sy.interest_rate as syir
 
 logger_yq = logging.getLogger('yq')
 # ===============================================================================================
@@ -123,7 +127,7 @@ def payouts(df_sim, barrierHit):
         final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
     else:
         final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
-    df_payouts = pd.concat([df_payouts, final_payout], axis = 0).set_index('Date')
+    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
     return df_payouts
         
 ## Alt product payouts
@@ -162,7 +166,7 @@ def payouts_no_autocall(df_sim, barrierHit):
         final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
     else:
         final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
-    df_payouts = pd.concat([df_payouts, final_payout], axis = 0).set_index('Date')
+    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
     return df_payouts
 
 # Basically a bond with a risk of early redemption
@@ -194,7 +198,7 @@ def payouts_no_barrier(df_sim, barrierHit):
     
     #Final redemption
     final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
-    df_payouts = pd.concat([df_payouts, final_payout], axis = 0).set_index('Date')
+    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
     return df_payouts
 
 # Basically a bond
@@ -215,7 +219,7 @@ def payouts_no_barrier_no_autocall(df_sim, barrierHit):
     
     #Final redemption
     final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
-    df_payouts = pd.concat([df_payouts, final_payout], axis = 0).set_index('Date')
+    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
     return df_payouts
 
 
@@ -223,9 +227,52 @@ def payouts_no_barrier_no_autocall(df_sim, barrierHit):
 # RNV
 # ===============================================================================================
 
-def rnv(df_payouts, today):
-    #TODO: refer to interest rates/bond prices and do discounting
-    return sum(df_payouts['Payout'])
+def populate_bond_table_sc(today, bond_price):
+    bond_table = pd.DataFrame(index=pd.date_range(today, cs.REDEMPTION_DATE), columns=['Price'])
+    bond_table.index.name = 'Date'
+    X = [syir.get_period(col) for col in bond_price.columns]
+    Y = bond_price.loc[today].to_list()
+    for date in bond_table.index:
+        #tdelta = (cs.FINAL_FIXING_DATE - date).days/365
+        tdelta = (date - today).days / 365
+        # for date in bond_price.index:
+        interpolated_y = np.interp(tdelta,X,Y)
+        bond_table.loc[date]['Price'] = interpolated_y
+    return bond_table
+
+def create_bond_table_sc(today):
+    path = '../data/bond'
+    bond_yield = None
+    for file in os.listdir(path):
+        df = pd.read_csv(os.path.join(path, file))[['Date','Price']]
+        df.rename(columns={'Price':file.split(' ')[1]}, inplace=True)
+        df['Date'] = pd.to_datetime(df['Date'],format='%m/%d/%Y')
+        df = df.set_index('Date').iloc[::-1]
+        if bond_yield is None:
+            bond_yield = df
+        else:
+            bond_yield = pd.concat([bond_yield, df], axis=1)
+    bond_yield = bond_yield.interpolate()
+    bond_yield = bond_yield.reindex(sorted(bond_yield.columns, key=lambda x: syir.get_period(x)), axis=1)
+    bond_price = pd.DataFrame(index=bond_yield.index)
+    for col in bond_yield.columns:
+        bond_price[col] = bond_yield[col].apply(lambda x: np.exp(-x/100*syir.get_period(col)))
+    #print(bond_price)
+    #bond_table = syir.populate_bond_table(bond_price, today, cs.FINAL_FIXING_DATE)
+    bond_table = populate_bond_table_sc(today, bond_price)
+    return bond_table
+
+def rnv_single(df_payouts, today):
+    bond_table = create_bond_table_sc(today)
+    return np.sum(bond_table.loc[df_payouts['Date']]['Price'].to_numpy() * df_payouts['Payout'].to_numpy())
+
+def rnv_multiple(df_payouts_arr, today):
+    bond_table = create_bond_table_sc(today)
+    rnv_arr = []
+    for df_payouts in df_payouts_arr:
+        #rnv = np.sum(bond_table.loc[df_payouts['Date']]['Price'].to_numpy() * df_payouts['Payout'].to_numpy())
+        rnv_arr.append(np.sum(bond_table.loc[df_payouts['Date']]['Price'].to_numpy() * df_payouts['Payout'].to_numpy()))
+    return rnv_arr
 
 
 # ===============================================================================================
@@ -238,19 +285,21 @@ def pricing_single(df_sim):
     df_historical = get_historical_assets(first_sim_date, cs.INITIAL_FIXING_DATE)
     barrierHit = checkBarrier(df_historical)
     df_payouts = payouts(df_sim, barrierHit)
-    price = rnv(df_payouts, df_historical.index[-1])
+    price = rnv_single(df_payouts, df_historical.index[-1])
     return price
 
 # put in an array of many dfs, get back an array of their prices
 def pricing_multiple(df_sim_array):
     first_sim_date = df_sim_array[0].first_valid_index()
     df_historical = get_historical_assets(first_sim_date, cs.INITIAL_FIXING_DATE)
+    today = df_historical.index[-1]
     barrierHit = checkBarrier(df_historical)
-    price = []
+    df_payouts_arr = []
     for df_sim in df_sim_array:
         df_payouts = payouts(df_sim, barrierHit)
-        price.append(rnv(df_payouts, df_historical.index[-1]))
-    return price
+        df_payouts_arr.append(df_payouts)
+    rnv_arr = rnv_multiple(df_payouts_arr, today)
+    return rnv_arr
 
 
 # ===============================================================================================
@@ -259,3 +308,51 @@ def pricing_multiple(df_sim_array):
 
 # Look in greeks.py for simple implementations!
 # Watch this space for simultaneous payoff and greek calculations.
+
+def payouts_h(df_sim, barrierHit, h):
+    #init
+    df_payouts_dict = {'0': [pd.DataFrame()]}
+    for asset in cs.ASSET_NAMES:
+        df_payouts_dict[asset] = [pd.DataFrame(), pd.DataFrame()]
+    first_date = df_sim.first_valid_index()
+    
+    #Early redemption, does not yield dividends past called date
+    trigger_date = cs.FINAL_FIXING_DATE #init to final fixing date
+    redemption_date = cs.REDEMPTION_DATE #init to final redemption date
+    for date in cs.EARLY_REDEMPTION_OBSERVATION_DATES:
+        if date >= first_date:
+            autocall_hit = True
+            for asset in cs.ASSET_NAMES:
+                autocall_hit = autocall_hit and df_sim.loc[date][asset] >= cs.INITIAL_LEVELS[asset] * cs.EARLY_REDEMPTION_LEVEL
+            if autocall_hit:
+                trigger_date = date
+                redemption_date = cs.EARLY_REDEMPTION_DATES[date]
+                break
+
+    #barrier check
+    if not barrierHit:
+        #check barrier for sim path
+        for asset in cs.ASSET_NAMES:
+            if min(df_sim[asset]) < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
+                barrierHit = True
+                break
+    
+    #dividend payment
+    for date in cs.COUPON_PAYMENT_DATES:
+        if date <= redemption_date and date > first_date:
+            div_payout = pd.DataFrame({'Payout': [cs.COUPON_PAYOUT], 'Date': [date]})
+            df_payouts = pd.concat([df_payouts, div_payout], axis = 0)
+    
+    #Final redemption
+    #if early redemption occured, payout = 1000 regardless of barrierHit
+    if barrierHit:
+        worst_performing = cs.DENOMINATION
+        for asset in cs.ASSET_NAMES:
+            final_price = df_sim.loc[trigger_date][asset] #this will be > cs.DENOMINATION if autocall occurred
+            worst_performing = min(worst_performing, final_price)
+        final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
+    else:
+        final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
+    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
+    return df_payouts
+     
