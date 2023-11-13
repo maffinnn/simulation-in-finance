@@ -205,34 +205,37 @@ if __name__ == "__main__":
     # model_eval.analyse_V_t()
     #################################################
     # TODO: Change the acc start time to fix the issues
+    # TODO: Take note of the order of running (run for low hanging fruit first)
     # Individual testing
 
     @timeit
     def sim_grid_search_heston(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
-        if ('gbm' in models):
-            logger_yq.info("Doing grid search for GBM")
-            for hist_window, n_sim in itertools.product(hist_windows, n_sims):
-                logger_yq.info(f"Combination is hist_window: {hist_window}, n_sim: {n_sim}")
-                sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
-                                end_date=cs.FINAL_PROD_PRICING_DATE, 
-                                hist_window=hist_window, 
-                                n_sim=n_sim,
-                                plot=True, # Hardcoded
-                                max_sigma=0, # Won't be used anyway
-                                model='gbm')
-            pass
-         
-        if ('heston' in models):
-            logger_yq.info("Doing grid search for Heston")
-            for hist_window, n_sim, max_sigma in itertools.product(hist_windows, n_sims, max_sigmas):
-                logger_yq.info(f"Combination is hist_window: {hist_window}, n_sim: {n_sim}")
-                sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
-                                end_date=cs.FINAL_PROD_PRICING_DATE, 
-                                hist_window=hist_window, 
-                                n_sim=n_sim,
-                                plot=True, # Hardcoded
-                                max_sigma=max_sigma,
-                                model='heston')
+        n_sims = sorted(n_sims)
+        for n_sim in n_sims:
+            if ('gbm' in models):
+                logger_yq.info("Doing grid search for GBM")
+                for hist_window in hist_windows:
+                    logger_yq.info(f"Combination is hist_window: {hist_window}, n_sim: {n_sim}")
+                    sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
+                                    end_date=cs.FINAL_PROD_PRICING_DATE, 
+                                    hist_window=hist_window, 
+                                    n_sim=n_sim,
+                                    plot=False, # Hardcoded
+                                    max_sigma=0, # Won't be used anyway
+                                    model='gbm')
+                pass
+            
+            if ('heston' in models):
+                logger_yq.info("Doing grid search for Heston")
+                for hist_window, max_sigma in itertools.product(hist_windows, max_sigmas):
+                    logger_yq.info(f"Combination is hist_window: {hist_window}, n_sim: {n_sim}")
+                    sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
+                                    end_date=cs.FINAL_PROD_PRICING_DATE, 
+                                    hist_window=hist_window, 
+                                    n_sim=n_sim,
+                                    plot=False, # Hardcoded
+                                    max_sigma=max_sigma,
+                                    model='heston')
                 
        
 
@@ -243,16 +246,16 @@ if __name__ == "__main__":
     # Only for heston: sigma 0.35, 0.5, 10
 
     # Test for HESTON MAX SIGMA
-    hist_windows = [63]
-    n_sims = [3]
+    # Delete useless folders first, clean logs, adjust plot
+    hist_windows = [7, 63, 252]
+    n_sims = [10, 100, 1000, 10000, 100000]
     models = ['gbm','heston']
     max_sigmas = [0.5, 1.5, 10]
-    # sim_grid_search_heston(hist_windows=hist_windows,
-    #                 n_sims=n_sims,
-    #                 models=models,
-    #                 max_sigmas=max_sigmas)
-     
-    model_eval.analyse_rmse()
+    sim_grid_search_heston(hist_windows=hist_windows,
+                    n_sims=n_sims,
+                    models=models,
+                    max_sigmas=max_sigmas)
+    # model_eval.analyse_rmse()
     # TODO:
     #---------------------------
     # run_heston_sim_test_h()

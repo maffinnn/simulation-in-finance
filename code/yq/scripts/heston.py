@@ -176,7 +176,8 @@ class MultiHeston(PricingModel):
                 if (V_t < 0): logger_yq.warning("V_t SMALLER THAN 0")
                 V_t_vector[i] = max(V_t, 0) # Truncated V_t
                 sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i]
-        col_names = [f"{asset}_{h_vector[i]}" for i, asset in enumerate(self.ticker_list)]
+        # col_names = [f"{asset}_{h_vector[i]}" for i, asset in enumerate(self.ticker_list)]
+        col_names = [f"{asset}" for i, asset in enumerate(self.ticker_list)]
         logger_yq.info(f"The new column names are {col_names}")
         sim_data.columns = col_names
         return sim_data

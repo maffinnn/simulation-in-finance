@@ -98,11 +98,13 @@ def analyse_volatility():
 #     n_sims = [3]
 #     models = ['gbm','heston']
 #     max_sigmas = [0.5, 1.5, 10]
-def analyse_rmse(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
+# n_sim can be calculated
+# hist_windows: list, n_sims: list, models: list, max_sigmas: list
+def analyse_rmse():
     # TODO: Take the values from yq_script
     model = 'heston' #TODO:
-    dir_list = ['20231113_185603_63_0.5']
-
+    dir_list = ['20231114_004756_63_0.5']
+    max_sigma = 0.5
 
     # For different methodologies, we want to get the RMSE for the ppd_payous against actual price
     # Change to itertools
@@ -116,12 +118,18 @@ def analyse_rmse(hist_windows: list, n_sims: list, models: list, max_sigmas: lis
         actual_price = po.get_product_price(cs.FINAL_PROD_PRICING_DATE).rename(columns={'Price': 'actual_price'})
         # Actual price for the product price period
         actual_price = actual_price[actual_price.index >= cs.INITIAL_PROD_PRICING_DATE]
+        logger_yq.info(f'Actual_price df is\n{actual_price}')
 
         # Average payouts of all the sim paths on each ppd
         ppd_payouts = []
         for ppd in range(n_ppd):
+            # Need to rename columns first
+            logger_yq.info(f'pdd = {ppd} paths_arr[ppd] is\n{paths_arr[ppd]}')
             # Payouts for all the paths on one day of the price period (multiple paths)
-            paths_payout = po.pricing_multiple(paths_arr[ppd])
+            if (len(paths_arr[ppd]) != 0):
+                paths_payout = po.pricing_multiple(paths_arr[ppd])
+            else:
+                logger_yq.error(f"Path payouts cannot be 0")
             ppd_payouts.append(np.mean(paths_payout))
         # Payouts for the entire pricing period
         
@@ -133,28 +141,29 @@ def analyse_rmse(hist_windows: list, n_sims: list, models: list, max_sigmas: lis
         payouts_compare = pd.concat([ppd_payouts_df, actual_price], axis=1)
         logger_yq.info(f"The payouts compare df is:\n{payouts_compare.head()}")
 
-        # # TODO: Plot payouts_compare
-        # fig, ax = plt.subplots(figsize=(10,6)) 
-        # if self.model_name == 'heston':
-        #     title_str = f"Model: {model}, hist_wdw: INSERTSTH{model}, max_sigma: {max_sigma}"
-        # else:
-        #     # TODO: Do sth for gbm
-        #     pass
-        # subtitle_str = f"xxx"
-        # plt.title(f"{title_str}\n{subtitle_str}")
+        # TODO: Plot payouts_compare
+        fig, ax = plt.subplots(figsize=(10,6)) 
+        if model == 'heston':
+            title_str = f"Model: {model}, hist_wdw: INSERTSTH{model}, max_sigma: {max_sigma}"
+        else:
+            # TODO: Do sth for gbm
+            title_str = f"RMSE for all the price paths Model: {model}, hist_wdw: INSERTSTH{model}"
+            pass
+        subtitle_str = f"xxx"
+        plt.title(f"{title_str}\n{subtitle_str}")
 
-        # payouts_compare.plot()
-        # plt.legend(loc='upper right')
+        payouts_compare.plot()
+        plt.legend(loc='upper right')
 
-        # stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
-        # stor_dir.mkdir(parents=True, exist_ok=True)
-        # file_path = stor_dir.joinpath(f'#############.png') # TODO: Rename
-        # plt.savefig(file_path, bbox_inches='tight')
-        # plt.close()
+        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
+        stor_dir.mkdir(parents=True, exist_ok=True)
+        file_path = stor_dir.joinpath(f'#############.png') # TODO: Rename
+        plt.savefig(file_path, bbox_inches='tight')
+        plt.close()
 
-        # RMSE = np.sqrt(np.mean((payouts_compare['ppd_payouts'] - payouts_compare['actual_price']) ** 2))
-        # RMSE_list.append(RMSE)
-        # logger_yq.info(f"RMSE for combination is:\n{RMSE}") # TODO: Add combination
+        RMSE = np.sqrt(np.mean((payouts_compare['ppd_payouts'] - payouts_compare['actual_price']) ** 2))
+        RMSE_list.append(RMSE)
+        logger_yq.info(f"RMSE for combination is:\n{RMSE}") # TODO: Add combination
 
     # TODO: Write the list into a csv file or sth
 
