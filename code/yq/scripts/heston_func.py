@@ -116,18 +116,18 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
     rates = volSurfaceLong['rate'].to_numpy('float')
     # Can be used for debugging
     def iter_cb(params, iter, resid):
-        parameters = [params['sigma'].value, 
-                      params['kappa'].value, 
+        parameters = [params['kappa'].value, 
                       params['theta'].value, 
                       params['volvol'].value, 
                       params['rho'].value, 
+                      params['sigma'].value,
                       np.sum(np.square(resid))]
         # logger_yq.info(f"The parameters in heston are: {parameters}") 
         
     # This is the calibration function
-    def calibratorHeston(St, initialValues = [0.5,0.5,0.5,0.5,-0.5], 
-                                lowerBounds = [1e-2,1e-2,1e-2,1e-2,-1], 
-                                upperBounds = [10,10,10,10,0]): 
+    def calibratorHeston(St, initialValues = [0.5,0.5,0.5,-0.5,0.1], 
+                                lowerBounds = [1e-2,1e-2,1e-2,-1,1e-2], 
+                                upperBounds = [10,10,10,0,1.5]): 
 
         '''
         Implementation of the Levenberg Marquardt algorithm in Python to find the optimal value 
@@ -170,11 +170,11 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
 
         # Define parameters
         params = Parameters()
-        params.add('sigma',value = initialValues[0], min = lowerBounds[0], max = upperBounds[0])
         params.add('kappa',value = initialValues[1], min = lowerBounds[1], max = upperBounds[1])
         params.add('theta',value = initialValues[2], min = lowerBounds[2], max = upperBounds[2])
         params.add('volvol', value = initialValues[3], min = lowerBounds[3], max = upperBounds[3])
         params.add('rho', value = initialValues[4], min = lowerBounds[4], max = upperBounds[4])
+        params.add('sigma',value = initialValues[0], min = lowerBounds[0], max = upperBounds[0])
         
         # if np.isnan(list(params.valuesdict().values())).any():
         #     # logger_yq.warning("NaN detected in initial parameters:", params)
@@ -194,6 +194,7 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
                         params, 
                         method = 'leastsq', # 'leastsq' previously
                         # iter_cb = iter_cb, # Can be commented if don't want debugging
+                        max_nfev=500,
                         ftol = 1e-6)
         return(result)
 

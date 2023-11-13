@@ -1,0 +1,32 @@
+import functools
+import datetime
+import logging
+
+logger_yq = logging.getLogger('yq')
+
+def timeit(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        args_repr = [repr(a) for a in args]  # Argument representation
+        kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]  # Keyword-argument representation
+        signature = ", ".join(args_repr + kwargs_repr)  # Formatting
+
+        start_time = datetime.datetime.now()
+        result = func(*args, **kwargs)
+        end_time = datetime.datetime.now()
+        elapsed_time = end_time - start_time
+
+        # Convert to hours, minutes, seconds, and milliseconds
+        hours, rem = divmod(elapsed_time.total_seconds(), 3600)
+        minutes, seconds = divmod(rem, 60)
+        milliseconds = (seconds - int(seconds)) * 1000
+        seconds = int(seconds)
+
+        logger_yq.info(f"Runtime of {func.__name__}({signature}): {hours}h {minutes}m {seconds}s {milliseconds:.0f}ms")
+        return result
+    return wrapper
+
+if __name__ == "__main__":
+    # @timeit
+    # funcname()
+    pass

@@ -35,7 +35,7 @@ class SIXTradingCalendar:
                           The DataFrame's index is named 'Dates' and contains the trading dates.
         """
         six_calendar = mcal.get_calendar('SIX')
-        print(f"Holidays in the calendar up to 2200: {six_calendar.holidays().holidays[-10:]}")
+        # print(f"Holidays in the calendar up to 2200: {six_calendar.holidays().holidays[-10:]}")
         six_trading_days = six_calendar.valid_days(start_date, end_date).tz_localize(None)
 
         six_trading_days_df = pd.DataFrame(index = six_trading_days)
@@ -63,7 +63,7 @@ class SIXTradingCalendar:
         # Assuming create_six_trading_dates returns a pd.DatetimeIndex with trading dates
         try:
             position = self.six_trading_calendar.index.get_loc(trading_date)
-            print(position)
+            # print(position)
         except:
             raise ValueError(f"{trading_date} is not a trading date or is out of the given date range.")
 

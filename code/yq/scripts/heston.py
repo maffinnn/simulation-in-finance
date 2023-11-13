@@ -5,6 +5,8 @@ import time
 import logging
 import matplotlib.pyplot as plt
 from pathlib import Path
+from yq.utils import io
+from yq.utils.time import timeit
 from yq.scripts import heston_func as hf
 from yq.scripts import simulation as sm
 from yq.utils import option, calendar, log, path as yq_path
@@ -41,7 +43,7 @@ class PricingModel:
         self.payout = None # To store payoff calculations based on simulated data
 
 
-class multi_heston(PricingModel):
+class MultiHeston(PricingModel):
     """
     A class for simulating asset prices using the Multi-Factor Heston model.
 
@@ -66,8 +68,8 @@ class multi_heston(PricingModel):
         self.params_list_heston = None
         self.L_lower = None
 
+    @timeit
     def sim_n_path(self, n_sim):
-        start_time = time.time()
         self.hist_data = self.data[self.data.index < self.sim_start_date].sort_index().tail(self.hist_window)
         logger_yq.info(f"The historical data is\n {self.hist_data.head()}")
         self.calibrate(self.prod_date)
@@ -101,11 +103,6 @@ class multi_heston(PricingModel):
                 self.plot_sim_path(plot_hist=True, 
                                    sim_data_comb=sim_data_comb,
                                    sim=sim)
-
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        min, sec = divmod(elapsed_time, 60)
-        logger_yq.info(f"The elapsed time for {sim}th sim is {int(min)} minutes, {int(sec)} seconds")
     
     def sim_path(self, h_vector: np.array):
         sim_data = pd.DataFrame(np.zeros((self.sim_window, self.num_ticker)), columns=[self.ticker_list])
@@ -127,15 +124,13 @@ class multi_heston(PricingModel):
                 # if (i == 0): # LONN.SW
                 #     logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
                 # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
-                
+                logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
                 S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                 V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
                 
                 # if (i == 0): # LONN.SW
                 #     # print(f"Ratio is: {S_t_vector[i] / S_t}")
                 #     logger_yq.info("New S_t, new V_t and S_t+1/S_t is %s, %s, %s", S_t_vector[i], V_t_vector[i], S_t_vector[i] / S_t)
-
-                # logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
 
                 if (V_t < 0): logger_yq.warning("V_t SMALLER THAN 0")
                 V_t_vector[i] = max(V_t, 0) # Truncated V_t
@@ -145,44 +140,54 @@ class multi_heston(PricingModel):
         sim_data.columns = col_names
         return sim_data
 
+    @timeit
     def calibrate(self, prod_date: pd.Timestamp):
-        lonn_call = option.read_clean_options_data(options_dir='options-cleaned', curr_date=prod_date, file_name="lonn_call.csv")
-        sika_call = option.read_clean_options_data(options_dir='options-cleaned', curr_date=prod_date, file_name="sika_call.csv")
+        try:
+            self.params_list_heston = io.read_hparams(self.prod_date)
+            return
+        except:
+            # raise # Don't raise because I want to continue
+        
+            lonn_call = option.read_clean_options_data(options_dir='options-cleaned', curr_date=prod_date, file_name="lonn_call.csv")
+            sika_call = option.read_clean_options_data(options_dir='options-cleaned', curr_date=prod_date, file_name="sika_call.csv")
 
-        lonn_call = lonn_call[['maturity', 'strike', 'price', 'rate']]
-        sika_call = sika_call[['maturity', 'strike', 'price', 'rate']]
+            lonn_call = lonn_call[['maturity', 'strike', 'price', 'rate']]
+            sika_call = sika_call[['maturity', 'strike', 'price', 'rate']]
 
-        logger_yq.info(f"LONZA and SIKA df are \n{lonn_call.head()}\n{sika_call.head()}")
+            logger_yq.info(f"LONZA and SIKA df are \n{lonn_call.head()}\n{sika_call.head()}")
 
-        # Calibrate 2 sets of parameters for 2 individual assets
-        start_time = time.time()
-        lonn_S_0 = self.data.loc[prod_date][cs.ASSET_NAMES[0]]
-        sika_S_0 = self.data.loc[prod_date][cs.ASSET_NAMES[1]]
+            # Calibrate 2 sets of parameters for 2 individual assets
+            start_time = time.time()
+            lonn_S_0 = self.data.loc[prod_date][cs.ASSET_NAMES[0]]
+            sika_S_0 = self.data.loc[prod_date][cs.ASSET_NAMES[1]]
 
-        try: 
-            logger_yq.info(f"Calibrating LONZA.")
-            lonn_result = hf.calibrate_heston(lonn_S_0, lonn_call)
-            logger_yq.info(f"Calibrating SIKA.")
-            sika_result = hf.calibrate_heston(sika_S_0, sika_call)
-            logger_yq.info(f"The S_0 for LONZA and SIKA are {lonn_S_0} and {sika_S_0}")
-            logger_yq.info(f"Calibration results for LONZA and SIKA are \n{lonn_result}\n {sika_result}")
-        except Exception as e:
-            logger_yq.error(f"Error during calibration on {self.prod_date}: {e}")
+            try: 
+                logger_yq.info(f"Calibrating LONZA on {self.prod_date}.")
+                lonn_result = hf.calibrate_heston(lonn_S_0, lonn_call)
+                logger_yq.info(f"Calibrating SIKA on {self.prod_date}.")
+                sika_result = hf.calibrate_heston(sika_S_0, sika_call)
+                logger_yq.info(f"The S_0 for LONZA and SIKA are {lonn_S_0} and {sika_S_0}")
+                # logger_yq.info(f"Calibration results for LONZA and SIKA are \n{lonn_result}\n {sika_result}")
+            except Exception as e:
+                logger_yq.error(f"Error during calibration on {self.prod_date.strftime('%Y-%m-%d')}: {e}")
+                raise
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        min, sec = divmod(elapsed_time, 60)
-        logger_yq.info(f"The elapsed time for 2 calibration is {int(min)} minutes, {int(sec)} seconds")
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            min, sec = divmod(elapsed_time, 60)
+            logger_yq.info(f"The elapsed time for 2 calibration is {int(min)} minutes, {int(sec)} seconds")
 
-        self.params_list_heston = np.zeros((self.num_ticker, 5))
-        params_order = ['kappa', 'theta', 'volvol', 'rho', 'sigma']
-        # print(f"Enumerate order is: {enumerate(params_order)}\n")
-        for i, param in enumerate(params_order):
-            self.params_list_heston[0, i] = lonn_result.params[param].value  # For lonn_result
-            self.params_list_heston[1, i] = sika_result.params[param].value  # For sika_result
+            self.params_list_heston = np.zeros((self.num_ticker, 5))
+            params_order = ['kappa', 'theta', 'volvol', 'rho', 'sigma']
+            # print(f"Enumerate order is: {enumerate(params_order)}\n")
+            for i, param in enumerate(params_order):
+                self.params_list_heston[0, i] = lonn_result.params[param].value  # For lonn_result
+                self.params_list_heston[1, i] = sika_result.params[param].value  # For sika_result
 
-        logger_yq.info("The calibrated params_list_Heston is:\n %s", self.params_list_heston)
+            io.write_hparams(self.prod_date, self.params_list_heston)
+            logger_yq.info("The calibrated params_list_Heston is:\n %s", self.params_list_heston)
 
+    @timeit
     def calc_L_lower(self):
         log_returns_list = []
         for ticker in self.ticker_list:
@@ -209,6 +214,7 @@ class multi_heston(PricingModel):
         self.L_lower = np.linalg.cholesky(simplified_corr)
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
     
+    @timeit
     def plot_sim_path(self, plot_hist: bool, sim_data_comb: pd.DataFrame, sim: int) -> None:
         # Plot sim paths from prod pricing date (for each h) for each asset
         fig, ax = plt.subplots(figsize=(10,6)) 

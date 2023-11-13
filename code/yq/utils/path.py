@@ -10,6 +10,12 @@ def get_plots_path(cur_dir: str) -> str:
     tar_dir.mkdir(parents=True, exist_ok=True)
     return tar_dir
 
+def get_hparams(cur_dir: str) -> str:
+    root_dir = get_root_dir(cur_dir=cur_dir)
+    tar_dir = root_dir.joinpath('code', 'yq', 'scripts', 'hparams')
+    tar_dir.mkdir(parents=True, exist_ok=True)
+    return tar_dir
+
 def get_root_dir(cur_dir: str) -> str:
     while cur_dir.name != 'simulation-in-finance':    
             cur_dir = cur_dir.parent

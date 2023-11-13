@@ -1,3 +1,4 @@
+import itertools
 import typing
 import logging
 import pickle
@@ -14,6 +15,8 @@ from pathlib import Path
 import os
 
 # Self-written modules
+from yq.utils.time import timeit
+from yq.utils import io
 from yq.scripts import models
 from yq.scripts import heston
 from yq.utils import option
@@ -148,8 +151,9 @@ def read_csv_data_chill(file_name: str) -> pd.DataFrame:
 
     return options_data
 
+@timeit
 def plot_graph():
-    paths_arr = sm.read_sim_data('heston', '20231113_013012_363749', pd.Timestamp('2023-08-09'), pd.Timestamp('2023-08-09'))
+    paths_arr = sm.read_sim_data('heston', '20231113_030732_248877', pd.Timestamp('2023-08-09'), pd.Timestamp('2023-08-09'))
     df_sim = paths_arr[0][0]
 
     fig, ax = plt.subplots(figsize=(10,6))
@@ -172,6 +176,42 @@ def plot_graph():
     file_path = stor_dir.joinpath(f'test1.png')
     plt.savefig(file_path, bbox_inches='tight')
 
+@timeit
+def sim_price_period(start_date: pd.Timestamp, 
+                     end_date: pd.Timestamp, 
+                     hist_window: int,
+                     n_sim: int, 
+                     model: str):
+    tcal = calendar.SIXTradingCalendar()
+
+    start_time_acc = datetime.datetime.now()
+    # TODO: BEFORE RUNNING: Change the dates, h_array, 
+    count = 0
+    for prod_date in tcal.create_six_trading_dates(start_date, end_date).index:
+        try: 
+            logger_yq.info(f"Pricing the product on {prod_date}")
+            if (model == 'heston'):
+                params = {
+                    'prod_date': prod_date,
+                    'hist_window': hist_window,
+                    'h_array': [[0], [0]],
+                    'start_time_acc': start_time_acc,
+                    'plot': True
+                }
+                hst = heston.MultiHeston(params)
+                # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
+                hst.sim_n_path(n_sim=n_sim)
+                del hst
+            elif (model == 'gbm'):
+                # gbm = gbm.MultiGbm(params)
+                # gbm.sim_n_path(n_sim=n_sim)
+                # del gbm
+                pass
+            count += 1
+        except Exception as e:
+            logger_yq.error(f"Error during simulation on {prod_date}: {e}")
+    logger_yq.info(f"Simulated {n_sim} paths for {count} days.")
+  
 if __name__ == "__main__":
     # cur_dir = Path(os.getcwd()).parent # ipynb cannot use __file__
     cur_dir = Path(__file__).parent
@@ -182,81 +222,42 @@ if __name__ == "__main__":
     # plot_graph()
 
     #################################################
+    # TODO: Change the acc start time to fix the issues
+    # Individual testing
+    sim_price_period(start_date='2023-08-09', 
+                             end_date='2023-08-09', 
+                             hist_window=63, 
+                             n_sim=5,
+                             model='heston')
 
-    tcal = calendar.SIXTradingCalendar()
-    # print(bus_date_range)
-    # print(bus_date_range.index.to_list())
-    start_time_acc = datetime.datetime.now()
-    
-    # TODO: BEFORE RUNNING: Change the dates, h_array, 
-    start_time = time.time()
-    count = 0
-    for prod_date in tcal.create_six_trading_dates('2023-08-09', '2023-11-09').index:
-        try: 
-            logger_yq.info(f"Pricing the product on {prod_date}")
-            params = {
-                    'prod_date': prod_date,
-                    'hist_window': 7,
-                    'h_array': [[0], [0]],
-                    'start_time_acc': start_time_acc,
-                    'plot': True
-            }
-            hst = heston.multi_heston(params)
-            # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
-            hst.sim_n_path(n_sim=2)
-            del hst
-            count += 1
-        except Exception as e:
-            logger_yq.error(f"Error during calibration on {prod_date}: {e}")
+    # Might want to add sigma upper bound
+    @timeit
+    def sim_grid_search(hist_windows: list, n_sims: list, models: list):
+        for hist_window, n_sim, model in itertools.product(hist_windows, n_sims, models):
+            logger_yq.info(f"Running grid search for hist_window: {hist_windows}, n_sim: {n_sim}")
+            sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
+                             end_date=cs.FINAL_PROD_PRICING_DATE, 
+                             hist_window=hist_window, 
+                             n_sim=n_sim,
+                             model=model)
+            
+    # hist_windows = [7, 63, 252]
+    # n_sims = [10, 100, 1000]
+    # model = ['gbm', 'heston']
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    min, sec = divmod(elapsed_time, 60)
-    logger_yq.info(f"The elapsed time for {count} pricing dates is {int(min)} minutes, {int(sec)} seconds")
+    # Test
+    hist_windows = [63]
+    n_sims = [10]
+    models = ['heston']
+    # sim_grid_search(hist_windows=hist_windows,
+    #                 n_sims=n_sims,
+    #                 models=models)
     
+
     #---------------------------
     # run_heston_sim_test_h()
     # plot_a_figure()
 
     # read_csv_data_chill('lonn_call.csv') # Cannot read an xlsx file converted to csv file improperly
-
-    # Set up specific loggers
-   
-    # Your plotting code remains the same
-    # ...
-
-    # Logging the DataFrame
     pass
-    # calendar = calendar.SIXTradingCalendar()
-    # dates = calendar.create_six_trading_dates('2023-08-09', '2023-11-09')
-    # for date in dates.index:
-    #     option.create_csv_files(date)
-    # print("CSV files created")
 
-    # params = {
-    # 'data': data,
-    # 'ticker_list': ['LONN.SW', 'SIKA.SW']
-    # }
-    # trading_calendar = calendar.SIXTradingCalendar()
-    # heston = models.PricingModel(params = params)
-
-    # bus_date_range = trading_calendar.create_six_trading_dates('2023-08-09', '2023-08-09')
-    # # print(bus_date_range)
-    # # print(bus_date_range.index.to_list())
-    # for product_est_date in bus_date_range.index:
-    #     # print(date, type(date))
-        
-    #     try:
-    #         sim_start_date = trading_calendar.add_trading_day(product_est_date, 1)
-    #         sim_data = heston.multi_asset_heston_model(
-    #             sim_start_date=sim_start_date, 
-    #             hist_window=trading_calendar.calculate_business_days(sim_start_date, 
-    #                                                                 cs.FINAL_FIXING_DATE), 
-    #             sim_window=252, h_adjustment=[0, 0])
-    #         # print(sim_data)
-    #     except Exception as e:
-    #         # Log the error with the date that caused it
-    #         raise Exception("Heston has error.")
-        
-    #     # sim_data.columns = ['LONN.SW', 'SIKA.SW']
-    #     # sim_data['LONN.SW'] 
