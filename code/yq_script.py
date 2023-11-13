@@ -17,7 +17,7 @@ import os
 # Self-written modules
 from yq.utils.time import timeit
 from yq.utils import io
-from yq.scripts import models
+from yq.scripts import models, model_eval
 from yq.scripts import heston
 from yq.utils import option
 from yq.utils import calendar
@@ -221,25 +221,26 @@ if __name__ == "__main__":
     # option.clean_options_data('options-complete')
     # plot_graph()
 
+    model_eval.analyse_V_t()
     #################################################
     # TODO: Change the acc start time to fix the issues
     # Individual testing
-    sim_price_period(start_date='2023-08-09', 
-                             end_date='2023-08-09', 
+    sim_price_period(start_date='2023-11-03', 
+                             end_date='2023-11-03', 
                              hist_window=63, 
                              n_sim=5,
                              model='heston')
 
-    # Might want to add sigma upper bound
-    @timeit
-    def sim_grid_search(hist_windows: list, n_sims: list, models: list):
-        for hist_window, n_sim, model in itertools.product(hist_windows, n_sims, models):
-            logger_yq.info(f"Running grid search for hist_window: {hist_windows}, n_sim: {n_sim}")
-            sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
-                             end_date=cs.FINAL_PROD_PRICING_DATE, 
-                             hist_window=hist_window, 
-                             n_sim=n_sim,
-                             model=model)
+    # # Might want to add sigma upper bound
+    # @timeit
+    # def sim_grid_search(hist_windows: list, n_sims: list, models: list):
+    #     for hist_window, n_sim, model in itertools.product(hist_windows, n_sims, models):
+    #         logger_yq.info(f"Running grid search for hist_window: {hist_windows}, n_sim: {n_sim}")
+    #         sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
+    #                          end_date=cs.FINAL_PROD_PRICING_DATE, 
+    #                          hist_window=hist_window, 
+    #                          n_sim=n_sim,
+    #                          model=model)
             
     # hist_windows = [7, 63, 252]
     # n_sims = [10, 100, 1000]

@@ -123,8 +123,8 @@ class MultiHeston(PricingModel):
 
                 # if (i == 0): # LONN.SW
                 #     logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
-                # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
-                logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
+                logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
+                # logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
                 S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                 V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
                 
