@@ -1,6 +1,11 @@
 # Device files
 code/.DS_Store
 
+# Large files
+sim_data/
+logs/
+plots/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

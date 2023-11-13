@@ -251,6 +251,11 @@ if __name__ == "__main__":
     n_sims = [10, 100, 1000, 10000, 100000]
     models = ['gbm','heston']
     max_sigmas = [0.5, 1.5, 10]
+    
+    # hist_windows = [63]
+    # n_sims = [100]
+    # models = ['gbm']
+    # max_sigmas = [1.5]
     sim_grid_search_heston(hist_windows=hist_windows,
                     n_sims=n_sims,
                     models=models,
