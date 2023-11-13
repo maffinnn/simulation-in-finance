@@ -21,6 +21,7 @@ logger_yq = logging.getLogger('yq')
 # simulations with different models, calibrations (if needed), 
 class PricingModel:
     def __init__ (self, params):
+        self.model_name = None
         self.data = po.get_historical_assets_all()
         self.ticker_list = cs.ASSET_NAMES
         self.calendar = calendar.SIXTradingCalendar()
@@ -62,7 +63,9 @@ class MultiHeston(PricingModel):
     """
     def __init__(self, params):
         super().__init__(params)
+        self.model_name = "heston"
         self.h_array = np.array(params.get('h_array')) # All sublists must have the same length
+        self.max_sigma = params.get('max_sigma')
         self.hist_data = None
         self.Z_list = None
         self.params_list_heston = None
@@ -93,8 +96,8 @@ class MultiHeston(PricingModel):
                 logger_yq.warning(f"The length of sim_data and dates is different: {len(sim_data)} and {len(dates)}\n")
             logger_yq.info(f"1 sim, diff h, sim_data_comb:\n{sim_data_comb.head()}")
             # Save the every path into folder
-            sm.store_sim_data(start_time_acc=self.start_time_acc,
-                           model_name='heston',
+            sm.store_sim_data(uid=f"{self.start_time_acc.strftime('%Y%m%d_%H%M%S')}_{self.hist_window}_{self.max_sigma}",
+                           model_name=self.model_name,
                            sim_data=sim_data_comb,
                            product_est_date=self.prod_date,
                            sim=sim)
@@ -123,7 +126,7 @@ class MultiHeston(PricingModel):
 
                 # if (i == 0): # LONN.SW
                 #     logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
-                logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
+                # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
                 # logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
                 S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                 V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
@@ -143,7 +146,7 @@ class MultiHeston(PricingModel):
     @timeit
     def calibrate(self, prod_date: pd.Timestamp):
         try:
-            self.params_list_heston = io.read_hparams(self.prod_date)
+            self.params_list_heston = io.read_hparams(self.prod_date, self.max_sigma)
             return
         except:
             # raise # Don't raise because I want to continue
@@ -163,9 +166,9 @@ class MultiHeston(PricingModel):
 
             try: 
                 logger_yq.info(f"Calibrating LONZA on {self.prod_date}.")
-                lonn_result = hf.calibrate_heston(lonn_S_0, lonn_call)
+                lonn_result = hf.calibrate_heston(lonn_S_0, self.max_sigma, lonn_call)
                 logger_yq.info(f"Calibrating SIKA on {self.prod_date}.")
-                sika_result = hf.calibrate_heston(sika_S_0, sika_call)
+                sika_result = hf.calibrate_heston(sika_S_0, self.max_sigma, sika_call)
                 logger_yq.info(f"The S_0 for LONZA and SIKA are {lonn_S_0} and {sika_S_0}")
                 # logger_yq.info(f"Calibration results for LONZA and SIKA are \n{lonn_result}\n {sika_result}")
             except Exception as e:
@@ -184,7 +187,7 @@ class MultiHeston(PricingModel):
                 self.params_list_heston[0, i] = lonn_result.params[param].value  # For lonn_result
                 self.params_list_heston[1, i] = sika_result.params[param].value  # For sika_result
 
-            io.write_hparams(self.prod_date, self.params_list_heston)
+            io.write_hparams(prod_date=self.prod_date, max_sigma=self.max_sigma, hparams_list=self.params_list_heston)
             logger_yq.info("The calibrated params_list_Heston is:\n %s", self.params_list_heston)
 
     @timeit
@@ -233,17 +236,19 @@ class MultiHeston(PricingModel):
         logger_yq.info(f"The smooth path df is:\n{smooth_path}")
         smooth_path.plot(ax=ax, alpha=0.5) # Another way of plotting
 
-        title_str = f"PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, r: {self.interest_rate}"
+        title_str = f"Model: {self.model_name}, PPD: {self.prod_date.strftime('%Y-%m-%d')}, hist_wdw: {self.hist_window}, max_sigma: {self.max_sigma}"
         subtitle_str = f"sim_start_date: {self.sim_start_date.strftime('%Y-%m-%d')}, sim_wdw: {self.sim_window}"
         plt.title(f"{title_str}\n{subtitle_str}")
         plt.legend(loc='upper right')
 
-        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('sim_data_comb_heston', 
-                                                                          self.start_time_acc.strftime('%Y%m%d_%H%M%S_%f'), 
+        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(f'{self.model_name}',
+                                                                          'sim_data_comb', 
+                                                                          f"{self.start_time_acc.strftime('%Y%m%d_%H%M%S')}_{self.hist_window}_{self.max_sigma}", 
                                                                           self.prod_date.strftime('%Y_%m_%d'))
         stor_dir.mkdir(parents=True, exist_ok=True)
         file_path = stor_dir.joinpath(f'{sim}.png')
         plt.savefig(file_path, bbox_inches='tight')
+        plt.close()
         logger_yq.info(f"Path of 1 sim is plotted")
 
     def plot_prod_price():

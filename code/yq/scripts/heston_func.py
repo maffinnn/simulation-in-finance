@@ -107,7 +107,7 @@ def priceHestonMid(St, K, r, T, sigma, kappa, theta, volvol, rho):
 
 
 
-def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
+def calibrate_heston(St: float, max_sigma: float, options_data: pd.DataFrame) -> pd.DataFrame:
     volSurfaceLong = options_data
     # Define global variables to be used in optimization
     maturities = volSurfaceLong['maturity'].to_numpy('float')
@@ -127,7 +127,7 @@ def calibrate_heston(St: float, options_data: pd.DataFrame) -> pd.DataFrame:
     # This is the calibration function
     def calibratorHeston(St, initialValues = [0.5,0.5,0.5,-0.5,0.1], 
                                 lowerBounds = [1e-2,1e-2,1e-2,-1,1e-2], 
-                                upperBounds = [10,10,10,0,1.5]): 
+                                upperBounds = [10,10,10,0, max_sigma]): 
 
         '''
         Implementation of the Levenberg Marquardt algorithm in Python to find the optimal value 

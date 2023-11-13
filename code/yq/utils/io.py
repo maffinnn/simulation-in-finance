@@ -6,9 +6,11 @@ import logging
 
 logger_yq = logging.getLogger('yq')
 
-def write_hparams(prod_date: pd.Timestamp, hparams_list: np.array):
+def write_hparams(prod_date: pd.Timestamp, max_sigma: float, hparams_list: np.array):
     try:
-        file_path = yq_path.get_hparams(cur_dir=Path(__file__)).joinpath(f"{prod_date.strftime('%Y%m%d')}.csv")
+        stor_dir = yq_path.get_hparams(cur_dir=Path(__file__)).joinpath(str(max_sigma))
+        stor_dir.mkdir(parents=True, exist_ok=True)
+        file_path = stor_dir.joinpath(f"{prod_date.strftime('%Y%m%d')}.csv")
         # Convert numpy array to DataFrame for easier CSV writing
         pd.DataFrame(hparams_list).to_csv(file_path, index=False)
         logger_yq.info(f"Parameters saved successfully to {file_path}")
@@ -17,9 +19,10 @@ def write_hparams(prod_date: pd.Timestamp, hparams_list: np.array):
         raise
 
 
-def read_hparams(prod_date: pd.Timestamp) -> np.array:
+def read_hparams(prod_date: pd.Timestamp, max_sigma: float) -> np.array:
     try:
-        file_path = yq_path.get_hparams(cur_dir=Path(__file__)).joinpath(f'{prod_date.strftime("%Y%m%d")}.csv')
+        file_path = yq_path.get_hparams(cur_dir=Path(__file__)).joinpath(str(max_sigma), 
+                                                                         f'{prod_date.strftime("%Y%m%d")}.csv')
         # Read CSV file into DataFrame and then convert to numpy array
         hparams_list = pd.read_csv(file_path).values
         logger_yq.info(f"Parameters loaded successfully from {file_path}")

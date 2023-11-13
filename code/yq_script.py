@@ -181,6 +181,8 @@ def sim_price_period(start_date: pd.Timestamp,
                      end_date: pd.Timestamp, 
                      hist_window: int,
                      n_sim: int, 
+                     plot: bool,
+                     max_sigma: float,
                      model: str):
     tcal = calendar.SIXTradingCalendar()
 
@@ -196,7 +198,8 @@ def sim_price_period(start_date: pd.Timestamp,
                     'hist_window': hist_window,
                     'h_array': [[0], [0]],
                     'start_time_acc': start_time_acc,
-                    'plot': True
+                    'plot': plot,
+                    'max_sigma': max_sigma
                 }
                 hst = heston.MultiHeston(params)
                 # logger_yq.info(f"Heston hist attributes are {vars(heston)}")
@@ -216,44 +219,62 @@ if __name__ == "__main__":
     # cur_dir = Path(os.getcwd()).parent # ipynb cannot use __file__
     cur_dir = Path(__file__).parent
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
+    logger_yq.info("\n##########START##########\n")
     # logger_yq = logging.getLogger('yq')
     # option.format_file_names('options-complete')
     # option.clean_options_data('options-complete')
     # plot_graph()
 
-    model_eval.analyse_V_t()
+    #############################################
+    # ANALYSIS FUNCTIONS
+    # model_eval.analyse_V_t()
     #################################################
     # TODO: Change the acc start time to fix the issues
     # Individual testing
-    sim_price_period(start_date='2023-11-03', 
-                             end_date='2023-11-03', 
-                             hist_window=63, 
-                             n_sim=5,
-                             model='heston')
+    # sim_price_period(start_date='2023-08-09', 
+    #                          end_date='2023-08-09', 
+    #                          hist_window=63, 
+    #                          n_sim=5,
+    #                          plot=True,
+    #                          max_sigma=0.35,
+    #                          model='heston')
 
-    # # Might want to add sigma upper bound
-    # @timeit
-    # def sim_grid_search(hist_windows: list, n_sims: list, models: list):
-    #     for hist_window, n_sim, model in itertools.product(hist_windows, n_sims, models):
-    #         logger_yq.info(f"Running grid search for hist_window: {hist_windows}, n_sim: {n_sim}")
-    #         sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
-    #                          end_date=cs.FINAL_PROD_PRICING_DATE, 
-    #                          hist_window=hist_window, 
-    #                          n_sim=n_sim,
-    #                          model=model)
+    @timeit
+    def sim_grid_search_heston(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
+        if ('gbm' in models):
+            logger_yq.info("Doing grid search for GBM")
+            pass
+         
+        if ('heston' in models):
+            logger_yq.info("Doing grid search for Heston")
+            for hist_window, n_sim, max_sigma in itertools.product(hist_windows, n_sims, max_sigmas):
+                logger_yq.info(f"Running grid search for hist_window: {hist_window}, n_sim: {n_sim}")
+                sim_price_period(start_date=cs.INITIAL_PROD_PRICING_DATE, 
+                                end_date=cs.FINAL_PROD_PRICING_DATE, 
+                                hist_window=hist_window, 
+                                n_sim=n_sim,
+                                plot=True, # Hardcoded
+                                max_sigma=max_sigma,
+                                model='heston')
+                
+       
+
             
     # hist_windows = [7, 63, 252]
     # n_sims = [10, 100, 1000]
     # model = ['gbm', 'heston']
+    # Only for heston: sigma 0.35, 0.5, 10
 
-    # Test
+    # Test for HESTON MAX SIGMA
     hist_windows = [63]
-    n_sims = [10]
-    models = ['heston']
-    # sim_grid_search(hist_windows=hist_windows,
-    #                 n_sims=n_sims,
-    #                 models=models)
-    
+    n_sims = [3]
+    models = ['gbm','heston']
+    max_sigmas = [0.5, 1.5, 10]
+    sim_grid_search_heston(hist_windows=hist_windows,
+                    n_sims=n_sims,
+                    models=models,
+                    max_sigmas=max_sigmas)
+     
 
     #---------------------------
     # run_heston_sim_test_h()

@@ -13,7 +13,7 @@ logger_yq = logging.getLogger('yq')
 def analyse_V_t():
     # Sample data from the user input
     curr_dir = Path(__file__)
-    file_path = yq_path.get_root_dir(cur_dir=curr_dir).joinpath('code', 'yq', 'inter-data', '20230809_max_sigma_0.5_v_t.txt')
+    file_path = yq_path.get_root_dir(cur_dir=curr_dir).joinpath('code', 'yq', 'inter-data', '20230809_max_sigma_1.5_v_t.txt')
 
     # Read the contents of the file
     with open(file_path, 'r') as file:
@@ -50,7 +50,7 @@ def analyse_V_t():
     file_path = stor_dir.joinpath('v_t_over_time.png')
     # Data Visualization
     df.plot(kind='line')
-    plt.title('V_t Values Over Time\nDate: 2023-08-09, max_sigma = 0.5, kappa = [3.70, 8.30]')
+    plt.title('V_t Values Over Time\nDate: 2023-08-09, max_sigma = 1.5, kappa = [3.70, 8.30]')
     plt.xlabel('Simulation time steps')
     plt.ylabel('V_t Values')
     plt.axhline(0.02714370413916297, color='r', linestyle='-.', label='Theta for LONN.SE')
