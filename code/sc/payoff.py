@@ -9,6 +9,14 @@ from yq.utils import path as yq_path
 import sy.interest_rate as syir
 
 logger_yq = logging.getLogger('yq')
+
+# ===============================================================================================
+# Generic Helper Functions
+# ===============================================================================================
+
+def average(arr):
+    return sum(arr) / len(arr)
+
 # ===============================================================================================
 # Historical
 # ===============================================================================================
@@ -268,10 +276,11 @@ def rnv_multiple(df_payouts_arr, today):
     bond_table = create_bond_table_sc(today)
     rnv_arr = []
     for df_payouts in df_payouts_arr:
-        #rnv = np.sum(bond_table.loc[df_payouts['Date']]['Price'].to_numpy() * df_payouts['Payout'].to_numpy())
         rnv_arr.append(np.sum(bond_table.loc[df_payouts['Date']]['Price'].to_numpy() * df_payouts['Payout'].to_numpy()))
     return rnv_arr
 
+def rnv_multiple_bond_table(df_payouts, bond_table):
+    return np.sum(bond_table.loc[df_payouts['Date']]['Price'].to_numpy() * df_payouts['Payout'].to_numpy())
 
 # ===============================================================================================
 # Run Pricing (Abstracted)
@@ -307,50 +316,118 @@ def pricing_multiple(df_sim_array):
 # Look in greeks.py for simple implementations!
 # Watch this space for simultaneous payoff and greek calculations.
 
-def payouts_h(df_sim, barrierHit, h):
+# returns 3 payout dfs in a list, [0, +, -]
+def payouts_h(df_sim, barrierHit, h, asset_h):
     #init
-    df_payouts_dict = {'0': [pd.DataFrame()]}
-    for asset in cs.ASSET_NAMES:
-        df_payouts_dict[asset] = [pd.DataFrame(), pd.DataFrame()]
+    df_payouts_arr = [pd.DataFrame(), pd.DataFrame(), pd.DataFrame()] #[0, +, -]
+    factor = [1, 1 + h, 1 - h]
     first_date = df_sim.first_valid_index()
     
     #Early redemption, does not yield dividends past called date
-    trigger_date = cs.FINAL_FIXING_DATE #init to final fixing date
-    redemption_date = cs.REDEMPTION_DATE #init to final redemption date
-    for date in cs.EARLY_REDEMPTION_OBSERVATION_DATES:
-        if date >= first_date:
-            autocall_hit = True
-            for asset in cs.ASSET_NAMES:
-                autocall_hit = autocall_hit and df_sim.loc[date][asset] >= cs.INITIAL_LEVELS[asset] * cs.EARLY_REDEMPTION_LEVEL
-            if autocall_hit:
-                trigger_date = date
-                redemption_date = cs.EARLY_REDEMPTION_DATES[date]
-                break
+    trigger_date = [cs.FINAL_FIXING_DATE] * 3 #init to final fixing date
+    redemption_date = [cs.REDEMPTION_DATE] * 3 #init to final redemption date
+
+    #for each path
+    for i in range(3):
+        #at each autocall date
+        for date in cs.EARLY_REDEMPTION_OBSERVATION_DATES:
+            #after today
+            if date >= first_date:
+                autocall_hit = True
+                #iterate through each asset to check for autocall
+                for asset in cs.ASSET_NAMES:
+                    if asset == asset_h:
+                        autocall_hit = autocall_hit and (df_sim.loc[date][asset] * factor[i] >= cs.INITIAL_LEVELS[asset] * cs.EARLY_REDEMPTION_LEVEL)
+                    else:
+                        autocall_hit = autocall_hit and (df_sim.loc[date][asset] >= cs.INITIAL_LEVELS[asset] * cs.EARLY_REDEMPTION_LEVEL)
+                if autocall_hit:
+                    trigger_date[i] = date
+                    redemption_date[i] = cs.EARLY_REDEMPTION_DATES[date]
+                    break #dont check subsequent autocall dates
 
     #barrier check
+    barrier_arr = [barrierHit] * 3
     if not barrierHit:
-        #check barrier for sim path
+        #check barrier for simulated paths
         for asset in cs.ASSET_NAMES:
-            if min(df_sim[asset]) < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
-                barrierHit = True
-                break
+            if asset != asset_h:
+                if min(df_sim[asset]) < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
+                    barrier_arr = [True] * 3
+                    break
+            else:
+                asset_h_min = min(df_sim[asset])
+                for i in range(3):
+                    if asset_h_min * factor[i] < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
+                        barrier_arr[i] = True
     
     #dividend payment
-    for date in cs.COUPON_PAYMENT_DATES:
-        if date <= redemption_date and date > first_date:
-            div_payout = pd.DataFrame({'Payout': [cs.COUPON_PAYOUT], 'Date': [date]})
-            df_payouts = pd.concat([df_payouts, div_payout], axis = 0)
+    for i in range(3):
+        for date in cs.COUPON_PAYMENT_DATES:
+            if date <= redemption_date[i] and date > first_date:
+                div_payout = pd.DataFrame({'Payout': [cs.COUPON_PAYOUT], 'Date': [date]})
+                df_payouts_arr[i] = pd.concat([df_payouts_arr[i], div_payout], axis = 0)
     
     #Final redemption
     #if early redemption occured, payout = 1000 regardless of barrierHit
-    if barrierHit:
-        worst_performing = cs.DENOMINATION
+    for i in range(3):
+        if barrier_arr[i]:
+            worst_performing = cs.DENOMINATION
+            for asset in cs.ASSET_NAMES:
+                if asset != asset_h:
+                    final_price = df_sim.loc[trigger_date[i]][asset] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
+                else:
+                    final_price = df_sim.loc[trigger_date[i]][asset] * factor[i] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
+                worst_performing = min(worst_performing, final_price)
+            final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date[i]]})
+        else:
+            final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date[i]]})
+        df_payouts_arr[i] = pd.concat([df_payouts_arr[i], final_payout], axis = 0)
+    return df_payouts_arr
+
+def delta(price_arr, h):
+    return (price_arr[1] - price_arr[2]) / (2 * h)
+
+def gamma(price_arr, h):
+    return (price_arr[1] - 2 * price_arr[0] + price_arr[2]) / (h ** 2)
+
+# returns list of [price, greeks]
+# greeks is a dict with keys 'asset name' and values [delta, gamma]
+def pricing_with_greeks_single(df_sim, h):
+    first_sim_date = df_sim.first_valid_index()
+    df_historical = get_historical_assets(first_sim_date, cs.INITIAL_FIXING_DATE)
+    today = df_historical.index[-1]
+    barrierHit = checkBarrier(df_historical)
+
+    price = -1
+    greeks = {}
+    for asset in cs.ASSET_NAMES:
+        df_payouts_arr = payouts_h(df_sim, barrierHit, h, asset)
+        rnv_arr = rnv_multiple(df_payouts_arr, today)
+        price = rnv_arr[0]
+        greeks[asset] = [delta(rnv_arr, h), gamma(rnv_arr, h)]
+    return [price, greeks]
+
+# returns array of lists [price, greeks]
+# greeks is a dict with keys 'asset name' and values [delta, gamma]
+def pricing_with_greeks_multiple(df_sim_arr, h):
+    results_arr = []
+    
+    first_sim_date = df_sim_arr[0].first_valid_index()
+    df_historical = get_historical_assets(first_sim_date, cs.INITIAL_FIXING_DATE)
+    today = df_historical.index[-1]
+    barrierHit = checkBarrier(df_historical)
+
+    bond_table = create_bond_table_sc(today)
+
+    for df in df_sim_arr:
+        price = -1
+        greeks = {}
         for asset in cs.ASSET_NAMES:
-            final_price = df_sim.loc[trigger_date][asset] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
-            worst_performing = min(worst_performing, final_price)
-        final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
-    else:
-        final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
-    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
-    return df_payouts
-     
+            paths_payouts_arr = payouts_h(df, barrierHit, h, asset)
+            rnv_arr = []
+            for path_payout in paths_payouts_arr:
+                rnv_arr.append(rnv_multiple_bond_table(path_payout, bond_table))
+            price = rnv_arr[0]
+            greeks[asset] = [delta(rnv_arr, h), gamma(rnv_arr, h)]
+        results_arr.append([price, greeks])
+    return results_arr
