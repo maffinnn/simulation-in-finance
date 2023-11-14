@@ -18,6 +18,7 @@ from sc import payoff as po
 from sy.interest_rate import populate_bond_table
 import datetime
 
+pd.set_option('display.max_rows', None)  # Set to None to display all rows
 logger_yq = logging.getLogger('yq')
 
 def analyse_V_t():
@@ -103,7 +104,7 @@ def analyse_volatility():
 def analyse_rmse():
     # TODO: Take the values from yq_script
     model = 'heston' #TODO:
-    dir_list = ['20231114_015957_63_1.5']
+    dir_list = ['20231114_024931_7_0.5']
     max_sigma = 0.5
 
     # For different methodologies, we want to get the RMSE for the ppd_payous against actual price
@@ -114,17 +115,17 @@ def analyse_rmse():
         n_sim = len(paths_arr[0])
         n_ppd = len(paths_arr)
     
-
+    
         actual_price = po.get_product_price(cs.FINAL_PROD_PRICING_DATE).rename(columns={'Price': 'actual_price'})
         # Actual price for the product price period
         actual_price = actual_price[actual_price.index >= cs.INITIAL_PROD_PRICING_DATE]
-        logger_yq.info(f'Actual_price df is\n{actual_price}')
+        # logger_yq.info(f'Actual_price df is\n{actual_price}')
 
         # Average payouts of all the sim paths on each ppd
         ppd_payouts = []
         for ppd in range(n_ppd):
             # Need to rename columns first
-            logger_yq.info(f'pdd = {ppd} paths_arr[ppd] is\n{paths_arr[ppd]}')
+            # logger_yq.info(f'pdd = {ppd} paths_arr[ppd] is\n{paths_arr[ppd]}')
             # Payouts for all the paths on one day of the price period (multiple paths)
             if (len(paths_arr[ppd]) != 0):
                 paths_payout = po.pricing_multiple(paths_arr[ppd])

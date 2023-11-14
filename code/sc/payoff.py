@@ -22,7 +22,7 @@ def get_product_price(today):
     cur_dir = Path(__file__).parent
     root_dir = yq_path.get_root_dir(cur_dir=cur_dir)
     json_file_path = root_dir.joinpath('code', 'sc', 'product_price.json')
-    logger_yq.info(f"The json file path for product price is: {json_file_path}")
+    # logger_yq.info(f"The json file path for product price is: {json_file_path}")
     df_product = pd.read_json(json_file_path).rename(columns = {'date': 'Date', 'value': 'Price'})
     df_product['Date'] = pd.to_datetime(df_product['Date'])
     df_product['Price'] = df_product['Price'] / 100 * cs.DENOMINATION
@@ -37,7 +37,7 @@ def get_historical_assets(first_sim_date, start_date = pd.Timestamp('2019-01-01'
         cur_dir = Path(__file__).parent
         root_dir = yq_path.get_root_dir(cur_dir=cur_dir)
         json_file_path = root_dir.joinpath('code', 'sc', f'{asset}.json')
-        logger_yq.info(f"The historical asset json file path is: {json_file_path}")
+        # logger_yq.info(f"The historical asset json file path is: {json_file_path}")
         df_asset = pd.read_json(json_file_path).drop(['high', 'low', 'close', 'open'], axis = 1)
         df_asset = df_asset.rename(columns = {'date': 'Date', 'value': asset})
         df_asset['Date'] = pd.to_datetime(df_asset['Date'])
@@ -57,7 +57,7 @@ def get_historical_assets_all():
         cur_dir = Path(__file__).parent
         root_dir = yq_path.get_root_dir(cur_dir=cur_dir)
         json_file_path = root_dir.joinpath('code', 'sc', f'{asset}.json')
-        logger_yq.info(f"The json file path is: {json_file_path}")
+        # logger_yq.info(f"The json file path is: {json_file_path}")
         df_asset = pd.read_json(json_file_path).drop(['high', 'low', 'close', 'open'], axis = 1)
         df_asset = df_asset.rename(columns = {'date': 'Date', 'value': asset})
         df_asset['Date'] = pd.to_datetime(df_asset['Date'])

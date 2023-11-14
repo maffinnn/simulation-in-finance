@@ -130,27 +130,6 @@ def read_csv_data_chill(file_name: str) -> pd.DataFrame:
     return options_data
 
 @timeit
-def plot_graph(model: str, prod_date: str):
-    paths_arr = sm.read_sim_data(model, '20231113_185603_63_0.5', pd.Timestamp(prod_date), pd.Timestamp(prod_date))
-    n_sim = len(paths_arr[0])
-    n_ppd = len(paths_arr)
-    logger_yq.info(f"The number of PPD and sims is {n_ppd}, {n_sim} ")
-    sim_paths = pd.concat(paths_arr[0], axis=1)
-    
-    fig, ax = plt.subplots(figsize=(10,6))
-    sim_paths.plot()
-    
-    title_str = f"PPD: {prod_date}"
-    plt.title(title_str)
-    plt.legend(loc='upper right')
-    plt.tight_layout()
-    stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath(f'{model}',
-                                                                          'n_sim')                     
-    stor_dir.mkdir(parents=True, exist_ok=True)
-    file_path = stor_dir.joinpath(f"{prod_date.strftime('%Y%m%d')}_{n_sim}.png")
-    plt.savefig(file_path, bbox_inches='tight')
-
-@timeit
 def sim_price_period(start_date: pd.Timestamp, 
                      end_date: pd.Timestamp, 
                      hist_window: int,

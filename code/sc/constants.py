@@ -32,6 +32,7 @@ ISSUE_PRICE_PERCENTAGE = 1.00  # 100%
 # Simulation constants
 INITIAL_PROD_PRICING_DATE = pd.Timestamp('2023-08-09')
 FINAL_PROD_PRICING_DATE = pd.Timestamp('2023-11-09')
+PRICING_WINDOW = 67
 INTEREST_RATE = 1.750 / 100
 # SIMULATION_START_DATE = next day from the date of the product price estimation
 
