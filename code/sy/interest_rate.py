@@ -16,13 +16,12 @@ def get_period(key: str):
     }
     return map[key]
 
-def populate_bond_table(bond_price, today, final_fixing_date):
-    bond_table = pd.DataFrame(index=pd.date_range(today, final_fixing_date), columns=['price'])
+def populate_bond_table(bond_price, today, maturity_date):
+    bond_table = pd.DataFrame(index=pd.date_range(today, maturity_date), columns=['price'])
     X = [get_period(col) for col in bond_price.columns]
+    Y = bond_price.loc[today].to_list()  
     for date in bond_table.index:
-        tdelta = (final_fixing_date - date).days/365
-        # for date in bond_price.index:
-        Y = bond_price.loc[today].to_list()  
+        tdelta = (date - today).days/365
         interpolated_y = np.interp(tdelta,X,Y)
         bond_table.loc[date]['price'] = interpolated_y
     return bond_table

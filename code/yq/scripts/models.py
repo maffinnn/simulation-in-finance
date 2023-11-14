@@ -139,7 +139,7 @@ class PricingModel:
         sim_data_copy = sim_data.copy(deep=True)
         sim_window = sim_data.index
         t_0 = sim_data.index[0] - datetime.timedelta(1)
-        bond_table = populate_bond_table(bond_price, t_0, cs.FINAL_FIXING_DATE)
+        bond_table = populate_bond_table(bond_price, t_0, cs.REDEMPTION_DATE)
         for date in sim_window:
             for i in range(self.num_ticker):
                 ticker = cs.ASSET_NAMES[i]
