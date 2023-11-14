@@ -28,10 +28,11 @@ from sc import constants as cs
 from sc import payoff as po
 from sy.variance_reduction import apply_control_variates
 from sy.interest_rate import populate_bond_table, get_period
-from sy.calibration import apply_empirical_martingale_correction
+
 if __name__ == "__main__":
     cur_dir = Path(__file__).parent
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
     logger_yq.info("\n##########START##########\n")
     
-    model_eval.analyse_rmse()
+    model_eval.analyse_rmse(model='gbm')
+    # model_eval.analyse_rmse(model='heston')

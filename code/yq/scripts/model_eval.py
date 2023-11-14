@@ -94,6 +94,20 @@ def analyse_volatility():
     pass
     # Fetch data form options
 
+def extract_file_name_gbm(input_string):
+    # Split the string using underscore as the delimiter
+    parts = input_string.split('_')
+
+    # Extract the date_time part
+    date_time = parts[0] + '_' + parts[1]
+
+    # Extract the last digit of the string
+    last_digit = parts[2]
+
+    return date_time, last_digit
+
+
+
 @timeit
 # hist_windows = [63]
 #     n_sims = [3]
@@ -101,72 +115,101 @@ def analyse_volatility():
 #     max_sigmas = [0.5, 1.5, 10]
 # n_sim can be calculated
 # hist_windows: list, n_sims: list, models: list, max_sigmas: list
-def analyse_rmse():
-    # TODO: Take the values from yq_script
-    model = 'heston' #TODO:
-    dir_list = ['20231114_024931_7_0.5']
-    max_sigma = 0.5
 
-    # For different methodologies, we want to get the RMSE for the ppd_payous against actual price
-    # Change to itertools
-    RMSE_list = []
-    for uid in dir_list:
-        paths_arr = sm.read_sim_data(model, uid, cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
+# Roughly 30 sec to read the 1K file
+def analyse_rmse(model: str):
+    # TODO: Take the values from yq_script
+    gbm_files = ["20231114_024525_7", "20231114_024646_63", "20231114_024808_252", 
+                 "20231114_030106_7", "20231114_031302_63", "20231114_032613_252",
+                 "20231114_052051_7", "20231114_072227_63", "20231114_092701_252"]
+    
+    # gbm_files = ["20231114_024525_7", "20231114_030106_7", "20231114_031302_63", "20231114_032613_252"]
+    RMSE_dict = {}
+    for uid in gbm_files: # TODO: Change
+        print(uid)
+        # Getting back the strings
+        if model == 'gbm':
+            time_str, hist_wdw = extract_file_name_gbm(uid)
+            print(time_str, hist_wdw)
+        else:
+            pass
+
+        paths_arr, dates = sm.read_sim_data(model, uid, cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
         n_sim = len(paths_arr[0])
-        n_ppd = len(paths_arr)
-    
-    
+        n_ppd = len(paths_arr) # Some missing lists in n_ppd
+        print(n_sim, n_ppd)
+
         actual_price = po.get_product_price(cs.FINAL_PROD_PRICING_DATE).rename(columns={'Price': 'actual_price'})
         # Actual price for the product price period
         actual_price = actual_price[actual_price.index >= cs.INITIAL_PROD_PRICING_DATE]
         # logger_yq.info(f'Actual_price df is\n{actual_price}')
 
+        payouts_compare = pd.DataFrame({'ppd_payouts': np.zeros(len(actual_price))})
+        payouts_compare.index = pd.to_datetime(actual_price.index)
+        payouts_compare = pd.concat([payouts_compare, actual_price], axis=1)
+        
+        # logger_yq.info("The payouts compare df is {payouts_compare}")
+
         # Average payouts of all the sim paths on each ppd
-        ppd_payouts = []
         for ppd in range(n_ppd):
             # Need to rename columns first
             # logger_yq.info(f'pdd = {ppd} paths_arr[ppd] is\n{paths_arr[ppd]}')
             # Payouts for all the paths on one day of the price period (multiple paths)
             if (len(paths_arr[ppd]) != 0):
                 paths_payout = po.pricing_multiple(paths_arr[ppd])
+                payouts_compare.loc[pd.Timestamp(dates[ppd]),'ppd_payouts'] =  np.mean(paths_payout)
             else:
                 logger_yq.error(f"Path payouts cannot be 0")
-            ppd_payouts.append(np.mean(paths_payout))
-        # Payouts for the entire pricing period
-        
-        if (len(ppd_payouts) != len(actual_price)):
-            logger_yq.error(f"The length of payouts and actual price dfs is diff: {len(ppd_payouts)}, {len(actual_price)}")
-        
-        ppd_payouts_df = pd.DataFrame({'ppd_payouts': ppd_payouts})
-        ppd_payouts_df.index = actual_price.index
-        payouts_compare = pd.concat([ppd_payouts_df, actual_price], axis=1)
-        logger_yq.info(f"The payouts compare df is:\n{payouts_compare.head()}")
+        # print(payouts_compare)
 
-        # TODO: Plot payouts_compare
-        fig, ax = plt.subplots(figsize=(10,6)) 
+        # For Heston need to deal with empty PPD, calculate 1 more RMSE_clean
         if model == 'heston':
-            title_str = f"Model: {model}, hist_wdw: INSERTSTH{model}, max_sigma: {max_sigma}"
-        else:
-            # TODO: Do sth for gbm
-            title_str = f"RMSE for all the price paths Model: {model}, hist_wdw: INSERTSTH{model}"
-            pass
-        subtitle_str = f"xxx"
-        plt.title(f"{title_str}\n{subtitle_str}")
-
-        payouts_compare.plot()
-        plt.legend(loc='upper right')
-
-        stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
-        stor_dir.mkdir(parents=True, exist_ok=True)
-        file_path = stor_dir.joinpath(f'#############.png') # TODO: Rename
-        plt.savefig(file_path, bbox_inches='tight')
-        plt.close()
+            compare_clean = payouts_compare.copy(deep=True)
+            compare_clean = compare_clean[(compare_clean.index < pd.Timestamp('2023-09-15')) | (compare_clean.index > pd.Timestamp('2023-10-01'))]
+            compare_clean = compare_clean[compare_clean['ppd_payouts'] > 0]
+            RMSE_clean = np.sqrt(np.mean((compare_clean['ppd_payouts'] - compare_clean['actual_price']) ** 2))
 
         RMSE = np.sqrt(np.mean((payouts_compare['ppd_payouts'] - payouts_compare['actual_price']) ** 2))
-        RMSE_list.append(RMSE)
-        logger_yq.info(f"RMSE for combination is:\n{RMSE}") # TODO: Add combination
 
-    # TODO: Write the list into a csv file or sth
+        
+        if model == 'heston':
+            # RMSE_dict[""] = RMSE
+            # RMSE_dict[] = RMSE_clean
+
+            # logger_yq.info(f"RMSE for combination is:\n{RMSE} {RMSE_clean}") # TODO: Add combination
+            # print(RMSE, RMSE_clean)
+            title_str = f"model, hist_wdw, max_sigma"
+            pass
+        else:
+            RMSE_dict[f"{model}_{uid}_{hist_wdw}_{n_sim}_{n_ppd}"] = RMSE
+            # logger_yq.info(f"RMSE for combination is:\n{RMSE} {RMSE_clean}") # TODO: Add combination
+            print(RMSE)
+
+            fig, ax = plt.subplots(figsize=(10, 6))
+            plt.tight_layout()
+            title_str = f"Model: {model}, hist_wdw: {hist_wdw}"
+            subtitle_str = f"n_sim: {n_sim}, n_ppd: {n_ppd}, RMSE: {RMSE:.2f}"
+            plt.title(f"{title_str}\n{subtitle_str}")  # Adjust font size as needed
+            
+            
+            ax.plot(payouts_compare.index, payouts_compare['ppd_payouts'],
+                    alpha = 1, label='ppd_payouts') # Must use this to see title
+            ax.plot(payouts_compare.index, payouts_compare['actual_price'],
+                    alpha = 1, label='actual_price')
+            plt.legend(loc='upper right')
+
+            stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
+            file_path = stor_dir.joinpath(f'{model}_{uid}_{n_sim}_{n_ppd}.png')
+            stor_dir.mkdir(parents=True, exist_ok=True)
+            plt.savefig(file_path, bbox_inches='tight')
+            plt.close()
+
+    print(RMSE_dict)
+
+
+        
+
+   
 
 
 
