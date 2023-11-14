@@ -97,16 +97,20 @@ def analyse_volatility():
 def extract_file_name_gbm(input_string):
     # Split the string using underscore as the delimiter
     parts = input_string.split('_')
-
-    # Extract the date_time part
     date_time = parts[0] + '_' + parts[1]
+    hist_wdw = parts[2]
 
-    # Extract the last digit of the string
-    last_digit = parts[2]
+    return date_time, hist_wdw
 
-    return date_time, last_digit
+def extract_file_name_heston(input_string):
+    # Split the string using underscore as the delimiter
+    parts = input_string.split('_')
+    date_time = parts[0] + '_' + parts[1]
+    hist_wdw = parts[2]
+    max_sigma = parts[3]
 
 
+    return date_time, hist_wdw, max_sigma
 
 @timeit
 # hist_windows = [63]
@@ -118,21 +122,29 @@ def extract_file_name_gbm(input_string):
 
 # Roughly 30 sec to read the 1K file
 def analyse_rmse(model: str):
-    # TODO: Take the values from yq_script
+    # TODO: Add heston params
     gbm_files = ["20231114_024525_7", "20231114_024646_63", "20231114_024808_252", 
                  "20231114_030106_7", "20231114_031302_63", "20231114_032613_252",
                  "20231114_052051_7", "20231114_072227_63", "20231114_092701_252"]
-    
+    heston_files = ["20231114_024931_7_0.5", "20231114_025048_7_1.5", "20231114_025152_7_10",
+                    "20231114_025252_63_0.5", "20231114_025415_63_1.5", "20231114_025539_63_10",
+                    "20231114_025704_252_0.5", "20231114_025829_252_1.5", "20231114_025950_252_10",
+                    "20231114_033852_7_0.5", "20231114_034926_7_1.5", "20231114_035807_7_10",
+                    "20231114_040708_63_0.5", "20231114_041953_63_1.5", "20231114_043237_63_10",
+                    "20231114_044509_252_0.5", "20231114_045744_252_1.5", "20231114_050915_252_10",   
+                    "20231114_115230_7_0.5", "20231114_134109_7_1.5", "20231114_151836_7_10",
+                    "20231114_165326_63_0.5", "20231114_191500_63_1.5", "20231114_220543_63_10"]
     # gbm_files = ["20231114_024525_7", "20231114_030106_7", "20231114_031302_63", "20231114_032613_252"]
     RMSE_dict = {}
-    for uid in gbm_files: # TODO: Change
+    for uid in heston_files: # TODO: Change
         print(uid)
-        # Getting back the strings
+        # Getting back the strings, rmb to convert to the dtype if needed
         if model == 'gbm':
             time_str, hist_wdw = extract_file_name_gbm(uid)
             print(time_str, hist_wdw)
         else:
-            pass
+            date_time, hist_wdw, max_sigma = extract_file_name_heston(uid)
+            print(date_time, hist_wdw, max_sigma)
 
         paths_arr, dates = sm.read_sim_data(model, uid, cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
         n_sim = len(paths_arr[0])
@@ -160,12 +172,12 @@ def analyse_rmse(model: str):
                 payouts_compare.loc[pd.Timestamp(dates[ppd]),'ppd_payouts'] =  np.mean(paths_payout)
             else:
                 logger_yq.error(f"Path payouts cannot be 0")
-        # print(payouts_compare)
+        print(payouts_compare)
 
         # For Heston need to deal with empty PPD, calculate 1 more RMSE_clean
         if model == 'heston':
             compare_clean = payouts_compare.copy(deep=True)
-            compare_clean = compare_clean[(compare_clean.index < pd.Timestamp('2023-09-15')) | (compare_clean.index > pd.Timestamp('2023-10-01'))]
+            compare_clean = compare_clean[(compare_clean.index < pd.Timestamp('2023-09-15')) | (compare_clean.index > pd.Timestamp('2023-10-03'))]
             compare_clean = compare_clean[compare_clean['ppd_payouts'] > 0]
             RMSE_clean = np.sqrt(np.mean((compare_clean['ppd_payouts'] - compare_clean['actual_price']) ** 2))
 
@@ -173,16 +185,36 @@ def analyse_rmse(model: str):
 
         
         if model == 'heston':
-            # RMSE_dict[""] = RMSE
-            # RMSE_dict[] = RMSE_clean
+            RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_{max_sigma}_unadj"] = RMSE
+            RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_{max_sigma}_adj"] = RMSE_clean
 
-            # logger_yq.info(f"RMSE for combination is:\n{RMSE} {RMSE_clean}") # TODO: Add combination
-            # print(RMSE, RMSE_clean)
+            logger_yq.info(f"RMSE and RMSE_clean for {model}_{uid}_{n_sim}_{n_ppd}_{max_sigma} is:\n{RMSE} {RMSE_clean}")
+            print(RMSE, RMSE_clean)
             title_str = f"model, hist_wdw, max_sigma"
-            pass
+
+            compare_list = [payouts_compare, compare_clean]
+            adjusted = ['unadj', 'adj']
+            for i, rmse_val in enumerate([RMSE, RMSE_clean]):
+                fig, ax = plt.subplots(figsize=(10, 6))
+                plt.tight_layout()
+                title_str = f"Model: {model}, hist_wdw: {hist_wdw}, adj: {adjusted[i]}"
+                subtitle_str = f"n_sim: {n_sim}, n_ppd: {n_ppd}, max_sigma: {max_sigma}, RMSE: {rmse_val:.2f}"
+                plt.title(f"{title_str}\n{subtitle_str}")  # Adjust font size as needed
+                
+                ax.plot(compare_list[i].index, compare_list[i]['ppd_payouts'],
+                        alpha = 1, label='ppd_payouts') # Must use this to see title
+                ax.plot(compare_list[i].index, compare_list[i]['actual_price'],
+                        alpha = 1, label='actual_price')
+                plt.legend(loc='upper right')
+
+                stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
+                file_path = stor_dir.joinpath(f'{model}_{uid}_{n_sim}_{n_ppd}_{adjusted[i]}.png')
+                stor_dir.mkdir(parents=True, exist_ok=True)
+                plt.savefig(file_path, bbox_inches='tight')
+                plt.close()
         else:
             RMSE_dict[f"{model}_{uid}_{hist_wdw}_{n_sim}_{n_ppd}"] = RMSE
-            # logger_yq.info(f"RMSE for combination is:\n{RMSE} {RMSE_clean}") # TODO: Add combination
+            # logger_yq.info(f"RMSE for combination is:\n{RMSE} {RMSE_clean}")
             print(RMSE)
 
             fig, ax = plt.subplots(figsize=(10, 6))
