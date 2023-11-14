@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 import pandas as pd
 from yq.utils import calendar, path as yq_path
-from yq import logs
+# from yq import logs
 from sc import constants as cs
 
 logger_yq = logging.getLogger('yq')
