@@ -122,7 +122,7 @@ def payouts(df_sim, barrierHit):
     if barrierHit:
         worst_performing = cs.DENOMINATION
         for asset in cs.ASSET_NAMES:
-            final_price = df_sim.loc[trigger_date][asset] #this will be > cs.DENOMINATION if autocall occurred
+            final_price = df_sim.loc[trigger_date][asset] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
             worst_performing = min(worst_performing, final_price)
         final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
     else:
@@ -161,7 +161,7 @@ def payouts_no_autocall(df_sim, barrierHit):
     if barrierHit:
         worst_performing = cs.DENOMINATION
         for asset in cs.ASSET_NAMES:
-            final_price = df_sim.loc[trigger_date][asset] #this will be > cs.DENOMINATION if autocall occurred
+            final_price = df_sim.loc[trigger_date][asset] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
             worst_performing = min(worst_performing, final_price)
         final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
     else:
@@ -348,7 +348,7 @@ def payouts_h(df_sim, barrierHit, h):
     if barrierHit:
         worst_performing = cs.DENOMINATION
         for asset in cs.ASSET_NAMES:
-            final_price = df_sim.loc[trigger_date][asset] #this will be > cs.DENOMINATION if autocall occurred
+            final_price = df_sim.loc[trigger_date][asset] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
             worst_performing = min(worst_performing, final_price)
         final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
     else:
