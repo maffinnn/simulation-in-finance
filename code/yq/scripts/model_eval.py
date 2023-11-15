@@ -7,6 +7,8 @@ import time
 import logging
 import matplotlib.pyplot as plt
 from pathlib import Path
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 
 from yq.utils import io
 from yq.utils.time import timeit
@@ -75,8 +77,7 @@ def analyse_rho_volatility():
 
     # TODO: yq
 
-
-def analyse_volatility():
+def anal_vol():
     data = po.get_historical_assets_all()
     prod_date = pd.Timestamp('2023-08-09')
     S_0_vector = [data.loc[prod_date, asset] for asset in cs.ASSET_NAMES]
@@ -85,12 +86,52 @@ def analyse_volatility():
     lonn_call = option.read_clean_options_data(options_dir='options-cleaned', curr_date=prod_date, file_name="lonn_call.csv")
     sika_call = option.read_clean_options_data(options_dir='options-cleaned', curr_date=prod_date, file_name="sika_call.csv")
 
-    for index, df in enumerate([lonn_call, sika_call]):
+    df_list = [lonn_call, sika_call]
+    for index, df in enumerate(df_list):
         df = df[['maturity', 'IV', 'strike']]
         df['moneyness'] = S_0_vector[index] / df['strike']
 
         logger_yq.info(f"Dataframe of volatility smile is\n{df.head()}")
-    
+
+    # plot_volatility(df=df, title)
+
+def plot_volatility(df, title):
+
+    # Unique maturities for different plots
+    maturities = df['maturity'].unique()
+
+    plt.figure(figsize=(12, 6))
+
+    for mat in maturities:
+        subset = df[df['maturity'] == mat]
+        # Scatter plot
+        plt.scatter(subset['moneyness'], subset['IV'], label=f'Maturity: {mat:.2f}')
+
+        # # Apply LOWESS smoothing
+        # lowess = statsm.nonparametric.lowess(subset['IV'], subset['moneyness'], frac=0.1)
+
+        # # Plot the smoothed line
+        # plt.plot(lowess[:, 0], lowess[:, 1], label=f'Smoothed {mat:.2f}')
+
+    plt.title('2D Plot of IV vs. Moneyness for LONN.SE on 2023-08-09')
+    plt.xlabel('Moneyness')
+    plt.ylabel('Implied Volatility (IV)')
+    plt.legend()
+    plt.show()
+    plt.close()
+
+
+    # 3D Scatter Plot
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(df['moneyness'], df['maturity'], df['IV'], c='r', marker='o')
+    ax.set_title(f'3D Scatter Plot of IV for {title}')
+    ax.set_xlabel('Moneyness')
+    ax.set_ylabel('Maturity')
+    ax.set_zlabel('Implied Volatility (IV)')
+    plt.show()
+    plt.close()
+
     pass
     # Fetch data form options
 
@@ -126,14 +167,16 @@ def analyse_rmse(model: str):
     gbm_files = ["20231114_024525_7", "20231114_024646_63", "20231114_024808_252", 
                  "20231114_030106_7", "20231114_031302_63", "20231114_032613_252",
                  "20231114_052051_7", "20231114_072227_63", "20231114_092701_252"]
-    heston_files = ["20231114_024931_7_0.5", "20231114_025048_7_1.5", "20231114_025152_7_10",
-                    "20231114_025252_63_0.5", "20231114_025415_63_1.5", "20231114_025539_63_10",
-                    "20231114_025704_252_0.5", "20231114_025829_252_1.5", "20231114_025950_252_10",
-                    "20231114_033852_7_0.5", "20231114_034926_7_1.5", "20231114_035807_7_10",
-                    "20231114_040708_63_0.5", "20231114_041953_63_1.5", "20231114_043237_63_10",
-                    "20231114_044509_252_0.5", "20231114_045744_252_1.5", "20231114_050915_252_10",   
-                    "20231114_115230_7_0.5", "20231114_134109_7_1.5", "20231114_151836_7_10",
-                    "20231114_165326_63_0.5", "20231114_191500_63_1.5", "20231114_220543_63_10"]
+    # heston_files = ["20231114_024931_7_0.5", "20231114_025048_7_1.5", "20231114_025152_7_10",
+    #                 "20231114_025252_63_0.5", "20231114_025415_63_1.5", "20231114_025539_63_10",
+    #                 "20231114_025704_252_0.5", "20231114_025829_252_1.5", "20231114_025950_252_10",
+    #                 "20231114_033852_7_0.5", "20231114_034926_7_1.5", "20231114_035807_7_10",
+    #                 "20231114_040708_63_0.5", "20231114_041953_63_1.5", "20231114_043237_63_10",
+    #                 "20231114_044509_252_0.5", "20231114_045744_252_1.5", "20231114_050915_252_10",   
+    #                 "20231114_115230_7_0.5", "20231114_134109_7_1.5", "20231114_151836_7_10",
+    #                 "20231114_165326_63_0.5", "20231114_191500_63_1.5"]
+    heston_files = ["20231114_220543_63_10", 
+                    "20231115_010234_252_0.5", "20231115_032413_252_1.5", "20231115_051421_252_10"]
     # gbm_files = ["20231114_024525_7", "20231114_030106_7", "20231114_031302_63", "20231114_032613_252"]
     RMSE_dict = {}
     for uid in heston_files: # TODO: Change
@@ -172,7 +215,9 @@ def analyse_rmse(model: str):
                 payouts_compare.loc[pd.Timestamp(dates[ppd]),'ppd_payouts'] =  np.mean(paths_payout)
             else:
                 logger_yq.error(f"Path payouts cannot be 0")
-        print(payouts_compare)
+        pd.set_option('display.max_rows', None)
+        logger_yq.info(f"The payouts compare df is: {payouts_compare}")
+        pd.reset_option('display.max_rows')
 
         # For Heston need to deal with empty PPD, calculate 1 more RMSE_clean
         if model == 'heston':
@@ -185,10 +230,10 @@ def analyse_rmse(model: str):
 
         
         if model == 'heston':
-            RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_{max_sigma}_unadj"] = RMSE
-            RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_{max_sigma}_adj"] = RMSE_clean
+            RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_unadj"] = RMSE
+            RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_adj"] = RMSE_clean
 
-            logger_yq.info(f"RMSE and RMSE_clean for {model}_{uid}_{n_sim}_{n_ppd}_{max_sigma} is:\n{RMSE} {RMSE_clean}")
+            logger_yq.info(f"RMSE and RMSE_clean for {model}_{uid}_{n_sim}_{n_ppd} is:\n{RMSE} {RMSE_clean}")
             print(RMSE, RMSE_clean)
             title_str = f"model, hist_wdw, max_sigma"
 
@@ -215,7 +260,6 @@ def analyse_rmse(model: str):
         else:
             RMSE_dict[f"{model}_{uid}_{hist_wdw}_{n_sim}_{n_ppd}"] = RMSE
             # logger_yq.info(f"RMSE for combination is:\n{RMSE} {RMSE_clean}")
-            print(RMSE)
 
             fig, ax = plt.subplots(figsize=(10, 6))
             plt.tight_layout()
@@ -236,12 +280,130 @@ def analyse_rmse(model: str):
             plt.savefig(file_path, bbox_inches='tight')
             plt.close()
 
+    logger_yq.info(f"RMSE dict is {RMSE_dict}")
     print(RMSE_dict)
 
 
-        
+def analyse_RMSE_asset():
+    """
+    Failed attempt. Only works for small value of n_sim. Large amount will cause
+    the mean path to be a horizontal straight line. But actually even the small 
+    value of n_sim also cannot capture the trend. If the model is able to capture,
+    most of the paths will lie around the mean (due to normal distribution) which 
+    is still a good representation of the average path.
+    """
+        # Function parameters
+    model = 'gbm'
+    gbm_files = ["20231114_092701_252"] # GBM champion: 20231114_092701_252. heston 20231115_032413_252_1.5 # TODO: heston need adjust
+    # Test GBM: 20231114_024525_7
+    # RMSE dict for each ppd
+    RMSE_dict = {}
+    RMSE_list = []
+    for uid in gbm_files:
 
-   
+        print(uid)
+        # Getting back the strings, rmb to convert to the dtype if needed
+        if model == 'gbm':
+            time_str, hist_wdw = extract_file_name_gbm(uid)
+            print(time_str, hist_wdw)
+        else:
+            date_time, hist_wdw, max_sigma = extract_file_name_heston(uid)
+            print(date_time, hist_wdw, max_sigma)
+
+        paths_arr, dates = sm.read_sim_data(model, uid, cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
+        n_sim = len(paths_arr[0])
+        n_ppd = len(paths_arr) # Some missing lists in n_ppd
+        print(n_sim, n_ppd)
+
+        # For each ppd/simulation date, we have many paths. Take average, each asset with its asset price
+        # The dates for the path need to be sliced (first day of sim to last day of avai data by sc func)
+        for ppd in range(1): # TODO: Do for 1 path first
+            actual_St = po.get_historical_assets_all()
+            sim_start_date = paths_arr[ppd][0].first_valid_index()
+            actual_St = actual_St[(actual_St.index >= sim_start_date)]
+            actual_St.columns = [f'actual_{name}' for name in actual_St.columns]
+            avai_end_date = actual_St.last_valid_index()
+            print(avai_end_date)
+            #display(actual_St.head())
+            # Concat all the UA prediction across all sims
+            # Then take all the sims average groupby the date of sim
+            paths = pd.DataFrame() 
+
+            plt.subplots(figsize=(10, 6))
+            plt.tight_layout()
+            plt.tight_layout() # TODO:
+            title_str = f"Simulated Paths Against Actual Share Price"
+            subtitle_str = f"Model: {model}, hist_wdw: {hist_wdw}, n_sim: {n_sim}, n_ppd: {n_ppd}"
+            plt.title(f"{title_str}\n{subtitle_str}")  # Adjust font size as needed
+                
+            # Concat and TODO: plot graph
+            for sim in range(n_sim):
+                path = paths_arr[ppd][sim]
+                path = path[path.index <= avai_end_date]
+                #display(f"Path:\n{path}")
+                paths = pd.concat([paths, path], axis=0)
+
+                for asset in cs.ASSET_NAMES:
+                    plt.plot(path.index, path[asset], alpha=0.5, label=f'sim_{asset}')  
+
+            for asset in cs.ASSET_NAMES:
+                plt.plot(actual_St.index, actual_St, alpha=1, label=f'actual_{asset}')
+            # path.plot()
+            stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
+            file_path = stor_dir.joinpath(f'{model}_{uid}_{n_sim}_{n_ppd}_asset.png')
+            stor_dir.mkdir(parents=True, exist_ok=True)
+            plt.savefig(file_path, bbox_inches='tight')
+
+            plt.close()
+
+            #display(len(paths) == len(actual_St) * n_sim)
+            #display(len(actual_St))
+            #display(len(paths))
+
+            # Get average
+            paths_mean = paths.groupby(paths.index).mean()
+
+            # Concat axis=1 with actual price
+            if (len(paths_mean) == len(actual_St)):
+                St_compare = pd.concat([paths_mean, actual_St], axis=1)
+                # display(St_compare.head())
+            else:
+                print("Error with length")
+
+            # Get RMSE
+            for asset in cs.ASSET_NAMES:
+                RMSE  = np.sqrt(np.mean((St_compare[asset] - 
+                                        St_compare[f'actual_{asset}']) ** 2))
+                RMSE_dict[f'{asset}_RMSE'] = RMSE
+                RMSE_list.append(RMSE.round(2))
+                
+                
+            # display(RMSE_dict)
+            plt.subplots(figsize=(10, 6))
+            plt.tight_layout()
+            plt.tight_layout() # TODO:
+            title_str = f"Simulated Paths Against Actual Share Price"
+            subtitle_str = f"Model: {model}, hist_wdw: {hist_wdw}, n_sim: {n_sim}, n_ppd: {n_ppd}, RMSE: {RMSE_list}"
+            plt.title(f"{title_str}\n{subtitle_str}")  # Adjust font size as needed
+
+            for asset in cs.ASSET_NAMES:
+                plt.plot(paths_mean.index, paths_mean[asset], alpha=0.5, label=f'sim_{asset}')  
+
+            for asset in cs.ASSET_NAMES:
+                plt.plot(actual_St.index, actual_St, alpha=1, label=f'actual_{asset}')
+            # path.plot()
+            plt.legend(loc='upper right')
+            stor_dir = yq_path.get_plots_path(Path(__file__).parent).joinpath('eval', model)
+            file_path = stor_dir.joinpath(f'{model}_{uid}_{n_sim}_{n_ppd}_mean_asset.png')
+            stor_dir.mkdir(parents=True, exist_ok=True)
+            plt.savefig(file_path, bbox_inches='tight')
+
+            plt.close()
+            plt.close()
+
+            
+
+
 
 
 

@@ -78,3 +78,7 @@ n_sims = [100]
 models = ['gbm']
 max_sigmas = [1.5]
 ```
+## Full run
+Start time: 20231114_024525
+End time: 20231115_070152
+About 28 hours

@@ -87,7 +87,8 @@ class MultiGBM(PricingModel):
             # logger_yq.info(f"The 3 matrices L_lower, Z.T, LZ are:\n{self.L_lower}\n{Z.T}\n{LZ}", )
 
             for i in range(self.num_ticker):
-                S_t_vector[i] = S_t_vector[i] * np.exp(self.interest_rate * self.dt - 0.5 * self.cov_matrix[i][i] * self.dt + LZ[i]) 
+                S_t_vector[i] = S_t_vector[i] * np.exp(self.interest_rate * self.dt - 
+                                                       0.5 * self.cov_matrix[i][i] * self.dt + LZ[i]) 
                 sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i]
         
         # col_names = [f"{asset}_{h_vector[i]}" for i, asset in enumerate(self.ticker_list)]

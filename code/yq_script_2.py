@@ -35,5 +35,6 @@ if __name__ == "__main__":
     logger_yq.info("\n##########START##########\n")
     
     # model_eval.analyse_rmse(model='gbm')
-    model_eval.analyse_rmse(model='heston')
-    # TODO: Still need to add 3 more
+    # model_eval.analyse_rmse(model='heston')
+
+    model_eval.analyse_RMSE_asset()

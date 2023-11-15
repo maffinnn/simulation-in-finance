@@ -83,22 +83,6 @@ class PricingModel:
 
 
 class MultiHeston(PricingModel):
-    """
-    A class for simulating asset prices using the Multi-Factor Heston model.
-
-    Attributes:
-        h_array (np.array): Array of h-values for the Heston model.
-        hist_data (DataFrame): Historical data used for calibration.
-        Z_list (np.array): Random values for simulation.
-        params_list_heston (np.array): Parameters for the Heston model.
-        L_lower (np.array): Lower triangular matrix from Cholesky decomposition.
-
-    Methods:
-        sim_n_path(n_sim): Simulate 'n_sim' paths of asset prices.
-        sim_path(S_0_vector): Simulate a single path of asset prices.
-        calibrate(prod_date): Calibrate the model parameters.
-        calc_L_lower(): Calculate the lower triangular matrix L.
-    """
     def __init__(self, params):
         super().__init__(params)
         self.h_array = np.array(params.get('h_array')) # All sublists must have the same length
@@ -166,7 +150,8 @@ class MultiHeston(PricingModel):
                 #     logger_yq.info("LZ values are %s, %s", LZ[2 * i], LZ[2 * i + 1])
                 # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
                 # logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
-                S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
+                S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * 
+                                             self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
                 V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
                 
                 # if (i == 0): # LONN.SW

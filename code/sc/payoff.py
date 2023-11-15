@@ -249,10 +249,12 @@ def populate_bond_table_sc(today, bond_price):
     return bond_table
 
 def create_bond_table_sc(today):
-    path = '../data/bond'
+    cur_dir = Path(__file__).parent
+    root_dir = yq_path.get_root_dir(cur_dir=cur_dir)
+    tar_dir = root_dir.joinpath('data', 'bond')
     bond_yield = None
-    for file in os.listdir(path):
-        df = pd.read_csv(os.path.join(path, file))[['Date','Price']]
+    for file in os.listdir(tar_dir):
+        df = pd.read_csv(os.path.join(tar_dir, file))[['Date','Price']]
         df.rename(columns={'Price':file.split(' ')[1]}, inplace=True)
         df['Date'] = pd.to_datetime(df['Date'],format='%m/%d/%Y')
         df = df.set_index('Date').iloc[::-1]

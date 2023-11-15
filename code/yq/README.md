@@ -1,4 +1,17 @@
 # README
+## Introduction
+- TODO: 
+
+## Results
+- The performance of GBM and Heston is against expectation
+    - Expected Heston that utilise stochastic volatility in the path simulatio would perform a lot better but it  underperformed. A lot of effort is put into downloading options data, cleaning options data, calibrating model  parameters, manually adjusting problematic options data (more than half out of 134 (2 x 67 PPD).)
+
+    - Performed further analysis on the mean forecasted prices against the actual share price, and realised that for   SIKA.SE, both of the models were able to capture the trends pretty well, probably due to the less volatile nature.  However, both models were challenged when they needed to predict the steep downward trend for LONN.SE in October,  Heston frequently going against the trend, hence the higer RMSE.
+
+    - Even the n_sim=10 GBM managed to rank number 6 out of all the models during the hyperparameter tuning, which only  needs a mockingly short amount of time to build and simulate compared to other models with large n_sim.
+
+    - The RMSE 26.08 to 528.32, which is quite a big range. Unexpectedly, again  the top 3 of the models are all GBM. The top 5 models have RMSE smaller or equal to 52.74.
+
 ## Navigation
 - Start reading the codes in yq_script.py in code/
     - Grid search for different models, hyperparameters.
@@ -27,10 +40,12 @@
     - Calibrated heston parameters are stored in hparams folder (organised based on the 
     max_sigma upper bound used in the heston_func.py).
 
+    - The final evaluation of the RMSEs of all the models built during hyperparameter tuning is under the yq_pg.ipynb,  and the evaluation of the mean paths and individual paths with again
+
 ### Challenges
 - Calibration error debugging
     - Potential pitfalls: taking sqrt(x) or log(x) where x is negative.
-    doing x**y where x is negative. Since y is real, there will be a fractional component, and a negative number to a fractional exponent is not a real number.
+    doing x**y where x is negative. Since y is real, there will be a fractional component, and a negative number to a   fractional exponent is not a real number.
     doing x/y where both x and y are 0.
 
 - Code writing
@@ -42,7 +57,7 @@
     with that way.
 
 - Mathematical models
-    - Translating from the models' form to codes need time. Consider at least one day to understand the concepts per model, and more days for those with calibration, exogenous data,
+    - Translating from the models' form to codes need time. Consider at least one day to understand the concepts per model,   and more days for those with calibration, exogenous data,
     discretisation methods, multiple model parameters
 
     - Kudos to Prof Patrick who helped us a lot in understanding the models! [Link to his NTU profile](https://www.ntu.edu.sg/research/faculty-directory/detail/rp00948)
@@ -94,8 +109,6 @@
 
     - Need to understand how python packages work.
 
-
-
 - Collaborating with others
     - It is crucial to discuss the format of data needed, parameters needed, how to access
     certain information that is lost after storing the data (for eg. calculating the payoffs
@@ -121,3 +134,4 @@ can save time on refactoring gbm and heston classes multiple times.
 
 - Take care of wellbeing! Do not sleep too late because of one project!.
 
+- Try to capture the steep downward trend in October
