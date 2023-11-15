@@ -363,7 +363,7 @@ def payouts_h(df_sim, barrierHit, h, asset_h):
                 for i in range(3):
                     if asset_h_min * factor[i] < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
                         barrier_arr[i] = True
-    
+
     #dividend payment
     for i in range(3):
         for date in cs.COUPON_PAYMENT_DATES:
@@ -389,10 +389,10 @@ def payouts_h(df_sim, barrierHit, h, asset_h):
     return df_payouts_arr
 
 def delta(price_arr, h):
-    return (price_arr[1] - price_arr[2]) / (2 * h)
+    return (price_arr[1] - price_arr[2]) / (2 * h * price_arr[0])
 
 def gamma(price_arr, h):
-    return (price_arr[1] - 2 * price_arr[0] + price_arr[2]) / (h ** 2)
+    return (price_arr[1] - 2 * price_arr[0] + price_arr[2]) / (price_arr[0] * (h ** 2))
 
 # returns list of [price, greeks]
 # greeks is a dict with keys 'asset name' and values [delta, gamma]
