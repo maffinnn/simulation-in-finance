@@ -180,7 +180,7 @@ def payouts_no_autocall(df_sim, barrierHit):
 # Basically a bond with a risk of early redemption
 # expect higher price wrt original
 # barrierHit param not used but left in to maintain consistency
-def payouts_no_barrier(df_sim, barrierHit):
+def payouts_no_barrier_denom(df_sim, barrierHit):
     #init
     df_payouts = pd.DataFrame()
     first_date = df_sim.first_valid_index()
@@ -208,6 +208,54 @@ def payouts_no_barrier(df_sim, barrierHit):
     final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
     df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
     return df_payouts
+
+#always return worst performing, max payout is denom
+def payouts_no_barrier_worst(df_sim, barrierHit):
+    #init
+    barrierHit = True
+    df_payouts = pd.DataFrame()
+    first_date = df_sim.first_valid_index()
+    
+    #Early redemption, does not yield dividends past called date
+    trigger_date = cs.FINAL_FIXING_DATE #init to final fixing date
+    redemption_date = cs.REDEMPTION_DATE #init to final redemption date
+    for date in cs.EARLY_REDEMPTION_OBSERVATION_DATES:
+        if date >= first_date:
+            autocall_hit = True
+            for asset in cs.ASSET_NAMES:
+                autocall_hit = autocall_hit and df_sim.loc[date][asset] >= cs.INITIAL_LEVELS[asset] * cs.EARLY_REDEMPTION_LEVEL
+            if autocall_hit:
+                trigger_date = date
+                redemption_date = cs.EARLY_REDEMPTION_DATES[date]
+                break
+
+    #barrier check
+    if not barrierHit:
+        #check barrier for sim path
+        for asset in cs.ASSET_NAMES:
+            if min(df_sim[asset]) < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
+                barrierHit = True
+                break
+    
+    #dividend payment
+    for date in cs.COUPON_PAYMENT_DATES:
+        if date <= redemption_date and date > first_date:
+            div_payout = pd.DataFrame({'Payout': [cs.COUPON_PAYOUT], 'Date': [date]})
+            df_payouts = pd.concat([df_payouts, div_payout], axis = 0)
+    
+    #Final redemption
+    #if early redemption occured, payout = 1000 regardless of barrierHit
+    if barrierHit:
+        worst_performing = cs.DENOMINATION
+        for asset in cs.ASSET_NAMES:
+            final_price = df_sim.loc[trigger_date][asset] * cs.CONVERSION_RATIOS[asset] #this will be > cs.DENOMINATION if autocall occurred
+            worst_performing = min(worst_performing, final_price)
+        final_payout = pd.DataFrame({'Payout': [worst_performing], 'Date': [redemption_date]})
+    else:
+        final_payout = pd.DataFrame({'Payout': [cs.DENOMINATION], 'Date': [redemption_date]})
+    df_payouts = pd.concat([df_payouts, final_payout], axis = 0)
+    return df_payouts
+ 
 
 # Basically a bond
 # expect higher price than everything else
@@ -363,7 +411,7 @@ def payouts_h(df_sim, barrierHit, h, asset_h):
                 for i in range(3):
                     if asset_h_min * factor[i] < cs.BARRIER * cs.INITIAL_LEVELS[asset]:
                         barrier_arr[i] = True
-    
+
     #dividend payment
     for i in range(3):
         for date in cs.COUPON_PAYMENT_DATES:
@@ -389,10 +437,10 @@ def payouts_h(df_sim, barrierHit, h, asset_h):
     return df_payouts_arr
 
 def delta(price_arr, h):
-    return (price_arr[1] - price_arr[2]) / (2 * h)
+    return (price_arr[1] - price_arr[2]) / (2 * h * price_arr[0])
 
 def gamma(price_arr, h):
-    return (price_arr[1] - 2 * price_arr[0] + price_arr[2]) / (h ** 2)
+    return (price_arr[1] - 2 * price_arr[0] + price_arr[2]) / (price_arr[0] * (h ** 2))
 
 # returns list of [price, greeks]
 # greeks is a dict with keys 'asset name' and values [delta, gamma]
