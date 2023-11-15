@@ -68,6 +68,7 @@ def analyse_V_t():
     plt.ylabel('V_t Values')
     plt.axhline(0.02714370413916297, color='r', linestyle='-.', label='Theta for LONN.SE')
     plt.axhline(0.012215540619082728, color='g', linestyle='-.', label='Theta for SIKA.SE')
+    plt.legend()
     plt.savefig(file_path)
 
 def analyse_rho_volatility():
@@ -222,7 +223,8 @@ def analyse_rmse(model: str):
         # For Heston need to deal with empty PPD, calculate 1 more RMSE_clean
         if model == 'heston':
             compare_clean = payouts_compare.copy(deep=True)
-            compare_clean = compare_clean[(compare_clean.index < pd.Timestamp('2023-09-15')) | (compare_clean.index > pd.Timestamp('2023-10-03'))]
+            compare_clean = compare_clean[(compare_clean.index < pd.Timestamp('2023-09-15')) | 
+                                          (compare_clean.index > pd.Timestamp('2023-10-03'))]
             compare_clean = compare_clean[compare_clean['ppd_payouts'] > 0]
             RMSE_clean = np.sqrt(np.mean((compare_clean['ppd_payouts'] - compare_clean['actual_price']) ** 2))
 
@@ -294,7 +296,7 @@ def analyse_RMSE_asset():
     """
         # Function parameters
     model = 'gbm'
-    gbm_files = ["20231114_092701_252"] # GBM champion: 20231114_092701_252. heston 20231115_032413_252_1.5 # TODO: heston need adjust
+    gbm_files = ["20231114_092701_252"] # Top performers: GBM: 20231114_092701_252 heston 20231115_032413_252_1.5 # TODO: heston need adjust
     # Test GBM: 20231114_024525_7
     # RMSE dict for each ppd
     RMSE_dict = {}

@@ -37,4 +37,6 @@ if __name__ == "__main__":
     # model_eval.analyse_rmse(model='gbm')
     # model_eval.analyse_rmse(model='heston')
 
-    model_eval.analyse_RMSE_asset()
+    # model_eval.analyse_RMSE_asset()
+
+    model_eval.analyse_V_t()
