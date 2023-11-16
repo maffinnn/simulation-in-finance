@@ -165,9 +165,9 @@ def extract_file_name_heston(input_string):
 # Roughly 30 sec to read the 1K file
 def analyse_rmse(model: str):
     # TODO: Add heston params
-    gbm_files = ["20231114_024525_7", "20231114_024646_63", "20231114_024808_252", 
-                 "20231114_030106_7", "20231114_031302_63", "20231114_032613_252",
-                 "20231114_052051_7", "20231114_072227_63", "20231114_092701_252"]
+    # gbm_files = ["20231114_024525_7", "20231114_024646_63", "20231114_024808_252", 
+    #              "20231114_030106_7", "20231114_031302_63", "20231114_032613_252",
+    #              "20231114_052051_7", "20231114_072227_63", "20231114_092701_252"]
     # heston_files = ["20231114_024931_7_0.5", "20231114_025048_7_1.5", "20231114_025152_7_10",
     #                 "20231114_025252_63_0.5", "20231114_025415_63_1.5", "20231114_025539_63_10",
     #                 "20231114_025704_252_0.5", "20231114_025829_252_1.5", "20231114_025950_252_10",
@@ -176,11 +176,11 @@ def analyse_rmse(model: str):
     #                 "20231114_044509_252_0.5", "20231114_045744_252_1.5", "20231114_050915_252_10",   
     #                 "20231114_115230_7_0.5", "20231114_134109_7_1.5", "20231114_151836_7_10",
     #                 "20231114_165326_63_0.5", "20231114_191500_63_1.5"]
-    heston_files = ["20231114_220543_63_10", 
-                    "20231115_010234_252_0.5", "20231115_032413_252_1.5", "20231115_051421_252_10"]
-    # gbm_files = ["20231114_024525_7", "20231114_030106_7", "20231114_031302_63", "20231114_032613_252"]
+    # heston_files = ["20231114_220543_63_10", 
+    #                 "20231115_010234_252_0.5", "20231115_032413_252_1.5", "20231115_051421_252_10"]
+    gbm_files = ["20231114_092701_252"]
     RMSE_dict = {}
-    for uid in heston_files: # TODO: Change
+    for uid in gbm_files: # TODO: Change
         print(uid)
         # Getting back the strings, rmb to convert to the dtype if needed
         if model == 'gbm':
@@ -229,7 +229,8 @@ def analyse_rmse(model: str):
             RMSE_clean = np.sqrt(np.mean((compare_clean['ppd_payouts'] - compare_clean['actual_price']) ** 2))
 
         RMSE = np.sqrt(np.mean((payouts_compare['ppd_payouts'] - payouts_compare['actual_price']) ** 2))
-
+        MAE = np.mean(np.abs(payouts_compare['ppd_payouts'] - payouts_compare['actual_price']))
+        print(f"MAE: {MAE}")
         
         if model == 'heston':
             RMSE_dict[f"{model}_{uid}_{n_sim}_{n_ppd}_unadj"] = RMSE

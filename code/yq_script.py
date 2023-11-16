@@ -224,17 +224,18 @@ if __name__ == "__main__":
     # model = ['gbm', 'heston']
     # Only for heston: sigma 0.35, 0.5, 10
 
-    # Test for HESTON MAX SIGMA
+    # For final grid search
     # Delete useless folders first, clean logs, adjust plot
     hist_windows = [7, 63, 252]
     n_sims = [10, 100, 1000]
     max_sigmas = [0.5, 1.5, 10] # For heston only
     models = ['gbm','heston']
     
-    hist_windows = [63]
-    n_sims = [100]
-    max_sigmas = [1.5]
-    models = ['gbm']
+    # For testing only
+    # hist_windows = [63]
+    # n_sims = [100]
+    # max_sigmas = [1.5]
+    # models = ['gbm']
     sim_grid_search_heston(hist_windows=hist_windows,
                     n_sims=n_sims,
                     models=models,

@@ -125,7 +125,6 @@
 
     - Plotting graphs is very useful.
 
-
 ## Future improvements
 - Consider planning out the final presentation style first before even starting,
 can save time on refactoring gbm and heston classes multiple times.
@@ -134,4 +133,15 @@ can save time on refactoring gbm and heston classes multiple times.
 
 - Take care of wellbeing! Do not sleep too late because of one project!.
 
-- Try to capture the steep downward trend in October
+- Try to capture the steep downward trend in October. Key findings: On October 17 the Capital  Markets Day was held, and before that there were warnings about worse outlooks  related to the production of Moderna's decision to reduce substance production for the COVID  vaccine.
+
+- Explore numba, packages or purchase GPU computing power to increase the number  of simulations.
+
+- Calibration (prof's suggestion)
+    - Use the first PPD's calibrated hparams to generate the entire path.
+
+    - Plot out the volatility smile curve for the entire path (using its V_t  as implied volatility and the options data to for moneyness).
+
+    - If the volatility smile curve is not good, regenerate.
+
+    - Do this for all the underlying assets.

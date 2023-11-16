@@ -34,9 +34,10 @@ if __name__ == "__main__":
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
     logger_yq.info("\n##########START##########\n")
     
-    # model_eval.analyse_rmse(model='gbm')
+    model_eval.analyse_rmse(model='gbm')
     # model_eval.analyse_rmse(model='heston')
 
     # model_eval.analyse_RMSE_asset()
 
-    model_eval.analyse_V_t()
+    #model_eval.analyse_V_t()
+    
