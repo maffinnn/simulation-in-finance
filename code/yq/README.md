@@ -135,7 +135,22 @@ can save time on refactoring gbm and heston classes multiple times.
 
 - Try to capture the steep downward trend in October. Key findings: On October 17 the Capital  Markets Day was held, and before that there were warnings about worse outlooks  related to the production of Moderna's decision to reduce substance production for the COVID  vaccine.
 
-- Explore numba, packages or purchase GPU computing power to increase the number  of simulations.
+- Perform bottleneck analysis in the simulate n paths function to reduce runtime
+    - In-memory databases like SQLite or Redis might be worth exploring for fast read-write capabilities.
+    
+    - Distributed computing like Apache Spark might be able to handle large datasets more efficiently.
+    
+    - Write asynchronous functions or perform multithreading (be aware of Global Interpretation Lock for python).
+
+    - Batch multiple simulation results together if read and write time is significant.
+
+    - Consider different data formats like HDF5 or Parquet.
+
+    - Choose representative samples to represent the data instead of the entire dataset.
+
+    - Numba, packages or purchase GPU computing power to increase the number  of simulations.
+
+    - Check whether the constraint is on the CPU or GPU of the hardware.
 
 - Calibration (prof's suggestion)
     - Use the first PPD's calibrated hparams to generate the entire path.

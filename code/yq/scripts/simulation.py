@@ -4,9 +4,11 @@ import pandas as pd
 import typing
 from pathlib import Path
 from yq.utils import calendar
+from yq.utils.time import timeit
 
 logger_yq = logging.getLogger('yq')
 
+@timeit
 def read_sim_data(model_name: str, 
                   uid: str, 
                   prod_est_start_date: pd.Timestamp, 
@@ -47,11 +49,12 @@ def read_sim_data(model_name: str,
         dates.append(product_est_date)
         product_est_date_sim_data_df_list.append(sim_data_df)
         # print(f"sim_data_df for {product_est_date}:\n {product_est_date_sim_data_df_list}\n")
-        logger_yq.info(f"Total sims/length of sim_data_df for {product_est_date}: {len(sim_data_df)}")
+        # logger_yq.info(f"Total sims/length of sim_data_df for {product_est_date}: {len(sim_data_df)}")
 
-    logger_yq.info(f"Total days is: {len(product_est_date_sim_data_df_list)}")
+    # logger_yq.info(f"Total days is: {len(product_est_date_sim_data_df_list)}")
     return product_est_date_sim_data_df_list, dates
 
+@timeit
 def store_sim_data(uid: str,
                    model_name: str,
                    sim_data: pd.DataFrame,

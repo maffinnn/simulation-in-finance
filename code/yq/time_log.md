@@ -82,3 +82,34 @@ max_sigmas = [1.5]
 Start time: 20231114_024525
 End time: 20231115_070152
 About 28 hours
+
+## Bottleneck analysis of the GBM sim_n_path functions
+
+2023-11-17 00:32:44,452 - yq - INFO - Runtime of sim_path: 0h 0m 0s 17.881000ms
+(<yq.scripts.gbm.MultiGBM object at 0x137fab810>, h_vector=array([0, 0]))
+2023-11-17 00:32:44,537 - yq - INFO - Runtime of store_sim_data: 0h 0m 0s 0.846000ms
+
+Estimated runtime: total hyperparameters combinations x number of product pricing dates x n_sims
+
+For the case above: 1 x 67 x 1000 x (17.881 + 0.846) / 1000ms/s / 60s/min = 20 min
+
+CPU is going very high around 2023-11-17 00:38 - suspect file read write will be slower (because of indexing issues)
+
+- One of the storage time is high, sim path ranges from 20 to 40ms
+2023-11-17 00:40:10,249 - yq - INFO - Runtime of sim_path: 0h 0m 0s 19.573000ms
+(<yq.scripts.gbm.MultiGBM object at 0x14fe84c10>, h_vector=array([0, 0]))
+2023-11-17 00:40:10,350 - yq - INFO - Runtime of store_sim_data: 0h 0m 0s 12.056000ms
+
+- Printing the signature (function params) is a bad idea because it will print all the dataframes also (even slower)
+logger_yq.info(f"Runtime of {func.__name__}: {int(hours)}h {int(minutes)}m {seconds}s {milliseconds:.6f}ms\n({signature})")
+
+2023-11-17 00:54:09,259 - yq - INFO - Runtime of sim_price_period: 0h 13m 59s 440.897000ms
+(start_date=Timestamp('2023-08-09 00:00:00'), end_date=Timestamp('2023-11-09 00:00:00'), hist_window=252, n_sim=100, plot=False, max_sigma=0, model='gbm')
+
+- After taking out the constant in the exponential:
+    - Highest runtime is 63ms (2 paths)
+    - 2023-11-17 01:03:05,361 - yq - INFO - Runtime of sim_path: 0h 0m 0s 63.342000ms
+    - 585/670 is under 20 seconds
+
+- 29% of the store_item is taking 1ms and above now (bad thing)
+    - 2023-11-17 01:03:28,119 - yq - INFO - Runtime of store_sim_data: 0h 0m 0s 1.306000ms

@@ -28,7 +28,6 @@ from sc import constants as cs
 from sc import payoff as po
 from sy.variance_reduction import apply_control_variates
 from sy.interest_rate import populate_bond_table, get_period
-from sy.calibration import apply_empirical_martingale_correction
 
 # data = option.read_options_data("lonn_call.csv")
 # print(data)
@@ -167,7 +166,7 @@ def sim_price_period(start_date: pd.Timestamp,
             count += 1
         except Exception as e:
             logger_yq.error(f"Error during simulation on {prod_date}: {e}")
-    logger_yq.info(f"Simulated {n_sim} paths for {count} days.")
+    # logger_yq.info(f"Simulated {n_sim} paths for {count} days.")
   
 if __name__ == "__main__":
     # cur_dir = Path(os.getcwd()).parent # ipynb cannot use __file__
@@ -226,16 +225,16 @@ if __name__ == "__main__":
 
     # For final grid search
     # Delete useless folders first, clean logs, adjust plot
-    hist_windows = [7, 63, 252]
-    n_sims = [10, 100, 1000]
-    max_sigmas = [0.5, 1.5, 10] # For heston only
-    models = ['gbm','heston']
+    # hist_windows = [7, 63, 252]
+    # n_sims = [10, 100, 1000]
+    # max_sigmas = [0.5, 1.5, 10] # For heston only
+    # models = ['gbm','heston']
     
     # For testing only
-    # hist_windows = [63]
-    # n_sims = [100]
-    # max_sigmas = [1.5]
-    # models = ['gbm']
+    hist_windows = [252]
+    n_sims = [10]
+    max_sigmas = [1.5]
+    models = ['gbm']
     sim_grid_search_heston(hist_windows=hist_windows,
                     n_sims=n_sims,
                     models=models,
