@@ -12,6 +12,10 @@ import datetime
 
 logger_yq = logging.getLogger('yq')
 
+"""
+This file is outdated. Please refer to heston.py and gbm.py.
+"""
+
 class PricingModel:
     def __init__(self, params: typing.Dict):
         self.data = params.get('data') # Stock price data for underlying asset (can include max data, in the training function can customise what dates to use)

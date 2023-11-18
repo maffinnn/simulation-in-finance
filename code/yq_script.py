@@ -29,19 +29,6 @@ from sc import payoff as po
 from sy.variance_reduction import apply_control_variates
 from sy.interest_rate import populate_bond_table, get_period
 
-# data = option.read_options_data("lonn_call.csv")
-# print(data)
-
-# # Create an instance of the SIXTradingCalendar class
-# trading_calendar = calendar.SIXTradingCalendar()
-
-# # Perform various operations using the class instance
-# # For example, calculate the number of business days between two dates
-# start_date = pd.Timestamp('2023-01-01')
-# end_date = pd.Timestamp('2023-01-10')
-# business_days = trading_calendar.calculate_business_days(start_date, end_date)
-# print(f"Number of business days: {business_days}")
-
 # Serialize and save an object
 def save_object(obj, filename):
     with open(filename, 'wb') as outp:  # Write in binary mode
@@ -51,82 +38,6 @@ def save_object(obj, filename):
 def load_object(filename):
     with open(filename, 'rb') as inp:  # Read in binary mode
         return pickle.load(inp)
-
-def run_heston_sim_test_h():
-    historical_start_date = '2022-08-09'
-    # Define the ticker list
-    ticker_list = ['LONN.SW', 'SIKA.SW']
-
-    # Fetch the data
-    data = yf.download(ticker_list, historical_start_date)['Adj Close'] # Auto adjust is false
-    data.plot()
-    
-    # model_instance = models.PricingModel(params=params)
-    # save_object(model_instance, 'model_instance.pkl')
-    # loaded_model_instance = load_object('model_instance.pkl')
-    # print(loaded_model_instance.data)
-
-    start_time_acc = datetime.datetime.now() # Track the nth attempt
-    print(start_time_acc)
-    n_sim = 1
-    trading_calendar = calendar.SIXTradingCalendar()
-    bus_date_range = trading_calendar.create_six_trading_dates('2023-08-09', '2023-08-09')
-    for prod_date in bus_date_range.index:
-        params = {
-            'data': data,
-            'ticker_list': ['LONN.SW', 'SIKA.SW'],
-            'prod_date': prod_date
-        }
-        try:
-            start_time = time.time()
-            heston = models.PricingModel(params=params)
-
-            sim_data_df = []
-            for sim in range(n_sim):
-                sim_start_date = trading_calendar.add_trading_day(prod_date, 1)
-                
-                
-                sim_data = heston.multi_asset_heston_model(
-                    sim_start_date=sim_start_date, 
-                    hist_window=252, 
-                    sim_window=trading_calendar.calculate_business_days(sim_start_date, cs.FINAL_FIXING_DATE), 
-                    h_adjustment=[0, 0])
-                sim_data_df.append(sim_data)
-                
-                sim_data_h = heston.multi_asset_heston_model(
-                    sim_start_date=sim_start_date, 
-                    hist_window=252, 
-                    sim_window=trading_calendar.calculate_business_days(sim_start_date, cs.FINAL_FIXING_DATE), 
-                    h_adjustment=[1, 0])
-
-            end_time = time.time()
-            elapsed_time = end_time - start_time
-            min, sec = divmod(elapsed_time, 60)
-            print(f"The elapsed time is for {n_sim} is {int(min)} minutes, {int(sec)} seconds")
-            
-            S_T_1 = sim_data.loc[cs.FINAL_FIXING_DATE, 'LONN.SW']
-            S_T_2 = sim_data_h.loc[cs.FINAL_FIXING_DATE,'LONN.SW']
-            print(S_T_1 / S_T_2)
-            
-            S_0_1 = data.loc[prod_date, 'LONN.SW']
-            S_0_2 = data.loc[prod_date, 'LONN.SW'] + 1
-            print(S_0_1 / S_0_2)
-            print(S_T_1, S_T_2, S_0_1, S_0_2)
-        except Exception as e:
-            # Log the error with the date that caused it
-            raise Exception("MultiHeston has error.")
-
-
-def read_csv_data_chill(file_name: str) -> pd.DataFrame:
-    curr_dir = Path(__file__).parent.parent
-    print(curr_dir)
-
-    file_path = curr_dir.joinpath('data', 'options-test', '20230814', file_name)
-    print(file_path)
-
-    options_data = pd.read_csv(file_path)
-
-    return options_data
 
 @timeit
 def sim_price_period(start_date: pd.Timestamp, 
@@ -232,7 +143,7 @@ if __name__ == "__main__":
     
     # For testing only
     hist_windows = [252]
-    n_sims = [100]
+    n_sims = [1]
     max_sigmas = [1.5]
     models = ['heston']
     sim_grid_search_heston(hist_windows=hist_windows,
