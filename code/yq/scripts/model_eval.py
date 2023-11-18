@@ -178,9 +178,10 @@ def analyse_rmse(model: str):
     #                 "20231114_165326_63_0.5", "20231114_191500_63_1.5"]
     # heston_files = ["20231114_220543_63_10", 
     #                 "20231115_010234_252_0.5", "20231115_032413_252_1.5", "20231115_051421_252_10"]
-    gbm_files = ["20231114_092701_252"]
+    # gbm_files = ["20231114_092701_252"]
+    heston_files = ['20231118_211401_252_1.5']
     RMSE_dict = {}
-    for uid in gbm_files: # TODO: Change
+    for uid in heston_files: # TODO: Change
         print(uid)
         # Getting back the strings, rmb to convert to the dtype if needed
         if model == 'gbm':

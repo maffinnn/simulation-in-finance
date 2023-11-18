@@ -151,8 +151,8 @@ class MultiHeston(PricingModel):
                 # logger_yq.info("The values for %sth iteration asset %s are %s, %s, %s, %s, %s", t, i, S_t, kappa, theta, xi, V_t)
                 # logger_yq.info("The V_t value for %sth iteration asset %s is: %s", t, i, V_t)
                 S_t_vector[i] = S_t * np.exp((self.interest_rate - 0.5 * V_t) * 
-                                             self.dt + np.sqrt(V_t) * np.sqrt(self.dt) * LZ[2 * i])
-                V_t = V_t + kappa * (theta - V_t) * self.dt + xi * V_t * np.sqrt(self.dt) * LZ[2 * i + 1]
+                                             self.dt + np.sqrt(V_t * self.dt) * LZ[2 * i])
+                V_t = V_t + kappa * (theta - V_t) * self.dt + xi * np.sqrt(V_t * self.dt) * LZ[2 * i + 1]
                 
                 # if (i == 0): # LONN.SW
                 #     # print(f"Ratio is: {S_t_vector[i] / S_t}")

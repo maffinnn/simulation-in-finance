@@ -232,9 +232,9 @@ if __name__ == "__main__":
     
     # For testing only
     hist_windows = [252]
-    n_sims = [10]
+    n_sims = [100]
     max_sigmas = [1.5]
-    models = ['gbm']
+    models = ['heston']
     sim_grid_search_heston(hist_windows=hist_windows,
                     n_sims=n_sims,
                     models=models,

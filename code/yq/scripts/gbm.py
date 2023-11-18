@@ -38,7 +38,7 @@ class MultiGBM(PricingModel):
             sim_data_comb = pd.DataFrame()
             for pair in range(len(self.h_array[0])):
                 sim_data = self.sim_path(h_vector=self.h_array[:, pair])
-                # logger_yq.info(f"The simulated data for {sim}th iteration is:\n {sim_data.head()}")
+                logger_yq.info(f"The simulated data for {sim}th iteration is:\n {sim_data.head()}")
 
                 sim_data_comb = pd.concat([sim_data_comb, sim_data], axis=1)
             
@@ -48,7 +48,7 @@ class MultiGBM(PricingModel):
                 sim_data_comb.index = dates.index
             else:
                 logger_yq.warning(f"The length of sim_data and dates is different: {len(sim_data)} and {len(dates)}\n")
-            # logger_yq.info(f"1 sim, diff h, sim_data_comb:\n{sim_data_comb.head()}")
+            logger_yq.info(f"1 sim, diff h, sim_data_comb:\n{sim_data_comb.head()}")
             # Save the every path into folder
             sm.store_sim_data(uid=f"{self.start_time_acc.strftime('%Y%m%d_%H%M%S')}_{self.hist_window}",
                            model_name=self.model_name,
@@ -69,37 +69,30 @@ class MultiGBM(PricingModel):
             log_returns = np.log(self.hist_data[ticker] / self.hist_data[ticker].shift(1)) # np.log is natural log, (P_i/P_i-1)
             log_returns.dropna(inplace = True) # A series
             log_returns_list.append(log_returns)
-        # logger_yq.info(f"The log returns list for all assets is: {log_returns_list}")
+        logger_yq.info(f"The log returns list for all assets is: {log_returns_list}")
 
         self.cov_matrix = np.cov(np.array(log_returns_list))
         self.L_lower = np.linalg.cholesky(self.cov_matrix)
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
-    
-    @timeit
+        
     def sim_path(self, h_vector: np.array):
         sim_data = pd.DataFrame(np.zeros((self.sim_window, self.num_ticker)), columns=[self.ticker_list])
         adj_S_0 = self.S_0_vector + h_vector
         logger_yq.info(f"The adjusted S_0 is {adj_S_0}")
         S_t_vector = adj_S_0.copy() # Copy the adjusted S_0 vector
-
-        constant = self.interest_rate * self.dt - 0.5 * np.diag(self.cov_matrix) * self.dt
-
-        all_LZ = np.dot(self.L_lower, self.Z_list)
-
+        
         for t in range(self.sim_window):
-            # Z = self.Z_list[:, t]
-            # LZ = np.dot(self.L_lower, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
+            Z = self.Z_list[:, t]
+            LZ = np.dot(self.L_lower, Z.T) # For 1D vector the transpose doesn't matter, but for higher dimension yes
             # logger_yq.info(f"The 3 matrices L_lower, Z.T, LZ are:\n{self.L_lower}\n{Z.T}\n{LZ}", )
-            
-            # Vectorised even further
-            for t in range(self.sim_window):
-                S_t_vector = S_t_vector * np.exp(constant + all_LZ[:, t])
-                sim_data.iloc[t] = S_t_vector
 
+            for i in range(self.num_ticker):
+                S_t_vector[i] = S_t_vector[i] * np.exp(self.interest_rate * self.dt - 
+                                                       0.5 * self.cov_matrix[i][i] * self.dt + LZ[i]) 
+                sim_data.loc[t, self.ticker_list[i]] = S_t_vector[i]
+        
         # col_names = [f"{asset}_{h_vector[i]}" for i, asset in enumerate(self.ticker_list)]
         col_names = [f"{asset}" for i, asset in enumerate(self.ticker_list)]
         logger_yq.info(f"The new column names are {col_names}")
         sim_data.columns = col_names
         return sim_data
-    
-    
