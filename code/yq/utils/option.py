@@ -2,12 +2,23 @@ import logging
 from pathlib import Path
 import pandas as pd
 from yq.utils import calendar, path as yq_path
-# from yq import logs
 from sc import constants as cs
 
 logger_yq = logging.getLogger('yq')
 
 def read_clean_options_data(options_dir: str, curr_date: pd.Timestamp, file_name: str) -> pd.DataFrame:
+    """
+    This function constructs a file path using the given parameters, reads the CSV file, and returns the data.
+
+    Parameters:
+    options_dir (str): The directory where the options files are located.
+    curr_date (pd.Timestamp): The current date, used for generating directory names.
+    file_name (str): The name of the file to read.
+
+    Returns:
+    pd.DataFrame: A DataFrame containing the cleaned options data.
+
+    """
     curr_dir = Path(__file__).parent
     root_dir = yq_path.get_root_dir(curr_dir)
     dir_name = curr_date.strftime('%Y%m%d')
@@ -19,7 +30,13 @@ def read_clean_options_data(options_dir: str, curr_date: pd.Timestamp, file_name
     return options_data
 
 def clean_options_data(options_dir: str):
-    # Read CSV
+    """
+    This function iterates over all CSV files in the given directory, cleans the data,
+    and saves the cleaned data to a new location. It logs various information and warnings.
+
+    Parameters:
+    options_dir (str): The directory where the options files are located.
+    """
     trading_cal = calendar.SIXTradingCalendar()
     dates_df = trading_cal.create_six_trading_dates(cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
     cur_dir = Path(__file__).parent
@@ -65,6 +82,16 @@ def clean_options_data(options_dir: str):
 
 
 def clean_options_df(options_data: pd.DataFrame, curr_date: pd.Timestamp):
+    """
+    This function drops unnecessary rows, calculates maturity, and filters the data based on specific criteria.
+
+    Parameters:
+    options_data (pd.DataFrame): The DataFrame containing options data.
+    curr_date (pd.Timestamp): The current date for calculating maturity.
+
+    Returns:
+    pd.DataFrame: The cleaned DataFrame with only necessary columns and filtered data.
+    """
     # Drop the description rows
     options_data.dropna(subset=['ExDt'], inplace=True)
     # print(options_data.isna().sum())
@@ -91,7 +118,14 @@ def clean_options_df(options_data: pd.DataFrame, curr_date: pd.Timestamp):
     return options_data
 
 def format_file_names(options_dir: str):
-    # Change the options-test to other file names for actual op
+    """
+    This function renames files in the specified directory according to predefined criteria
+    and logs various information and warnings about the process.
+
+    Parameters:
+    options_dir (str): The directory where the options files are located.
+    """
+     # Change the options-test to other file names for actual op
     trading_cal = calendar.SIXTradingCalendar()
     dates_df = trading_cal.create_six_trading_dates(cs.INITIAL_PROD_PRICING_DATE, cs.FINAL_PROD_PRICING_DATE)
     
@@ -146,19 +180,13 @@ def format_file_names(options_dir: str):
         else:
             logger_yq.info("Path not exist or not a folder")
 
-def check_data():
-    pass
-
 def create_csv_files(prod_est_date: pd.Timestamp) -> None:
     """
-    Create a directory structure for a given production estimated date and
-    creates two CSV files, 'lonn_call.csv' and 'sika_call.csv', in this directory.
+    This function creates a directory path in the format 'data/options/YYYYMMDD' 
+    relative to the script's location and creates two CSV files in it.
 
     Parameters:
     prod_est_date (pd.Timestamp): The production estimated date.
-
-    The function creates a directory path in the format 'data/options/YYYYMMDD' 
-    relative to the script's location and creates two CSV files in it.
     """
     try:
         cur_dir = Path(__file__).parent
@@ -184,7 +212,7 @@ def create_csv_files(prod_est_date: pd.Timestamp) -> None:
 
 def read_options_data(file_name: str):
     """
-    Read the option data from a CSV file and clean it.
+    This function reads the option data from a CSV file and clean it. (outdated)
 
     Parameters:
     - file_name (str): The file name of the CSV file located in the 'data/options' folder.
@@ -205,7 +233,6 @@ def read_options_data(file_name: str):
       implementation uses a hard-coded path for the Jupyter environment. For script 
       execution, use `Path(__file__).parent.parent.parent` to set the correct path.
     """
-    # curr_dir = Path("/Users/tangyiqwan/Library/CloudStorage/OneDrive-NanyangTechnologicalUniversity/ntu/Acads/4_Y4S1/MH4518/group-project/code/simulation-in-finance/code/yq/playground_1.ipynb").parent.parent.parent
     curr_dir = Path(__file__).parent.parent.parent.parent
 
     print(curr_dir)

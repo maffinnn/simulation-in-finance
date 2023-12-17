@@ -1,5 +1,4 @@
 import pandas as pd
-import typing
 import numpy as np
 import time
 import logging
@@ -10,17 +9,36 @@ from yq.utils import io
 from yq.utils.time import timeit
 from yq.scripts import heston_func as hf
 from yq.scripts import simulation as sm
-from yq.utils import option, calendar, log, path as yq_path
+from yq.utils import option, calendar, path as yq_path
 from sc import constants as cs
 from sc import payoff as po
 from sy.interest_rate import populate_bond_table
-import datetime
 
 logger_yq = logging.getLogger('yq')
-
-# This is a pricing model to price a specific item on one date. Includes multiple
-# simulations with different models, calibrations (if needed), 
+ 
 class PricingModel:
+    """
+    This class represents a pricing model to price a product on one date. 
+    It includes multiple simulations with different models and calibrations if needed.
+
+    Attributes:
+        model_name (str): Name of the pricing model.
+        data (pd.DataFrame): Historical data of asset prices.
+        ticker_list (list): List of asset names.
+        calendar (SIXTradingCalendar): Trading calendar object.
+        prod_date (pd.Timestamp): The production date for pricing.
+        hist_window (int): Historical window for data.
+        start_time_acc (datetime): Accurate start time.
+        plot (bool): Flag to determine if plots should be generated.
+        time_steps_per_year (int): Number of time steps per year.
+        dt (float): Delta time for simulation steps.
+        interest_rate (float): Interest rate for pricing.
+        sim_end_date (pd.Timestamp): End date for simulation.
+        num_ticker (int): Number of tickers (assets).
+        sim_start_date (pd.Timestamp): Start date for simulation.
+        sim_window (int): Simulation window length.
+        S_0_vector (np.array): Initial price vector for assets.
+    """
     def __init__ (self, params):
         self.model_name = params.get('model_name')
         self.data = po.get_historical_assets_all()
@@ -41,8 +59,6 @@ class PricingModel:
         self.sim_window = self.calendar.calculate_business_days(self.sim_start_date, cs.FINAL_FIXING_DATE)
         self.S_0_vector = np.array([self.data.loc[self.prod_date, asset]
                     for asset in self.ticker_list])
-        self.sim_data = None # To store one simulated path of all the underlying assets
-        self.payout = None # To store payoff calculations based on simulated data
 
     @timeit
     def plot_sim_path(self, plot_hist: bool, sim_data_comb: pd.DataFrame, sim: int, uid: str) -> None:
@@ -83,7 +99,24 @@ class PricingModel:
 
 
 class MultiHeston(PricingModel):
+    """
+    This class extends PricingModel for specific use with the Heston model in simulations.
+
+    Attributes:
+        h_array (np.array): An array of initial price shifts for sensitivity analysis.
+        max_sigma (float): Maximum sigma value for calibration.
+        hist_data (pd.DataFrame): Historical data of asset prices.
+        Z_list (np.array): A list of random variables for simulation.
+        params_list_heston (np.array): Parameters list for the Heston model.
+        L_lower (np.array): Lower triangular matrix from Cholesky decomposition.
+    """
     def __init__(self, params):
+        """
+        This function initialises a PricingModel object with given parameters.
+
+        Parameters:
+        params (dict): Parameters for the pricing model including model name, production date, historical window, start time for accounting, plot flag, and other relevant parameters.
+        """
         super().__init__(params)
         self.h_array = np.array(params.get('h_array')) # All sublists must have the same length
         self.max_sigma = params.get('max_sigma')
@@ -94,6 +127,9 @@ class MultiHeston(PricingModel):
 
     @timeit
     def sim_n_path(self, n_sim):
+        """
+        This function simulates 'n' paths of asset prices using the Heston model.
+        """
         self.hist_data = self.data[self.data.index < self.sim_start_date].sort_index().tail(self.hist_window)
         logger_yq.info(f"The historical data is\n {self.hist_data.head()}")
         self.calibrate(self.prod_date)
@@ -130,6 +166,12 @@ class MultiHeston(PricingModel):
                                    uid=f"{self.start_time_acc.strftime('%Y%m%d_%H%M%S')}_{self.hist_window}_{self.max_sigma}")
     
     def sim_path(self, h_vector: np.array):
+        """
+        This function simulates 'n' paths of asset prices using the Heston model.
+
+        Parameters:
+        n_sim (int): The number of simulation paths to generate.
+        """
         sim_data = pd.DataFrame(np.zeros((self.sim_window, self.num_ticker)), columns=[self.ticker_list])
         adj_S_0 = self.S_0_vector + h_vector
         logger_yq.info(f"The adjusted S_0 is {adj_S_0}")
@@ -169,6 +211,15 @@ class MultiHeston(PricingModel):
 
     @timeit
     def calibrate(self, prod_date: pd.Timestamp):
+        """
+        This function simulates a single path of asset prices with a given set of initial price shifts.
+
+        Parameters:
+        h_vector (np.array): Array of initial price shifts for the simulation.
+
+        Returns:
+        pd.DataFrame: A DataFrame containing the simulated asset prices for the path.
+        """
         try:
             self.params_list_heston = io.read_hparams(self.prod_date, self.max_sigma)
             return
@@ -216,6 +267,12 @@ class MultiHeston(PricingModel):
 
     @timeit
     def calc_L_lower(self):
+        """
+        This function performs calibration for the Heston model based on historical data.
+
+        Parameters:
+        prod_date (pd.Timestamp): The production date for which calibration is performed.
+        """
         log_returns_list = []
         for ticker in self.ticker_list:
             log_returns = np.log(self.hist_data[ticker] / self.hist_data[ticker].shift(1)) # np.log is natural log, (P_i/P_i-1)
@@ -244,10 +301,3 @@ class MultiHeston(PricingModel):
             logger_yq.error(f"Error with max_sigma{self.max_sigma}, day: {self.prod_date}")
 
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
-
-    def plot_prod_price():
-        # Payout
-        # From initial pricing to end of pricing date
-        # Title: RMSE/MAPE, hist_wdw, n_sim
-
-        pass

@@ -1,24 +1,35 @@
 import pandas as pd
-import typing
 import numpy as np
-import time
 import logging
-import matplotlib.pyplot as plt
-from pathlib import Path
 
 from yq.scripts.heston import PricingModel
-from yq.utils import io
 from yq.utils.time import timeit
-from yq.scripts import heston_func as hf
 from yq.scripts import simulation as sm
-from yq.utils import option, calendar, log, path as yq_path
 from sc import constants as cs
-from sc import payoff as po
 
 logger_yq = logging.getLogger('yq')
 
 class MultiGBM(PricingModel):
+    """
+    A class representing a multi-asset Geometric Brownian Motion (GBM) model for pricing.
+
+    This class extends the PricingModel class and is used to simulate multiple paths of asset prices using
+    the GBM model.
+
+    Attributes:
+        h_array (np.array): An array of initial price shifts for sensitivity analysis.
+        hist_data (pd.DataFrame): Historical data of asset prices.
+        Z_list (np.array): A list of random variables for simulation.
+        L_lower (np.array): Lower triangular matrix from Cholesky decomposition of the covariance matrix.
+        cov_matrix (np.array): Covariance matrix of log returns.
+    """
     def __init__(self, params):
+        """
+        Initialize the MultiGBM object with given parameters.
+
+        Parameters:
+        params (dict): A dictionary containing model parameters.
+        """
         super().__init__(params)
         self.h_array = np.array(params.get('h_array')) # All sublists must have the same length
         self.hist_data = None
@@ -28,6 +39,14 @@ class MultiGBM(PricingModel):
 
     @timeit
     def sim_n_path(self, n_sim):
+        """
+        This function simulates n paths of both asset prices.
+
+        Parameters:
+        n_sim (int): The number of simulation paths to generate.
+
+        This method simulates multiple paths of asset prices, each path using different initial price shifts (from h_array) for sensitivity analysis. The simulated data is stored and optionally plotted.
+        """
         self.hist_data = self.data[self.data.index < self.sim_start_date].sort_index().tail(self.hist_window)
         logger_yq.info(f"The historical data is\n {self.hist_data.head()}")
         self.calc_L_lower()
@@ -64,6 +83,11 @@ class MultiGBM(PricingModel):
 
     @timeit
     def calc_L_lower(self):
+        """
+        This function calculates the lower triangular matrix from the Cholesky decomposition of the covariance matrix.
+
+        It computes the log returns of asset prices, forms a covariance matrix, and then performs Cholesky decomposition to obtain the lower triangular matrix L_lower.
+        """
         log_returns_list = []
         for ticker in self.ticker_list:
             log_returns = np.log(self.hist_data[ticker] / self.hist_data[ticker].shift(1)) # np.log is natural log, (P_i/P_i-1)
@@ -76,6 +100,17 @@ class MultiGBM(PricingModel):
         logger_yq.info(f"Lower triangular matrix L after Cholesky decomposition is:\n{self.L_lower}\n")
         
     def sim_path(self, h_vector: np.array):
+        """
+        This function simulates a single path of asset prices with a given set of initial price shifts.
+
+        Parameters:
+        h_vector (np.array): An array of initial price shifts for sensitivity analysis.
+
+        Returns:
+        pd.DataFrame: A DataFrame containing the simulated asset prices for the path.
+
+        This method simulates asset prices for a single path using the provided initial price shifts and the GBM model.
+        """
         sim_data = pd.DataFrame(np.zeros((self.sim_window, self.num_ticker)), columns=[self.ticker_list])
         adj_S_0 = self.S_0_vector + h_vector
         logger_yq.info(f"The adjusted S_0 is {adj_S_0}")

@@ -80,25 +80,31 @@ def sim_price_period(start_date: pd.Timestamp,
     # logger_yq.info(f"Simulated {n_sim} paths for {count} days.")
   
 if __name__ == "__main__":
+    #############################################
+    # SET UP LOGGER
     # cur_dir = Path(os.getcwd()).parent # ipynb cannot use __file__
     cur_dir = Path(__file__).parent
     logger_yq = log.setup_logger('yq', yq_path.get_logs_path(cur_dir=cur_dir).joinpath(f"log_file_{datetime.datetime.now().strftime('%Y%m%d_%H')}.log"))
     logger_yq.info("\n##########START##########\n")
     # logger_yq = logging.getLogger('yq')
+    
+    #############################################
+    # OPTIONS FUNCTIONS
     # option.format_file_names('options-complete')
     # option.clean_options_data('options-complete')
-    # plot_graph()
 
     #############################################
     # ANALYSIS FUNCTIONS
+    # model_eval.analyse_rmse(model='gbm')
+    # model_eval.analyse_rmse(model='heston')
+    # model_eval.analyse_RMSE_asset()
     # model_eval.analyse_V_t()
+
     #################################################
-    # TODO: Change the acc start time to fix the issues
-    # TODO: Take note of the order of running (run for low hanging fruit first)
-    # Individual testing
+    # SIMULATION
 
     @timeit
-    def sim_grid_search_heston(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
+    def sim_grid_search(hist_windows: list, n_sims: list, models: list, max_sigmas: list):
         n_sims = sorted(n_sims)
         for n_sim in n_sims:
             if ('gbm' in models):
@@ -112,7 +118,6 @@ if __name__ == "__main__":
                                     plot=False, # Hardcoded
                                     max_sigma=0, # Won't be used anyway
                                     model='gbm')
-                pass
             
             if ('heston' in models):
                 logger_yq.info("Doing grid search for Heston")
@@ -125,10 +130,8 @@ if __name__ == "__main__":
                                     plot=False, # Hardcoded
                                     max_sigma=max_sigma,
                                     model='heston')
-                
-       
-
-            
+    
+    # HYPERPARAMETERS
     # hist_windows = [7, 63, 252]
     # n_sims = [10, 100, 1000]
     # model = ['gbm', 'heston']
@@ -146,16 +149,10 @@ if __name__ == "__main__":
     n_sims = [1]
     max_sigmas = [1.5]
     models = ['heston']
-    sim_grid_search_heston(hist_windows=hist_windows,
+
+    # GRID SEARCH FUNCTIONS
+    sim_grid_search(hist_windows=hist_windows,
                     n_sims=n_sims,
                     models=models,
                     max_sigmas=max_sigmas)
-    # model_eval.analyse_rmse()
-    # TODO:
-    #---------------------------
-    # run_heston_sim_test_h()
-    # plot_a_figure()
-
-    # read_csv_data_chill('lonn_call.csv') # Cannot read an xlsx file converted to csv file improperly
-    pass
 

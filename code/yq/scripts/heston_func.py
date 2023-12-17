@@ -22,6 +22,24 @@ i = complex(0,1)
 # To be used in the Heston pricer
 # @jit
 def fHeston(s, St, K, r, T, sigma, kappa, theta, volvol, rho):
+    """
+    This function calculates the Heston model integrand for option pricing.
+
+    Parameters:
+    s (complex): Complex variable for integration.
+    St (float): Current stock price.
+    K (float): Strike price.
+    r (float): Risk-free interest rate.
+    T (float): Time to maturity.
+    sigma (float): Volatility of the stock.
+    kappa (float): Mean-reversion speed.
+    theta (float): Long-term mean of variance.
+    volvol (float): Volatility of volatility.
+    rho (float): Correlation between stock and variance.
+
+    Returns:
+    complex: The value of the Heston model integrand.
+    """
     # logger_yq.info(f"Received parameters for fHeston - s: {s}, St: {St}, K: {K}, r: {r}, T: {T}, sigma: {sigma}, kappa: {kappa}, theta: {theta}, volvol: {volvol}, rho: {rho}")
 
     prod = rho * sigma * i * s
@@ -79,6 +97,23 @@ def fHeston(s, St, K, r, T, sigma, kappa, theta, volvol, rho):
 # Heston Pricer (allow for parallel processing with numba)
 # @jit(forceobj=True)
 def priceHestonMid(St, K, r, T, sigma, kappa, theta, volvol, rho):
+    """
+    This function calculates the Heston model price for an option.
+
+    Parameters:
+    St (float): Current stock price.
+    K (float): Strike price.
+    r (float): Risk-free interest rate.
+    T (float): Time to maturity.
+    sigma (float): Volatility of the stock.
+    kappa (float): Mean-reversion speed.
+    theta (float): Long-term mean of variance.
+    volvol (float): Volatility of volatility.
+    rho (float): Correlation between stock and variance.
+
+    Returns:
+    float: The calculated option price using the Heston model.
+    """
     # logger_yq.info("Starting priceHestonMid calculation")
     P, iterations, maxNumber = 0, 1000, 100
     ds = maxNumber / iterations
@@ -108,6 +143,19 @@ def priceHestonMid(St, K, r, T, sigma, kappa, theta, volvol, rho):
 
 
 def calibrate_heston(St: float, max_sigma: float, options_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    This function calibrates the Heston model to market data.
+
+    Parameters:
+    St (float): Current stock price.
+    max_sigma (float): Maximum allowable sigma value.
+    options_data (pd.DataFrame): Market data of options including maturities, strikes, and prices.
+
+    Returns:
+    pd.DataFrame: The calibrated parameters for the Heston model.
+
+    The function uses the Levenberg Marquardt algorithm to find optimal Heston model parameters that best fit the given market data.
+    """
     volSurfaceLong = options_data
     # Define global variables to be used in optimization
     maturities = volSurfaceLong['maturity'].to_numpy('float')

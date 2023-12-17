@@ -3,9 +3,8 @@ import typing
 import numpy as np
 import time
 import logging
-from pathlib import Path
 from yq.scripts import heston_func as hf
-from yq.utils import option, calendar, log, path as yq_path
+from yq.utils import option, calendar
 from sc import constants as cs
 from sy.interest_rate import populate_bond_table
 import datetime

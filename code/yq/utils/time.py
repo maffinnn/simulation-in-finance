@@ -5,6 +5,18 @@ import logging
 logger_yq = logging.getLogger('yq')
 
 def timeit(func):
+    """
+    A decorator that logs the execution time of a function.
+
+    Parameters:
+    func (callable): The function to be timed.
+
+    Returns:
+    callable: The wrapper function.
+
+    This decorator logs the runtime of the function in hours, minutes, seconds, and milliseconds.
+    It can be applied to any function using the @timeit syntax.
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         args_repr = [repr(a) for a in args]  # Argument representation

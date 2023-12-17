@@ -1,29 +1,29 @@
 import logging
 import re
 import pandas as pd
-import typing
 import numpy as np
-import time
 import logging
 import matplotlib.pyplot as plt
 from pathlib import Path
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
 
-from yq.utils import io
 from yq.utils.time import timeit
-from yq.scripts import heston_func as hf
 from yq.scripts import simulation as sm
-from yq.utils import option, calendar, log, path as yq_path
+from yq.utils import option, path as yq_path
 from sc import constants as cs
 from sc import payoff as po
 from sy.interest_rate import populate_bond_table
-import datetime
 
 pd.set_option('display.max_rows', None)  # Set to None to display all rows
 logger_yq = logging.getLogger('yq')
 
 def analyse_V_t():
+    """
+    This function analyses the V_t (variance term in the Heston model) over time.
+
+    It reads V_t values from a text file, processes them using regular expressions, 
+    and then visualizes these values in a line plot. The function also marks the theta values 
+    for LONN.SE and SIKA.SE assets as horizontal lines on the plot.
+    """
     # Sample data from the user input
     curr_dir = Path(__file__)
     file_path = yq_path.get_root_dir(cur_dir=curr_dir).joinpath('code', 'yq', 'inter-data', '20230809_max_sigma_1.5_v_t.txt')
@@ -71,14 +71,12 @@ def analyse_V_t():
     plt.legend()
     plt.savefig(file_path)
 
-def analyse_rho_volatility():
-    pass
-    # Plot rho and the volatility
-    # 1st day is 
-
-    # TODO: yq
-
 def anal_vol():
+    """
+    This function analyses the implied volatility (IV) for different assets.
+
+    It reads cleaned options data, computes moneyness, and prepares data for volatility smile analysis.
+    """
     data = po.get_historical_assets_all()
     prod_date = pd.Timestamp('2023-08-09')
     S_0_vector = [data.loc[prod_date, asset] for asset in cs.ASSET_NAMES]
@@ -97,7 +95,15 @@ def anal_vol():
     # plot_volatility(df=df, title)
 
 def plot_volatility(df, title):
+    """
+    This function plots the implied volatility against moneyness for given assets.
 
+    Parameters:
+    df (pd.DataFrame): The DataFrame containing the data to plot (maturity, IV, and strike).
+    title (str): The title for the plot.
+
+    It creates both 2D and 3D plots to visualize the implied volatility surface.
+    """
     # Unique maturities for different plots
     maturities = df['maturity'].unique()
 
@@ -137,6 +143,15 @@ def plot_volatility(df, title):
     # Fetch data form options
 
 def extract_file_name_gbm(input_string):
+    """
+    This function extracts date-time and historical window information from a GBM model file name.
+
+    Parameters:
+    input_string (str): The file name string to extract information from.
+
+    Returns:
+    Tuple[str, str]: A tuple containing the extracted date-time string and historical window value.
+    """
     # Split the string using underscore as the delimiter
     parts = input_string.split('_')
     date_time = parts[0] + '_' + parts[1]
@@ -145,6 +160,15 @@ def extract_file_name_gbm(input_string):
     return date_time, hist_wdw
 
 def extract_file_name_heston(input_string):
+    """
+    This function extracts date-time, historical window, and max_sigma information from a Heston model file name.
+
+    Parameters:
+    input_string (str): The file name string to extract information from.
+
+    Returns:
+    Tuple[str, str, str]: A tuple containing the extracted date-time string, historical window value, and max_sigma value.
+    """
     # Split the string using underscore as the delimiter
     parts = input_string.split('_')
     date_time = parts[0] + '_' + parts[1]
@@ -155,16 +179,17 @@ def extract_file_name_heston(input_string):
     return date_time, hist_wdw, max_sigma
 
 @timeit
-# hist_windows = [63]
-#     n_sims = [3]
-#     models = ['gbm','heston']
-#     max_sigmas = [0.5, 1.5, 10]
-# n_sim can be calculated
-# hist_windows: list, n_sims: list, models: list, max_sigmas: list
 
 # Roughly 30 sec to read the 1K file
 def analyse_rmse(model: str):
-    # TODO: Add heston params
+    """
+    This function analyses the Root Mean Square Error (RMSE) for given simulation models.
+
+    Parameters:
+    model (str): The name of the model to analyze.
+
+    The function reads simulation data, compares it with actual product prices, and computes RMSE and Mean Absolute Error (MAE). It also visualizes the payout comparisons and RMSE values.
+    """
     # gbm_files = ["20231114_024525_7", "20231114_024646_63", "20231114_024808_252", 
     #              "20231114_030106_7", "20231114_031302_63", "20231114_032613_252",
     #              "20231114_052051_7", "20231114_072227_63", "20231114_092701_252"]
@@ -290,6 +315,8 @@ def analyse_rmse(model: str):
 
 def analyse_RMSE_asset():
     """
+    This function analyses the RMSE for assets in a simulation.
+
     Failed attempt. Only works for small value of n_sim. Large amount will cause
     the mean path to be a horizontal straight line. But actually even the small 
     value of n_sim also cannot capture the trend. If the model is able to capture,

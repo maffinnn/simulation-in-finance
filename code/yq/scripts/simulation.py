@@ -14,8 +14,21 @@ def read_sim_data(model_name: str,
                   prod_est_start_date: pd.Timestamp, 
                   prod_est_end_date: pd.Timestamp) -> typing.List:
     """
-    Returns the a 2D array paths_arr[PPD][sim] and a list of PPD available
-    For Heston might not be 67 because of Cholesky issues
+    This function reads simulation data from CSV files for a given model, unique identifier, and date range.
+
+    Parameters:
+    model_name (str): The name of the model used in the simulation.
+    uid (str): A unique identifier for the simulation data set.
+    prod_est_start_date (pd.Timestamp): The start date for the product pricing period.
+    prod_est_end_date (pd.Timestamp): The end date for the product pricing period.
+
+    Returns:
+    typing.List: A list containing two elements; the first is a list of DataFrames for each product estimation date, 
+                 and the second is a list of available product estimation dates.
+
+    The function iterates over the business days in the specified date range, reading stored simulation data from CSV files.
+    It returns a 2D array of paths for each product pricing date (PPD) and a list of available PPDs. For models like Heston, 
+    the number of paths might vary due to issues like Cholesky decomposition.
     """
     logger_yq.info('Reading sim data')
     cur_dir = Path(__file__).parent
@@ -60,6 +73,16 @@ def store_sim_data(uid: str,
                    sim_data: pd.DataFrame,
                    product_est_date: pd.Timestamp,
                    sim: int) -> None:
+    """
+    This function stores the simulation data into a CSV file.
+
+    Parameters:
+    uid (str): A unique identifier for the simulation data set.
+    model_name (str): The name of the model used in the simulation.
+    sim_data (pd.DataFrame): The simulation data to be stored.
+    product_est_date (pd.Timestamp): The product estimation date for the simulation data.
+    sim (int): The simulation number.
+    """
     cur_dir = Path(__file__).parent
     storage_dir = cur_dir.joinpath('..', '..', '..', 'sim_data', model_name, uid, product_est_date.strftime('%Y-%m-%d'))
     storage_dir.mkdir(parents=True, exist_ok=True)
