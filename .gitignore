@@ -1,5 +1,5 @@
 # Device files
-code/.DS_Store
+.DS_Store
 
 # Large files
 sim_data/
