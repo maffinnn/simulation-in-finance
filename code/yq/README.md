@@ -126,12 +126,10 @@
     - Plotting graphs is very useful.
 
 ## Future improvements
-- Consider planning out the final presentation style first before even starting,
-can save time on refactoring gbm and heston classes multiple times.
+- Consider planning out the final presentation style before even starting the project,
+which can save time on refactoring gbm and heston classes multiple times.
 
 - Use logger at different levels .
-
-- Take care of wellbeing! Do not sleep too late because of one project!.
 
 - Try to capture the steep downward trend in October. Key findings: On October 17 the Capital  Markets Day was held, and before that there were warnings about worse outlooks  related to the production of Moderna's decision to reduce substance production for the COVID  vaccine.
 
