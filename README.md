@@ -37,4 +37,4 @@ To execute simulations, initiate the process with `code/yq_script.py`. Ensure al
 - Refine calibration techniques.
 
 ## Contact Information
-- [Yi Qwan](mailto:yiqwan.hi@outlook.com)
+- [Yi Qwan](mailto:yiqwan.hello@outlook.com)
